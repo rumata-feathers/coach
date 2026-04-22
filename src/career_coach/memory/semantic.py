@@ -1,0 +1,133 @@
+"""Semantic / hypothesis repository.
+
+Tier 3 of the three-tier memory model. Hypotheses are append-only with
+weighted evidence — we never overwrite a hypothesis's confidence based on a
+single signal; we accumulate evidence rows and recompute.
+"""
+
+from __future__ import annotations
+
+from uuid import UUID
+
+from career_coach.db import get_pool
+from career_coach.models.user_model import (
+    EvidenceDraft,
+    Hypothesis,
+    HypothesisStatus,
+)
+
+
+class SemanticRepo:
+    """CRUD for ``hypotheses`` and ``hypothesis_evidence``."""
+
+    async def get_active(self, user_id: UUID) -> list[Hypothesis]:
+        """Return all active hypotheses for ``user_id``, newest first."""
+        pool = await get_pool()
+        async with pool.acquire() as conn:
+            rows = await conn.fetch(
+                """
+                SELECT hypothesis_id, statement, confidence, status, open_questions,
+                       created_at, last_updated, last_reviewed
+                FROM hypotheses
+                WHERE user_id = $1 AND status = 'active'
+                ORDER BY last_updated DESC
+                """,
+                user_id,
+            )
+        return [
+            Hypothesis(
+                hypothesis_id=row["hypothesis_id"],
+                statement=row["statement"],
+                confidence=row["confidence"],
+                status=row["status"],
+                open_questions=row["open_questions"] or [],
+                created_at=row["created_at"],
+                last_updated=row["last_updated"],
+                last_reviewed=row["last_reviewed"],
+            )
+            for row in rows
+        ]
+
+    async def create_hypothesis(
+        self,
+        user_id: UUID,
+        statement: str,
+        confidence: float,
+        open_questions: list[str] | None = None,
+    ) -> UUID:
+        """Insert a new hypothesis and return its id."""
+        pool = await get_pool()
+        async with pool.acquire() as conn:
+            hypothesis_id = await conn.fetchval(
+                """
+                INSERT INTO hypotheses (user_id, statement, confidence, open_questions)
+                VALUES ($1, $2, $3, $4::jsonb)
+                RETURNING hypothesis_id
+                """,
+                user_id,
+                statement,
+                confidence,
+                open_questions or [],
+            )
+        assert hypothesis_id is not None
+        return hypothesis_id  # type: ignore[no-any-return]
+
+    async def append_evidence(
+        self,
+        hypothesis_id: UUID,
+        evidence: EvidenceDraft,
+        turn_id: UUID | None = None,
+    ) -> UUID:
+        """Append one evidence row to a hypothesis (append-only principle)."""
+        pool = await get_pool()
+        async with pool.acquire() as conn:
+            evidence_id = await conn.fetchval(
+                """
+                INSERT INTO hypothesis_evidence
+                    (hypothesis_id, turn_id, source_type, excerpt, weight)
+                VALUES ($1, $2, $3, $4, $5)
+                RETURNING evidence_id
+                """,
+                hypothesis_id,
+                turn_id,
+                evidence.source_type,
+                evidence.excerpt,
+                evidence.weight,
+            )
+        assert evidence_id is not None
+        return evidence_id  # type: ignore[no-any-return]
+
+    async def update_confidence(
+        self,
+        hypothesis_id: UUID,
+        confidence: float,
+        status: HypothesisStatus | None = None,
+    ) -> None:
+        """Update confidence (and optionally status) and bump ``last_updated``."""
+        if not 0.0 <= confidence <= 1.0:
+            raise ValueError("confidence must be in [0, 1]")
+        pool = await get_pool()
+        async with pool.acquire() as conn:
+            if status is None:
+                await conn.execute(
+                    """
+                    UPDATE hypotheses
+                       SET confidence = $1, last_updated = now()
+                     WHERE hypothesis_id = $2
+                    """,
+                    confidence,
+                    hypothesis_id,
+                )
+            else:
+                await conn.execute(
+                    """
+                    UPDATE hypotheses
+                       SET confidence   = $1,
+                           status       = $2,
+                           last_updated = now()
+                     WHERE hypothesis_id = $3
+                    """,
+                    confidence,
+                    status,
+                    hypothesis_id,
+                )

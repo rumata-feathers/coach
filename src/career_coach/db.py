@@ -11,6 +11,7 @@ import json
 from typing import Any
 
 import asyncpg
+from pgvector.asyncpg import register_vector
 
 from career_coach.config import get_settings
 
@@ -37,6 +38,9 @@ async def _init_connection(conn: asyncpg.Connection) -> None:
         decoder=json.loads,
         schema="pg_catalog",
     )
+    # Register the pgvector codec so list[float] round-trips to/from `vector`.
+    # The extension must already be installed (migration 001 does so).
+    await register_vector(conn)
 
 
 async def get_pool() -> asyncpg.Pool:

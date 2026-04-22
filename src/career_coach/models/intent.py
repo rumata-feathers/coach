@@ -41,17 +41,11 @@ class IntentPacket(BaseModel):
     def _validate_clarification_rule(self) -> IntentPacket:
         """Enforce SPEC §6.1: don't block cheap turns with clarifying questions."""
         if self.needs_clarification and self.budget_hint == "quick":
-            raise ValueError(
-                "needs_clarification must be False when budget_hint == 'quick'."
-            )
+            raise ValueError("needs_clarification must be False when budget_hint == 'quick'.")
         if self.needs_clarification and self.clarity_score >= 0.5:
-            raise ValueError(
-                "needs_clarification must be False when clarity_score >= 0.5."
-            )
+            raise ValueError("needs_clarification must be False when clarity_score >= 0.5.")
         if self.needs_clarification and not self.clarification_question:
-            raise ValueError(
-                "clarification_question is required when needs_clarification is True."
-            )
+            raise ValueError("clarification_question is required when needs_clarification is True.")
         return self
 
     def model_post_init(self, __context: object) -> None:

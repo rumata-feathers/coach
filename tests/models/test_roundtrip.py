@@ -181,20 +181,14 @@ def test_profiler_io_round_trip() -> None:
         assistant_message="What specifically bothered you?",
         existing_facts={"age": 19},
     )
-    assert (
-        ProfilerInput.model_validate_json(profiler_input.model_dump_json())
-        == profiler_input
-    )
+    assert ProfilerInput.model_validate_json(profiler_input.model_dump_json()) == profiler_input
 
     profiler_output = ProfilerOutput(
         new_facts=[_fact_update()],
         fact_updates=[],
         hypothesis_evidence=[_evidence_draft()],
     )
-    assert (
-        ProfilerOutput.model_validate_json(profiler_output.model_dump_json())
-        == profiler_output
-    )
+    assert ProfilerOutput.model_validate_json(profiler_output.model_dump_json()) == profiler_output
 
 
 def test_intent_packet_rejects_clarification_on_quick_budget() -> None:
