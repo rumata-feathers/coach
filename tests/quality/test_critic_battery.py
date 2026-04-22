@@ -11,7 +11,6 @@ study economics. Active hypothesis: "User gravitates toward analytical work."
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 from uuid import UUID, uuid4
 
@@ -236,8 +235,11 @@ REJECT_SPECIMENS: list[tuple[CoachOutput, str]] = [
 
 @pytest.fixture(scope="module")
 def critic() -> Critic:
-    if not os.environ.get("ANTHROPIC_API_KEY"):
-        pytest.skip("ANTHROPIC_API_KEY not set — skipping Critic battery")
+    from career_coach.config import get_settings
+
+    settings = get_settings()
+    if not settings.huggingface_api_token:
+        pytest.skip("HUGGINGFACE_API_TOKEN not set — skipping Critic battery")
     return Critic(LLMFactory(config_path=_CONFIG))
 
 
