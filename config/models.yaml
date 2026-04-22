@@ -39,3 +39,11 @@ profiler:
   max_tokens: 1500
   extra_body:
     thinking: false
+
+onboarder:
+  provider: huggingface
+  model: Qwen/Qwen3-235B-A22B
+  temperature: 0.7
+  max_tokens: 2000
+  extra_body:
+    thinking: false

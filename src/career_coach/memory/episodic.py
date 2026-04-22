@@ -143,6 +143,16 @@ class EpisodicRepo:
                 np.array(embedding, dtype=np.float32),
             )
 
+    async def count_user_turns(self, user_id: UUID) -> int:
+        """Return the total number of turns recorded for ``user_id`` across all sessions."""
+        pool = await get_pool()
+        async with pool.acquire() as conn:
+            count: int = await conn.fetchval(
+                "SELECT COUNT(*) FROM turns WHERE user_id = $1",
+                user_id,
+            )
+        return count
+
     async def get_recent(self, session_id: UUID, limit: int = 5) -> list[TurnSummary]:
         """Return the most recent turns in chronological (ascending) order."""
         pool = await get_pool()

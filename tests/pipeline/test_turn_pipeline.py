@@ -110,7 +110,12 @@ def _patch_repos(
 
 @pytest.fixture()
 def pipeline_mocks() -> tuple[MockLLMClient, TurnPipeline]:
-    """Yield a (mock_llm, pipeline) pair with all repo calls stubbed."""
+    """Yield a (mock_llm, pipeline) pair with all repo calls stubbed.
+
+    ``_onboarding_policy.is_new_user`` is mocked to return ``False`` so tests
+    exercise the standard Coach/Critic paths. Onboarding is tested separately
+    in ``tests/pipeline/test_onboarding.py``.
+    """
     mock = MockLLMClient()
     factory = _make_factory(mock)
     pipeline = TurnPipeline(factory)
@@ -119,6 +124,8 @@ def pipeline_mocks() -> tuple[MockLLMClient, TurnPipeline]:
     pipeline._structured = structured
     pipeline._episodic = episodic
     pipeline._semantic = semantic
+    pipeline._onboarding_policy = AsyncMock()
+    pipeline._onboarding_policy.is_new_user.return_value = False
 
     return mock, pipeline
 

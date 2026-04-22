@@ -41,3 +41,26 @@ def test_orchestrator_flow_routing(turn_intent: str, budget_hint: str, expected_
     orch = Orchestrator()
     packet = _packet(turn_intent=turn_intent, budget_hint=budget_hint)
     assert orch.decide(packet) == expected_flow
+
+
+def test_orchestrator_routes_new_users_to_onboarding() -> None:
+    """is_new_user=True must override all other routing logic and return 'onboarding'."""
+    orch = Orchestrator()
+    # Even a vent or quick turn should go to onboarding for a new user.
+    for turn_intent in ("vent", "explore", "decide"):
+        for budget_hint in ("quick", "standard"):
+            packet = _packet(turn_intent=turn_intent, budget_hint=budget_hint)
+            result = orch.decide(packet, is_new_user=True)
+            assert result == "onboarding", (
+                f"Expected 'onboarding' for is_new_user=True, "
+                f"got {result!r} (intent={turn_intent}, budget={budget_hint})"
+            )
+
+
+def test_orchestrator_existing_users_not_routed_to_onboarding() -> None:
+    """is_new_user=False must never return 'onboarding'."""
+    orch = Orchestrator()
+    for turn_intent in ("explore", "decide", "reflect"):
+        packet = _packet(turn_intent=turn_intent, budget_hint="standard")
+        result = orch.decide(packet, is_new_user=False)
+        assert result != "onboarding"

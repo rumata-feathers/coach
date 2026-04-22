@@ -33,6 +33,7 @@ from career_coach.memory.episodic import EpisodicRepo, Session
 from career_coach.memory.semantic import SemanticRepo
 from career_coach.memory.structured import StructuredFactsRepo
 from career_coach.models.agent_io import CoachInput, CriticInput, UnderstanderInput
+from career_coach.pipeline.onboarding import OnboardingPipeline, OnboardingPolicy
 
 logger = logging.getLogger("career_coach.pipeline.turn")
 
@@ -62,6 +63,8 @@ class TurnPipeline:
         self._semantic = SemanticRepo()
         self._understander = Understander(factory)
         self._orchestrator = Orchestrator()
+        self._onboarding_policy = OnboardingPolicy()
+        self._onboarding_pipeline = OnboardingPipeline(factory)
         self._coach = Coach(factory)
         self._critic = Critic(factory)
         self._profiler = Profiler(factory)
@@ -124,64 +127,79 @@ class TurnPipeline:
                 clarification_only=True,
             )
 
-        # 5. Orchestrator
-        flow = self._orchestrator.decide(intent_packet)
-        logger.debug("Orchestrator chose flow %s.", flow)
+        # 5. Onboarding check + Orchestrator
+        is_new = await self._onboarding_policy.is_new_user(user_id)
+        flow = self._orchestrator.decide(intent_packet, is_new_user=is_new)
+        logger.debug("Orchestrator chose flow %s (is_new=%s).", flow, is_new)
 
-        # 6. Coach + Critic retry loop
-        critic_feedback: str | None = None
+        # 6. Route to onboarding or Coach + Critic loop
         critic_verdicts: list[dict[str, Any]] = []
         coach_out = None
 
-        for attempt in range(_MAX_COACH_RETRIES):
-            coach_input = CoachInput(
+        if flow == "onboarding":
+            # Onboarding bypasses the Critic — probe questions need no grounding check.
+            coach_out = await self._onboarding_pipeline.process_turn(
+                user_id=user_id,
+                session_id=session.session_id,
+                user_message=user_message,
                 intent_packet=intent_packet,
                 user_facts=user_facts,
-                active_hypotheses=active_hypotheses,
                 recent_turns=recent_turns,
-                critic_feedback=critic_feedback,
-            )
-            coach_out = await self._coach.run(coach_input)
-
-            if flow == "A":
-                # Flow A skips the Critic entirely.
-                break
-
-            # Flow B: run Critic
-            critic_input = CriticInput(
-                coach_output=coach_out,
-                user_facts=user_facts,
-                active_hypotheses=active_hypotheses,
-                intent_packet=intent_packet,
-            )
-            verdict = await self._critic.run(critic_input)
-            critic_verdicts.append(verdict.model_dump())
-
-            if verdict.verdict == "pass":
-                break
-
-            # Rejected — build feedback for next attempt
-            critic_feedback = verdict.suggested_fix or "; ".join(verdict.specific_complaints)
-            logger.debug(
-                "Critic rejected attempt %d/%d: %s",
-                attempt + 1,
-                _MAX_COACH_RETRIES,
-                critic_feedback,
             )
         else:
-            # All retries exhausted — force an honest escalation response.
-            logger.warning("Coach retry limit reached; using escalation response.")
-            coach_out = await self._coach.run_escalation(
-                CoachInput(
+            critic_feedback: str | None = None
+
+            for attempt in range(_MAX_COACH_RETRIES):
+                coach_input = CoachInput(
                     intent_packet=intent_packet,
                     user_facts=user_facts,
                     active_hypotheses=active_hypotheses,
                     recent_turns=recent_turns,
                     critic_feedback=critic_feedback,
                 )
-            )
+                coach_out = await self._coach.run(coach_input)
 
-        assert coach_out is not None  # always set by loop or escalation
+                if flow == "A":
+                    # Flow A skips the Critic entirely.
+                    break
+
+                # Flow B: run Critic
+                critic_input = CriticInput(
+                    coach_output=coach_out,
+                    user_facts=user_facts,
+                    active_hypotheses=active_hypotheses,
+                    intent_packet=intent_packet,
+                )
+                verdict = await self._critic.run(critic_input)
+                critic_verdicts.append(verdict.model_dump())
+
+                if verdict.verdict == "pass":
+                    break
+
+                # Rejected — build feedback for next attempt
+                critic_feedback = verdict.suggested_fix or "; ".join(
+                    verdict.specific_complaints
+                )
+                logger.debug(
+                    "Critic rejected attempt %d/%d: %s",
+                    attempt + 1,
+                    _MAX_COACH_RETRIES,
+                    critic_feedback,
+                )
+            else:
+                # All retries exhausted — force an honest escalation response.
+                logger.warning("Coach retry limit reached; using escalation response.")
+                coach_out = await self._coach.run_escalation(
+                    CoachInput(
+                        intent_packet=intent_packet,
+                        user_facts=user_facts,
+                        active_hypotheses=active_hypotheses,
+                        recent_turns=recent_turns,
+                        critic_feedback=critic_feedback,
+                    )
+                )
+
+        assert coach_out is not None  # always set by onboarding, loop, or escalation
 
         # 7. Persist turn
         turn_id = await self._episodic.save_turn(
