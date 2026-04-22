@@ -9,10 +9,15 @@ reading the environment.
 from __future__ import annotations
 
 from functools import lru_cache
+from pathlib import Path
 from typing import Literal
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Resolve .env relative to the project root, not the CWD, so uvicorn started
+# from any directory still finds the file.
+_ENV_FILE = Path(__file__).resolve().parents[2] / ".env"
 
 LLMProvider = Literal["anthropic", "huggingface", "openai"]
 
@@ -21,7 +26,7 @@ class Settings(BaseSettings):
     """Application settings resolved from environment variables."""
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=str(_ENV_FILE),
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",

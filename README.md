@@ -7,7 +7,8 @@ challenges, and building an evolving model of who they are.
 
 ## Status
 
-**v0 complete.** Single hardcoded test user, no frontend, no auth.
+**v0.5 in progress.** Reliability fixes, cold-start onboarding arc, session
+continuity verification, and distillation quality harness.
 FastAPI backend + Postgres (pgvector) + multi-agent pipeline.
 
 The full architectural contract lives in [`SPEC.md`](SPEC.md).
@@ -122,6 +123,71 @@ uv run python -m career_coach.jobs.distillation --user-id <uuid>
 
 ---
 
+## Running a real conversation
+
+The demo script creates a fresh user, sends a scripted sequence of messages
+through the full pipeline (Understander → Orchestrator → Coach/Onboarder →
+Profiler), runs distillation at the end, and writes a Markdown transcript to
+`reports/`.
+
+### Quickstart
+
+```bash
+uv run python scripts/demo_conversation.py
+```
+
+This uses a built-in 5-message script and an auto-generated display name.
+
+### Custom name and script
+
+```bash
+# Write messages to a file, one per line:
+cat > /tmp/my_script.txt <<'EOF'
+Should I study economics?
+I'm 19, studying in London, and maths comes easily to me.
+What careers use an economics degree in the UK?
+I'm also weighing computer science — how do I choose?
+What's the one question I should be asking myself?
+EOF
+
+uv run python scripts/demo_conversation.py \
+  --display-name "Alex" \
+  --script /tmp/my_script.txt
+```
+
+### Two-session mode
+
+Run the same user through two consecutive sessions to verify that cross-session
+facts and hypotheses carry over:
+
+```bash
+uv run python scripts/demo_conversation.py \
+  --display-name "Alex" \
+  --two-session-mode
+```
+
+### How session_id works
+
+The `/chat` API returns `session_id` in every response. Pass it back on the next
+turn to continue the same session:
+
+```bash
+# Turn 1 — starts a new session, returns session_id
+RESP=$(curl -s -X POST localhost:8000/chat \
+  -H "Content-Type: application/json" \
+  -d '{"user_id": "<uuid>", "message": "Should I study economics?"}')
+SESSION=$(echo "$RESP" | jq -r .session_id)
+echo "$RESP" | jq .response
+
+# Turn 2 — continues the same session
+curl -s -X POST localhost:8000/chat \
+  -H "Content-Type: application/json" \
+  -d "{\"user_id\": \"<uuid>\", \"session_id\": \"$SESSION\", \"message\": \"Tell me more\"}" \
+  | jq .response
+```
+
+---
+
 ## Architecture overview
 
 See [`docs/architecture.md`](docs/architecture.md) for diagrams and the key
@@ -192,7 +258,7 @@ career_coach/
 │   ├── models.yaml          # per-agent model config (change here to swap models)
 │   └── prompts/             # Jinja2 templates — all LLM prompts live here
 ├── migrations/              # plain SQL, applied by run_migrations.py
-├── scripts/                 # run_migrations, seed_test_user, run_quality_eval
+├── scripts/                 # run_migrations, seed_test_user, run_quality_eval, demo_conversation
 ├── src/career_coach/
 │   ├── agents/              # Understander, Orchestrator, Coach, Critic, Profiler
 │   ├── api/                 # FastAPI app + routes
