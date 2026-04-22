@@ -101,8 +101,16 @@ class Agent:
         tokens_in: int | None,
         tokens_out: int | None,
         error: str | None = None,
+        retry_count: int = 0,
+        fallback_reason: str | None = None,
     ) -> None:
         """Append a row to ``agent_calls`` for observability.
+
+        Args:
+            retry_count: Number of retry attempts made (0 = first attempt succeeded).
+            fallback_reason: Populated when a fallback path was used, e.g.
+                ``"empty_llm_response"``, ``"schema_validation_failed"``,
+                ``"retry_exhausted"``.  ``None`` means the happy path was taken.
 
         Payloads are round-tripped through JSON to coerce non-serialisable types
         (UUID, datetime, …) to strings before asyncpg's JSONB codec sees them.
@@ -115,8 +123,9 @@ class Agent:
                 """
                 INSERT INTO agent_calls
                     (turn_id, agent_name, model_used, input_payload, output_payload,
-                     latency_ms, tokens_in, tokens_out, error)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                     latency_ms, tokens_in, tokens_out, error,
+                     retry_count, fallback_reason)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
                 """,
                 turn_id,
                 self.name,
@@ -127,6 +136,8 @@ class Agent:
                 tokens_in,
                 tokens_out,
                 error,
+                retry_count,
+                fallback_reason,
             )
 
     @staticmethod

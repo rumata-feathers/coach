@@ -106,8 +106,29 @@ Key rules:
   Hardcoding prompt text in Python is explicitly banned.
 - **Observability** — every agent call writes a row to `agent_calls` via
   `self.log_call()`, including tokens in/out, latency, and any error.
+- **Retry-once** — if parsing fails, each agent appends a corrective message and
+  retries the LLM call once before falling back.  `retry_count` (0 or 1) and
+  `fallback_reason` (`"retry_exhausted"` | `null`) are logged to `agent_calls`.
 - **Fail safe** — agents that own the user-facing response (Coach, Understander)
   return a safe fallback on parse failure rather than crashing.
+
+### `agent_calls` columns (migration 003)
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `retry_count` | `INT DEFAULT 0` | Number of retry attempts (0 = first call succeeded) |
+| `fallback_reason` | `TEXT NULL` | `retry_exhausted` when both attempts failed; `null` on the happy path |
+
+Query fallback rate:
+```sql
+SELECT agent_name,
+       SUM(retry_count)                                   AS total_retries,
+       COUNT(*) FILTER (WHERE fallback_reason IS NOT NULL) AS fallbacks,
+       COUNT(*)                                            AS total_calls
+FROM agent_calls
+WHERE created_at > now() - interval '24 hours'
+GROUP BY agent_name;
+```
 
 ---
 

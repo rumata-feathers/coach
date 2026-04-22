@@ -66,6 +66,8 @@ class Critic(Agent):
         messages = [Message(role="user", content=prompt)]
         t0 = self.now_ms()
         error_str: str | None = None
+        retry_count = 0
+        fallback_reason: str | None = None
         response = await self.complete(messages, response_format="json")
 
         try:
@@ -80,10 +82,12 @@ class Critic(Agent):
                 Message(role="user", content=_RETRY_PROMPT),
             ]
             response = await self.complete(retry_messages, response_format="json")
+            retry_count = 1
             try:
                 verdict = _parse_verdict(response.text)
             except (json.JSONDecodeError, ValidationError, KeyError, TypeError) as exc:
                 error_str = str(exc)
+                fallback_reason = "retry_exhausted"
                 logger.warning(
                     "Critic parse error after retry (%s); failing open with pass.", exc
                 )
@@ -105,6 +109,8 @@ class Critic(Agent):
             tokens_in=response.tokens_in,
             tokens_out=response.tokens_out,
             error=error_str,
+            retry_count=retry_count,
+            fallback_reason=fallback_reason,
         )
         return verdict
 
