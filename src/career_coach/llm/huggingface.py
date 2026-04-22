@@ -1,9 +1,12 @@
 """Hugging Face provider backed by an OpenAI-compatible client.
 
-HF's Inference API exposes chat-tuned open models through an OpenAI-protocol
-endpoint, so we can reuse the ``openai`` async SDK by pointing its ``base_url``
-at HF. Keep this adapter thin — the whole point of the LLM layer is that
-provider changes are configuration, not code.
+HF's Inference Providers system exposes chat-tuned open models through an
+OpenAI-protocol endpoint at https://router.huggingface.co/v1 (the modern
+Inference Providers router, replacing the legacy api-inference endpoint).
+
+We can reuse the ``openai`` async SDK by pointing its ``base_url`` at that
+router. Keep this adapter thin — swapping providers is a config change, not a
+code change.
 """
 
 from __future__ import annotations
@@ -15,11 +18,13 @@ from openai import AsyncOpenAI
 
 from career_coach.llm.client import LLMClient, LLMResponse, Message, ResponseFormat
 
-DEFAULT_HF_BASE_URL = "https://api-inference.huggingface.co/v1"
+# Inference Providers router (modern replacement for api-inference.huggingface.co/v1).
+# Serves Qwen3, Llama, Kimi, DeepSeek and others via Novita/Nscale/Together/etc.
+DEFAULT_HF_BASE_URL = "https://router.huggingface.co/v1"
 
 
 class HuggingFaceClient(LLMClient):
-    """LLM client backed by the Hugging Face Inference API."""
+    """LLM client backed by the Hugging Face Inference Providers router."""
 
     def __init__(
         self,
@@ -49,7 +54,14 @@ class HuggingFaceClient(LLMClient):
         temperature: float = 0.7,
         max_tokens: int = 2000,
         response_format: ResponseFormat = "text",
+        extra_body: dict[str, Any] | None = None,
     ) -> LLMResponse:
+        """Run a chat completion.
+
+        ``extra_body`` is forwarded verbatim to the provider — useful for
+        model-specific parameters like ``{"thinking": false}`` on Qwen3 to
+        suppress the chain-of-thought block and halve token cost.
+        """
         kwargs: dict[str, Any] = {
             "model": model,
             "messages": [{"role": m.role, "content": m.content} for m in messages],
@@ -57,15 +69,21 @@ class HuggingFaceClient(LLMClient):
             "max_tokens": max_tokens,
         }
         if response_format == "json":
-            # Not every HF model honours this, but OpenAI-protocol endpoints
-            # accept the field and many chat-tuned models respect it.
             kwargs["response_format"] = {"type": "json_object"}
+        if extra_body:
+            kwargs["extra_body"] = extra_body
 
         response = await self._client.chat.completions.create(**kwargs)
         choice = response.choices[0]
         text = choice.message.content or ""
-        usage = response.usage
 
+        # Strip Qwen3 think-block if thinking was accidentally left enabled.
+        # The block appears as <think>...</think> before the actual answer.
+        if "<think>" in text and "</think>" in text:
+            end = text.rfind("</think>")
+            text = text[end + len("</think>"):].strip()
+
+        usage = response.usage
         return LLMResponse(
             text=text,
             model=model,

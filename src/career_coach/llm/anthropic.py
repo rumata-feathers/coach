@@ -39,6 +39,7 @@ class AnthropicClient(LLMClient):
         temperature: float = 0.7,
         max_tokens: int = 2000,
         response_format: ResponseFormat = "text",
+        extra_body: dict[str, Any] | None = None,  # accepted but ignored for Anthropic
     ) -> LLMResponse:
         system_prompt, chat_messages = _split_system(messages)
         if response_format == "json":

@@ -20,7 +20,7 @@ _CONFIG = Path(__file__).resolve().parents[2] / "config" / "models.yaml"
 
 def _make_factory(mock: MockLLMClient) -> LLMFactory:
     factory = LLMFactory(config_path=_CONFIG)
-    factory.register_client("anthropic", mock)
+    factory.register_client("huggingface", mock)
     return factory
 
 
@@ -69,7 +69,7 @@ async def test_understander_uses_correct_model() -> None:
     await understander.run(_make_input())
 
     assert len(mock.calls) == 1
-    assert mock.calls[0].model == "claude-haiku-4-5-20251001"
+    assert mock.calls[0].model == "Qwen/Qwen3-32B"
 
 
 async def test_understander_requests_json_format() -> None:

@@ -55,6 +55,7 @@ class LLMClient(Protocol):
         temperature: float = 0.7,
         max_tokens: int = 2000,
         response_format: ResponseFormat = "text",
+        extra_body: dict[str, Any] | None = None,
     ) -> LLMResponse:
         """Run a chat completion and return the assistant's reply.
 

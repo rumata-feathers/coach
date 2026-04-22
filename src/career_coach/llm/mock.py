@@ -10,6 +10,7 @@ from __future__ import annotations
 from collections import deque
 from collections.abc import Sequence
 from dataclasses import dataclass, field
+from typing import Any
 
 from career_coach.llm.client import LLMClient, LLMResponse, Message, ResponseFormat
 
@@ -23,6 +24,7 @@ class RecordedCall:
     temperature: float
     max_tokens: int
     response_format: ResponseFormat
+    extra_body: dict[str, Any] | None = None
 
 
 @dataclass
@@ -45,6 +47,7 @@ class MockLLMClient(LLMClient):
         temperature: float = 0.7,
         max_tokens: int = 2000,
         response_format: ResponseFormat = "text",
+        extra_body: dict[str, Any] | None = None,
     ) -> LLMResponse:
         self.calls.append(
             RecordedCall(
@@ -53,6 +56,7 @@ class MockLLMClient(LLMClient):
                 temperature=temperature,
                 max_tokens=max_tokens,
                 response_format=response_format,
+                extra_body=extra_body,
             )
         )
         text = self.responses.popleft() if self.responses else self.default_response

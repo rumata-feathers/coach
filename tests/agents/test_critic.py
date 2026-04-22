@@ -16,7 +16,7 @@ _CONFIG = Path(__file__).resolve().parents[2] / "config" / "models.yaml"
 
 def _make_factory(mock: MockLLMClient) -> LLMFactory:
     factory = LLMFactory(config_path=_CONFIG)
-    factory.register_client("anthropic", mock)
+    factory.register_client("huggingface", mock)
     return factory
 
 
@@ -107,7 +107,7 @@ async def test_critic_uses_haiku_model() -> None:
     critic = Critic(_make_factory(mock))
     await critic.run(_critic_input())
 
-    assert mock.calls[0].model == "claude-haiku-4-5-20251001"
+    assert mock.calls[0].model == "Qwen/Qwen3-32B"
 
 
 async def test_critic_fails_open_on_malformed_json() -> None:

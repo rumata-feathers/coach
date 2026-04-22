@@ -18,7 +18,7 @@ _CONFIG = Path(__file__).resolve().parents[2] / "config" / "models.yaml"
 
 def _make_factory(mock: MockLLMClient) -> LLMFactory:
     factory = LLMFactory(config_path=_CONFIG)
-    factory.register_client("anthropic", mock)
+    factory.register_client("huggingface", mock)
     return factory
 
 
@@ -80,7 +80,7 @@ async def test_coach_uses_sonnet_model() -> None:
     coach = Coach(_make_factory(mock))
     await coach.run(_make_input())
 
-    assert mock.calls[0].model == "claude-sonnet-4-6"
+    assert mock.calls[0].model == "Qwen/Qwen3-235B-A22B"
 
 
 async def test_coach_requests_json_format() -> None:

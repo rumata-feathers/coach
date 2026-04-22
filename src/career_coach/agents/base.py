@@ -88,6 +88,7 @@ class Agent:
             temperature=self._llm_config.temperature,
             max_tokens=self._llm_config.max_tokens,
             response_format=response_format,
+            extra_body=self._llm_config.extra_body,
         )
 
     async def log_call(

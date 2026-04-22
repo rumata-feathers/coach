@@ -7,9 +7,9 @@ client by name and receives a configured :class:`LLMClient` plus the defaults
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 import yaml
 
@@ -23,7 +23,7 @@ Provider = Literal["anthropic", "huggingface"]
 DEFAULT_CONFIG_PATH = Path(__file__).resolve().parents[3] / "config" / "models.yaml"
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class AgentLLMConfig:
     """Resolved configuration for a single agent."""
 
@@ -31,6 +31,7 @@ class AgentLLMConfig:
     model: str
     temperature: float
     max_tokens: int
+    extra_body: dict[str, Any] | None = field(default=None)
 
 
 class LLMFactory:
@@ -53,11 +54,14 @@ class LLMFactory:
             provider = cfg.get("provider")
             if provider not in ("anthropic", "huggingface"):
                 raise ValueError(f"Unsupported provider '{provider}' for agent '{agent_name}'")
+            raw_extra = cfg.get("extra_body")
+            extra_body = dict(raw_extra) if isinstance(raw_extra, dict) else None
             self._agent_configs[agent_name] = AgentLLMConfig(
                 provider=provider,
                 model=str(cfg["model"]),
                 temperature=float(cfg.get("temperature", 0.7)),
                 max_tokens=int(cfg.get("max_tokens", 2000)),
+                extra_body=extra_body,
             )
 
     # -- public API ---------------------------------------------------------
