@@ -11,6 +11,7 @@ import logging
 from fastapi import FastAPI
 
 from career_coach import __version__
+from career_coach.api.routes import router
 from career_coach.config import get_settings
 
 logger = logging.getLogger("career_coach.api")
@@ -36,6 +37,7 @@ def create_app() -> FastAPI:
         """Liveness probe. Returns a constant payload when the process is up."""
         return {"status": "ok", "version": __version__}
 
+    app.include_router(router)
     return app
 
 
