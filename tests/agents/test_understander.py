@@ -5,10 +5,12 @@ All LLM calls are intercepted by :class:`MockLLMClient` — no real API calls.
 
 from __future__ import annotations
 
+import asyncio
 import json
 from pathlib import Path
 from uuid import uuid4
 
+from career_coach.agents.base import Agent
 from career_coach.agents.understander import Understander, _fallback_packet, _parse_intent_packet
 from career_coach.llm.factory import LLMFactory
 from career_coach.llm.mock import MockLLMClient
@@ -135,11 +137,36 @@ async def test_parse_intent_packet_parses_valid_json() -> None:
     assert packet.turn_intent == "explore"
 
 
+async def test_now_ms_measures_real_elapsed_time() -> None:
+    """``Agent.now_ms`` must return a measurably non-zero delta after a sleep."""
+    t0 = Agent.now_ms()
+    await asyncio.sleep(0.025)  # 25 ms
+    t1 = Agent.now_ms()
+    assert t1 - t0 >= 20, f"Expected >=20 ms elapsed, got {t1 - t0} ms"
+
+
 def test_fallback_packet_is_always_valid() -> None:
     inp = _make_input()
     packet = _fallback_packet(inp)
     assert isinstance(packet, IntentPacket)
     assert not packet.needs_clarification
+
+
+async def test_understander_retries_on_empty_response() -> None:
+    """First LLM call returns empty string; retry returns valid JSON.
+
+    Verifies that the retry path is exercised: mock must receive exactly 2
+    calls, and the returned packet must be valid (from the second call).
+    """
+    mock = MockLLMClient()
+    mock.queue("", _valid_packet_json())  # empty first, valid second
+    understander = Understander(_make_factory(mock))
+
+    packet = await understander.run(_make_input())
+
+    assert len(mock.calls) == 2, "Expected exactly 2 LLM calls (original + retry)"
+    assert isinstance(packet, IntentPacket)
+    assert packet.turn_intent == "explore"
 
 
 async def test_understander_integration_with_real_prompt() -> None:

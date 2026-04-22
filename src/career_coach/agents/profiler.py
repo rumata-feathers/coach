@@ -26,6 +26,13 @@ from career_coach.models.user_model import EvidenceDraft, FactUpdate
 
 logger = logging.getLogger("career_coach.agents.profiler")
 
+_RETRY_PROMPT = (
+    "Your previous response was not valid JSON. "
+    "Return ONLY a JSON object matching this schema — "
+    "no prose, no code fences, no think-blocks:\n"
+    '{"new_facts": [], "fact_updates": [], "hypothesis_evidence": []}'
+)
+
 
 class Profiler(Agent):
     """Extracts facts and hypothesis evidence from a completed turn."""
@@ -55,14 +62,29 @@ class Profiler(Agent):
         t0 = self.now_ms()
         error_str: str | None = None
         response = await self.complete(messages, response_format="json")
-        latency = self.now_ms() - t0
 
         try:
             output = _parse_output(response.text)
-        except (json.JSONDecodeError, ValidationError, KeyError, TypeError) as exc:
-            error_str = str(exc)
-            logger.warning("Profiler parse error (%s); returning empty output.", exc)
-            output = ProfilerOutput()
+        except (json.JSONDecodeError, ValidationError, KeyError, TypeError) as first_exc:
+            logger.warning(
+                "Profiler parse error on first attempt (%s); retrying once.", first_exc
+            )
+            retry_messages = [
+                *messages,
+                Message(role="assistant", content=response.text or "(empty response)"),
+                Message(role="user", content=_RETRY_PROMPT),
+            ]
+            response = await self.complete(retry_messages, response_format="json")
+            try:
+                output = _parse_output(response.text)
+            except (json.JSONDecodeError, ValidationError, KeyError, TypeError) as exc:
+                error_str = str(exc)
+                logger.warning(
+                    "Profiler parse error after retry (%s); returning empty output.", exc
+                )
+                output = ProfilerOutput()
+
+        latency = self.now_ms() - t0
 
         await self.log_call(
             turn_id=turn_id,

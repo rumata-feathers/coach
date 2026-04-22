@@ -6,6 +6,7 @@ run without a database or API token.
 
 from __future__ import annotations
 
+import asyncio
 import json
 from pathlib import Path
 from unittest.mock import AsyncMock
@@ -16,6 +17,7 @@ import pytest
 from career_coach.llm.factory import LLMFactory
 from career_coach.llm.mock import MockLLMClient
 from career_coach.memory.episodic import Session
+from career_coach.models.agent_io import ProfilerOutput
 from career_coach.pipeline.turn import TurnPipeline, TurnResult
 
 _CONFIG = Path(__file__).resolve().parents[2] / "config" / "models.yaml"
@@ -206,3 +208,49 @@ async def test_process_turn_creates_session_when_none_given(
     )
 
     pipeline._episodic.create_session.assert_awaited_once()
+
+
+async def test_concurrent_turns_background_tasks_all_complete(
+    pipeline_mocks: tuple[MockLLMClient, TurnPipeline],
+) -> None:
+    """All Profiler background tasks must complete even under high concurrency.
+
+    Fires 20 concurrent ``process_turn`` calls with a slow Profiler mock
+    (50 ms sleep). Before the fix, tasks could be GC'd before completing
+    because ``_task`` was a local variable. With ``_background_tasks`` keeping
+    strong references, all 20 must complete.
+    """
+    mock, pipeline = pipeline_mocks
+
+    completed: list[int] = []
+
+    async def slow_run_and_save(*_args: object, **_kwargs: object) -> ProfilerOutput:
+        await asyncio.sleep(0.05)  # 50 ms
+        completed.append(1)
+        return ProfilerOutput()
+
+    pipeline._profiler.run_and_save = slow_run_and_save  # type: ignore[method-assign]
+
+    n = 20
+    # Each turn needs: Understander + Coach + Critic = 3 responses.
+    # Queue n * 3 responses (no profiler response needed — slow_run_and_save handles it).
+    for _ in range(n):
+        mock.queue(_intent_json(), _coach_json(), _critic_pass_json())
+
+    await asyncio.gather(
+        *[
+            pipeline.process_turn(
+                user_id=FAKE_USER_ID,
+                user_message=f"Message {i}",
+            )
+            for i in range(n)
+        ]
+    )
+
+    # Give all background tasks a moment to finish (they sleep 50 ms each).
+    await asyncio.sleep(0.2)
+
+    assert len(completed) == n, (
+        f"Expected {n} Profiler completions, got {len(completed)}. "
+        "Background tasks were likely GC'd before completion."
+    )

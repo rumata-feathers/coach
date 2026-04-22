@@ -105,8 +105,8 @@ async def chat(body: ChatRequest) -> ChatResponse:
     if not exists:
         raise HTTPException(status_code=404, detail=f"User {body.user_id} not found.")
 
-    pipeline = TurnPipeline(_get_factory())
     try:
+        pipeline = TurnPipeline(_get_factory())
         result = await pipeline.process_turn(
             user_id=body.user_id,
             user_message=body.message,
@@ -173,7 +173,7 @@ async def _run_distillation(user_id: UUID) -> None:
     """Background wrapper for the distillation job (Task 10 implementation)."""
     try:
         from career_coach.jobs.distillation import (
-            run_distillation,  # type: ignore[import-not-found]
+            run_distillation,
         )
 
         await run_distillation(user_id)

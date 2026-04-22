@@ -23,6 +23,14 @@ from career_coach.models.agent_io import CriticInput, CriticVerdict
 
 logger = logging.getLogger("career_coach.agents.critic")
 
+_RETRY_PROMPT = (
+    "Your previous response was not valid JSON. "
+    "Return ONLY a JSON object matching this schema — "
+    "no prose, no code fences, no think-blocks:\n"
+    '{"verdict": "pass|reject", "failure_modes": [], '
+    '"specific_complaints": [], "suggested_fix": null}'
+)
+
 
 class Critic(Agent):
     """Evaluates a :class:`CoachOutput` and returns a :class:`CriticVerdict`."""
@@ -59,20 +67,35 @@ class Critic(Agent):
         t0 = self.now_ms()
         error_str: str | None = None
         response = await self.complete(messages, response_format="json")
-        latency = self.now_ms() - t0
 
         try:
             verdict = _parse_verdict(response.text)
-        except (json.JSONDecodeError, ValidationError, KeyError, TypeError) as exc:
-            error_str = str(exc)
-            logger.warning("Critic parse error (%s); failing open with pass.", exc)
-            # Fail open: a broken Critic shouldn't block the user.
-            verdict = CriticVerdict(
-                verdict="pass",
-                failure_modes=[],
-                specific_complaints=[],
-                suggested_fix=None,
+        except (json.JSONDecodeError, ValidationError, KeyError, TypeError) as first_exc:
+            logger.warning(
+                "Critic parse error on first attempt (%s); retrying once.", first_exc
             )
+            retry_messages = [
+                *messages,
+                Message(role="assistant", content=response.text or "(empty response)"),
+                Message(role="user", content=_RETRY_PROMPT),
+            ]
+            response = await self.complete(retry_messages, response_format="json")
+            try:
+                verdict = _parse_verdict(response.text)
+            except (json.JSONDecodeError, ValidationError, KeyError, TypeError) as exc:
+                error_str = str(exc)
+                logger.warning(
+                    "Critic parse error after retry (%s); failing open with pass.", exc
+                )
+                # Fail open: a broken Critic shouldn't block the user.
+                verdict = CriticVerdict(
+                    verdict="pass",
+                    failure_modes=[],
+                    specific_complaints=[],
+                    suggested_fix=None,
+                )
+
+        latency = self.now_ms() - t0
 
         await self.log_call(
             turn_id=turn_id,

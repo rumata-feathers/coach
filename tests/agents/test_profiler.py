@@ -118,3 +118,16 @@ async def test_profiler_empty_arrays_are_valid() -> None:
     assert output.new_facts == []
     assert output.fact_updates == []
     assert output.hypothesis_evidence == []
+
+
+async def test_profiler_retries_on_empty_response() -> None:
+    """First LLM call returns empty string; retry returns valid JSON."""
+    mock = MockLLMClient()
+    mock.queue("", _good_output_json())  # empty first, valid second
+    profiler = Profiler(_make_factory(mock))
+
+    output = await profiler.run(_make_input())
+
+    assert len(mock.calls) == 2, "Expected exactly 2 LLM calls (original + retry)"
+    assert isinstance(output, ProfilerOutput)
+    assert len(output.new_facts) == 2

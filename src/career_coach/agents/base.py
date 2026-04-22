@@ -131,8 +131,12 @@ class Agent:
 
     @staticmethod
     def now_ms() -> int:
-        """Wall-clock time in milliseconds for latency measurement."""
-        return int(time.monotonic() * 1000)
+        """Wall-clock time in milliseconds for latency measurement.
+
+        Uses ``perf_counter_ns`` so two calls within the same millisecond
+        still produce a measurable non-zero difference.
+        """
+        return time.perf_counter_ns() // 1_000_000
 
 
 def _jsonify(data: dict[str, Any]) -> dict[str, Any]:

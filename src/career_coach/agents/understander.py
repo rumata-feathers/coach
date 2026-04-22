@@ -23,6 +23,16 @@ from career_coach.models.intent import IntentPacket
 
 logger = logging.getLogger("career_coach.agents.understander")
 
+_RETRY_PROMPT = (
+    "Your previous response was not valid JSON. "
+    "Return ONLY a JSON object matching this schema — "
+    "no prose, no code fences, no think-blocks:\n"
+    '{"session_theory": "string", "turn_intent": "explore|decide|vent|reflect|challenge|other", '
+    '"specific_ask": "string", "emotional_tenor": "string", "clarity_score": 0.0, '
+    '"needs_clarification": false, "clarification_question": null, '
+    '"inferred_constraints": [], "budget_hint": "quick|standard"}'
+)
+
 
 class Understander(Agent):
     """Produces an :class:`IntentPacket` from a user message."""
@@ -61,14 +71,29 @@ class Understander(Agent):
         t0 = self.now_ms()
         error_str: str | None = None
         response = await self.complete(messages, response_format="json")
-        latency = self.now_ms() - t0
 
         try:
             packet = _parse_intent_packet(response.text)
-        except (json.JSONDecodeError, ValidationError, KeyError) as exc:
-            error_str = str(exc)
-            logger.warning("Understander parse error (%s); returning fallback.", exc)
-            packet = _fallback_packet(input_data)
+        except (json.JSONDecodeError, ValidationError, KeyError) as first_exc:
+            logger.warning(
+                "Understander parse error on first attempt (%s); retrying once.", first_exc
+            )
+            retry_messages = [
+                *messages,
+                Message(role="assistant", content=response.text or "(empty response)"),
+                Message(role="user", content=_RETRY_PROMPT),
+            ]
+            response = await self.complete(retry_messages, response_format="json")
+            try:
+                packet = _parse_intent_packet(response.text)
+            except (json.JSONDecodeError, ValidationError, KeyError) as exc:
+                error_str = str(exc)
+                logger.warning(
+                    "Understander parse error after retry (%s); returning fallback.", exc
+                )
+                packet = _fallback_packet(input_data)
+
+        latency = self.now_ms() - t0
 
         await self.log_call(
             turn_id=turn_id,

@@ -20,6 +20,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from dataclasses import dataclass
+from typing import Any
 from uuid import UUID
 
 from career_coach.agents.coach import Coach
@@ -64,6 +65,9 @@ class TurnPipeline:
         self._coach = Coach(factory)
         self._critic = Critic(factory)
         self._profiler = Profiler(factory)
+        # Keeps strong references to background tasks so the GC can't collect
+        # them before they complete (Python GC collects unreferenced Tasks).
+        self._background_tasks: set[asyncio.Task[Any]] = set()
 
     async def process_turn(
         self,
@@ -126,7 +130,7 @@ class TurnPipeline:
 
         # 6. Coach + Critic retry loop
         critic_feedback: str | None = None
-        critic_verdicts: list[dict] = []
+        critic_verdicts: list[dict[str, Any]] = []
         coach_out = None
 
         for attempt in range(_MAX_COACH_RETRIES):
@@ -196,8 +200,10 @@ class TurnPipeline:
             session.session_id, intent_packet.session_theory
         )
 
-        # 9. Queue Profiler as a background task (non-blocking)
-        _task = asyncio.create_task(  # noqa: RUF006 — intentionally fire-and-forget
+        # 9. Queue Profiler as a background task (non-blocking).
+        # Keep a strong reference in _background_tasks so the GC doesn't
+        # collect the Task before it completes; discard on completion.
+        task = asyncio.create_task(
             self._profiler.run_and_save(
                 user_id=user_id,
                 turn_id=turn_id,
@@ -207,6 +213,8 @@ class TurnPipeline:
             ),
             name=f"profiler-{turn_id}",
         )
+        self._background_tasks.add(task)
+        task.add_done_callback(self._background_tasks.discard)
 
         return TurnResult(
             response=coach_out.response_text,

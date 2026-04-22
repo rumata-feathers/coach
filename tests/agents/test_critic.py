@@ -136,3 +136,16 @@ async def test_critic_prompt_contains_specific_ask() -> None:
 
     prompt = mock.calls[0].messages[0].content
     assert "Should I study economics?" in prompt
+
+
+async def test_critic_retries_on_empty_response() -> None:
+    """First LLM call returns empty string; retry returns valid JSON."""
+    mock = MockLLMClient()
+    mock.queue("", _pass_verdict())  # empty first, valid second
+    critic = Critic(_make_factory(mock))
+
+    verdict = await critic.run(_critic_input())
+
+    assert len(mock.calls) == 2, "Expected exactly 2 LLM calls (original + retry)"
+    assert isinstance(verdict, CriticVerdict)
+    assert verdict.verdict == "pass"

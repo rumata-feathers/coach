@@ -7,6 +7,7 @@ single signal; we accumulate evidence rows and recompute.
 
 from __future__ import annotations
 
+from typing import Any
 from uuid import UUID
 
 from career_coach.db import get_pool
@@ -125,7 +126,7 @@ class SemanticRepo:
         assert evidence_id is not None
         return evidence_id  # type: ignore[no-any-return]
 
-    async def get_unmatched_evidence(self, user_id: UUID) -> list[dict]:
+    async def get_unmatched_evidence(self, user_id: UUID) -> list[dict[str, Any]]:
         """Return all evidence rows with ``hypothesis_id IS NULL`` for a user.
 
         Joins through ``turns`` to filter by ``user_id``. Rows without a

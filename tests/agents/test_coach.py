@@ -149,3 +149,16 @@ async def test_coach_prompt_contains_hypotheses() -> None:
 
     prompt = mock.calls[0].messages[0].content
     assert "User prefers analytical work." in prompt
+
+
+async def test_coach_retries_on_empty_response() -> None:
+    """First LLM call returns empty string; retry returns valid JSON."""
+    mock = MockLLMClient()
+    mock.queue("", _good_output_json())  # empty first, valid second
+    coach = Coach(_make_factory(mock))
+
+    output = await coach.run(_make_input())
+
+    assert len(mock.calls) == 2, "Expected exactly 2 LLM calls (original + retry)"
+    assert isinstance(output, CoachOutput)
+    assert output.response_text

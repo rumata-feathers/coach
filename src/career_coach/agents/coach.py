@@ -23,6 +23,14 @@ from career_coach.models.user_model import Challenge
 
 logger = logging.getLogger("career_coach.agents.coach")
 
+_RETRY_PROMPT = (
+    "Your previous response was not valid JSON. "
+    "Return ONLY a JSON object matching this schema — "
+    "no prose, no code fences, no think-blocks:\n"
+    '{"response_text": "string", "referenced_facts": [], '
+    '"referenced_hypotheses": [], "proposed_challenge": null, "uncertainty_flags": []}'
+)
+
 _ESCALATION_RESPONSE = (
     "I want to give you a genuinely useful response here, but I'm running into "
     "difficulty shaping one that I'm confident is actually grounded in what I know "
@@ -67,14 +75,27 @@ class Coach(Agent):
         t0 = self.now_ms()
         error_str: str | None = None
         response = await self.complete(messages, response_format="json")
-        latency = self.now_ms() - t0
 
         try:
             output = _parse_coach_output(response.text)
-        except (json.JSONDecodeError, ValidationError, KeyError, TypeError) as exc:
-            error_str = str(exc)
-            logger.warning("Coach parse error (%s); using fallback output.", exc)
-            output = _error_output(str(exc))
+        except (json.JSONDecodeError, ValidationError, KeyError, TypeError) as first_exc:
+            logger.warning(
+                "Coach parse error on first attempt (%s); retrying once.", first_exc
+            )
+            retry_messages = [
+                *messages,
+                Message(role="assistant", content=response.text or "(empty response)"),
+                Message(role="user", content=_RETRY_PROMPT),
+            ]
+            response = await self.complete(retry_messages, response_format="json")
+            try:
+                output = _parse_coach_output(response.text)
+            except (json.JSONDecodeError, ValidationError, KeyError, TypeError) as exc:
+                error_str = str(exc)
+                logger.warning("Coach parse error after retry (%s); using fallback output.", exc)
+                output = _error_output(str(exc))
+
+        latency = self.now_ms() - t0
 
         await self.log_call(
             turn_id=turn_id,

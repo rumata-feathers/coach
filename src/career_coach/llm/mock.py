@@ -7,6 +7,7 @@ parameters without touching a real provider.
 
 from __future__ import annotations
 
+import asyncio
 from collections import deque
 from collections.abc import Sequence
 from dataclasses import dataclass, field
@@ -34,6 +35,11 @@ class MockLLMClient(LLMClient):
     responses: deque[str] = field(default_factory=deque)
     default_response: str = '{"ok": true}'
     calls: list[RecordedCall] = field(default_factory=list)
+    delay_ms: int = 0
+    """If non-zero, each ``complete`` call sleeps this many milliseconds.
+
+    Useful for latency measurement tests and concurrency stress tests.
+    """
 
     def queue(self, *texts: str) -> None:
         """Queue one or more textual responses to return in order."""
@@ -49,6 +55,8 @@ class MockLLMClient(LLMClient):
         response_format: ResponseFormat = "text",
         extra_body: dict[str, Any] | None = None,
     ) -> LLMResponse:
+        if self.delay_ms:
+            await asyncio.sleep(self.delay_ms / 1000)
         self.calls.append(
             RecordedCall(
                 messages=list(messages),
