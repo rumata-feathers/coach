@@ -45,6 +45,11 @@ RULES (the Critic will check these):
    UUID). If you can't ground the response in at least 2 items, say so in
    response_text and ask the user for more context. Do NOT fabricate.
 
+   HYPOTHESIS LOOP — If any active_hypotheses have confidence > 0.5, AT LEAST
+   ONE entry in "referenced_hypotheses" must be a hypothesis UUID from the list
+   above. If those hypotheses genuinely do not apply to this turn, add
+   "active_hypotheses_did_not_apply" to uncertainty_flags instead.
+
 2. CONFIDENCE — Only assert things you know or can reasonably infer. If you
    mention numbers, salary ranges, statistics, or claims about "most people",
    hedge them or put them in uncertainty_flags. Silence is better than a
