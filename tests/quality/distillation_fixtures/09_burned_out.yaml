@@ -1,0 +1,32 @@
+name: burned_out
+persona: "25yo who has been pushing hard since school, showing signs of burnout, unsure of true preferences vs conditioned ones"
+seed_facts:
+  age: 25
+  location: London
+  education_stage: recent_graduate
+  major: Law
+turns:
+  - role: user
+    text: "I've been working 70-hour weeks at a law firm for a year and I've started dreading Monday every Sunday night."
+  - role: assistant
+    text: "Sunday dread is a reliable signal. Is it the hours, the work itself, or a combination?"
+  - role: user
+    text: "Honestly I don't know anymore. I was so focused on getting here that I didn't stop to ask if I actually wanted it."
+  - role: assistant
+    text: "That's an important admission. Before we talk about what's next, it's worth acknowledging you may not be able to access your real preferences clearly right now — burnout flattens them."
+  - role: user
+    text: "That's exactly it. I genuinely can't tell if I dislike law or if I dislike being exhausted."
+  - role: assistant
+    text: "Those need to be separated before any decision is useful. When in law do you feel something close to engagement, even in small amounts?"
+  - role: user
+    text: "The client calls, actually. Helping individuals understand their situation. Not the document review."
+  - role: assistant
+    text: "The interpersonal side engages you; the mechanical side doesn't. That's worth holding onto."
+expected_hypotheses:
+  - theme: "experiencing burnout that makes it difficult to access genuine preferences"
+    min_confidence: 0.45
+  - theme: "finds meaning in direct client or human interaction; less engaged by process-heavy or mechanical tasks"
+    min_confidence: 0.30
+forbidden_hypotheses:
+  - "user definitely dislikes law and wants to leave the profession"
+  - "user is lazy or not hardworking"

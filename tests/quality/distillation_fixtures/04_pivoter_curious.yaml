@@ -1,0 +1,32 @@
+name: pivoter_curious
+persona: "22yo CS grad who discovered a passion for biology, genuinely curious about pivoting"
+seed_facts:
+  age: 22
+  location: Cambridge
+  education_stage: recent_graduate
+  major: Computer Science
+turns:
+  - role: user
+    text: "I graduated in CS six months ago but I've been obsessively reading biology papers. I think I want to pivot."
+  - role: assistant
+    text: "Obsessive reading is a strong signal. What specifically pulls you — the problems, the methods, or the subject matter?"
+  - role: user
+    text: "The problems. I think computational biology is where both my skills could actually matter. Genomics, protein folding, that kind of thing."
+  - role: assistant
+    text: "That's a coherent thesis — your CS background is a genuine asset in bioinformatics. What's stopped you from moving toward it?"
+  - role: user
+    text: "I'm not sure if I'd need a PhD, and I don't want to spend 5 years before I can do real work."
+  - role: assistant
+    text: "Some roles don't require a PhD — research software engineer or bioinformatics analyst. But I'd push back slightly: are you averse to academia itself, or just the timeline?"
+  - role: user
+    text: "The timeline mostly. I learn fast and I'm frustrated by slow-paced structures."
+  - role: assistant
+    text: "So you want to move into the field quickly and at pace. That's a constraint on paths, not on the field itself."
+expected_hypotheses:
+  - theme: "motivated by intersection of computing and biology / life sciences"
+    min_confidence: 0.40
+  - theme: "impatient with slow-paced or bureaucratic structures, prefers fast-paced environments"
+    min_confidence: 0.30
+forbidden_hypotheses:
+  - "user wants to leave technology entirely"
+  - "user is uncertain about their aptitude for their current field"

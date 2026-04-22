@@ -1,0 +1,36 @@
+name: over_committed
+persona: "21yo who says yes to everything, has 12 projects and clubs, struggles to say no or set boundaries"
+seed_facts:
+  age: 21
+  location: Oxford
+  education_stage: undergrad
+  major: Engineering
+turns:
+  - role: user
+    text: "I'm president of three societies, taking an extra module, doing a startup on the side, and trying to apply for grad schemes. I'm not sleeping well."
+  - role: assistant
+    text: "That's a lot. Is this what you want, or what you felt you should want?"
+  - role: user
+    text: "Mostly the second. I find it hard to say no, especially if it feels like an opportunity."
+  - role: assistant
+    text: "Every opportunity has an opportunity cost. What's actually suffering because of the overload?"
+  - role: user
+    text: "My degree work, my health, probably my relationships. I'm spread thin everywhere."
+  - role: assistant
+    text: "So the overcommitment is actively harming the things you care about. Do you know why you keep saying yes?"
+  - role: user
+    text: "Fear of missing out, definitely. And I get a small hit from being asked. It feels like validation."
+  - role: assistant
+    text: "That's useful self-knowledge. The pattern is: opportunity arrives → FOMO + ego signal → yes. Breaking it requires intervening at the recognition step, not just the decision step."
+  - role: user
+    text: "I know logically I should cut half of this but even thinking about it feels like failure."
+  - role: assistant
+    text: "The association between doing less and being less is the pattern. It's worth examining where that association came from."
+expected_hypotheses:
+  - theme: "overcommits due to difficulty saying no, fear of missing out, or need for external validation from being asked"
+    min_confidence: 0.45
+  - theme: "equates doing more with being more — reductions feel like failure even when logically beneficial"
+    min_confidence: 0.30
+forbidden_hypotheses:
+  - "user lacks ambition or drive"
+  - "user has no self-awareness about the overcommitment"

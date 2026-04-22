@@ -1,0 +1,32 @@
+name: social_connector
+persona: "21yo politics student, energised by people and group dynamics, finds solo work draining"
+seed_facts:
+  age: 21
+  location: Edinburgh
+  education_stage: undergrad
+  major: Politics
+turns:
+  - role: user
+    text: "I'm trying to figure out what I want to do after my degree. Every time I sit down alone to work on my dissertation I lose energy fast."
+  - role: assistant
+    text: "That drain when working alone is a signal. What kinds of tasks in your degree have felt energising?"
+  - role: user
+    text: "Seminars, debates, collaborative research projects. I organised a student conference last term and it was the most alive I'd felt all year."
+  - role: assistant
+    text: "So it's not just preference — you actually perform well in group settings. What was your role in the conference?"
+  - role: user
+    text: "I coordinated all the speakers and managed the programme. People kept coming to me with problems and I loved sorting them out."
+  - role: assistant
+    text: "That's more than enjoying people — you're energised by coordination under pressure. Do any careers come to mind where that's the core work?"
+  - role: user
+    text: "Consultancy, politics, maybe something in events or comms. I want to be talking to people and moving fast."
+  - role: assistant
+    text: "That clarity is useful. The common thread is high-bandwidth human interaction as the primary activity, not a side feature."
+expected_hypotheses:
+  - theme: "energised by high-bandwidth human interaction and coordination"
+    min_confidence: 0.40
+  - theme: "finds solo deep work draining or demotivating"
+    min_confidence: 0.30
+forbidden_hypotheses:
+  - "user is introverted or prefers working alone"
+  - "user lacks leadership ability"

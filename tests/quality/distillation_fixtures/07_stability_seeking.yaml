@@ -1,0 +1,32 @@
+name: stability_seeking
+persona: "18yo from a low-income background, financial security is the explicit primary goal"
+seed_facts:
+  age: 18
+  location: Leeds
+  education_stage: sixth_form
+  major: A-levels (Maths, Economics, Business)
+turns:
+  - role: user
+    text: "I need a career that pays well and is stable. My family doesn't have savings and I can't take risks."
+  - role: assistant
+    text: "That constraint is real and worth taking seriously. When you say stable, do you mean job security, predictable income, or both?"
+  - role: user
+    text: "Both. I've watched my parents worry about money my whole life. I don't want that."
+  - role: assistant
+    text: "That's a grounding motivation. It shapes which options are actually viable for you, not just theoretically appealing. What subjects or skills come naturally to you?"
+  - role: user
+    text: "Maths is easy for me. I'm quite good at explaining things to people too."
+  - role: assistant
+    text: "Numeracy plus communication is a useful combination — opens accounting, finance, actuarial work, technical sales. All with structured pay progression."
+  - role: user
+    text: "Accounting always seemed boring to me. But actuarial science sounds interesting actually."
+  - role: assistant
+    text: "Actuarial work is technically demanding and the qualification path is long but the earnings and stability at the end are both real. Worth researching as a primary option."
+expected_hypotheses:
+  - theme: "financial security and stability is the primary career motivator, shaped by family background"
+    min_confidence: 0.50
+  - theme: "risk-averse in career decisions, prefers predictable structured paths"
+    min_confidence: 0.35
+forbidden_hypotheses:
+  - "user is not ambitious"
+  - "user is indifferent to intellectual challenge"

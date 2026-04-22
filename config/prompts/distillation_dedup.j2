@@ -1,0 +1,46 @@
+{#
+  Deduplication check for the distillation job.
+
+  Called once per proposed-new hypothesis, BEFORE inserting it.
+  If an existing hypothesis is substantively the same, return its ID so
+  the distillation job treats the evidence as match_existing instead of
+  creating a duplicate.
+
+  Keep the call cheap: small payload, yes/no output.
+#}
+You are checking whether a proposed new hypothesis about a user is substantively
+the same as any existing hypothesis.
+
+Proposed hypothesis:
+"{{ proposed_statement }}"
+
+Existing hypotheses:
+{% if existing_hypotheses %}
+{% for h in existing_hypotheses %}
+- id: {{ h.hypothesis_id }}
+  statement: "{{ h.statement }}"
+  confidence: {{ h.confidence }}
+{% endfor %}
+{% else %}
+(none)
+{% endif %}
+
+Task: decide whether the proposed hypothesis expresses the SAME underlying
+trait, pattern, or value as any existing hypothesis.
+
+Two hypotheses are the SAME if they would be updated by the same evidence
+and describe the same aspect of the user. Minor wording differences do NOT
+make them different. A hypothesis that is a narrower or broader version of
+an existing one counts as the same.
+
+Two hypotheses are DIFFERENT if they describe genuinely distinct traits that
+would NOT always move together (e.g., "prefers solo work" vs "dislikes
+bureaucracy" are different even if related).
+
+Respond with JSON only — no prose, no markdown fences:
+
+If a match exists:
+{"duplicate": true, "existing_id": "<the matching hypothesis_id>", "reason": "<one sentence>"}
+
+If no match:
+{"duplicate": false, "existing_id": null, "reason": "<one sentence>"}

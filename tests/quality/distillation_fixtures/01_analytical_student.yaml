@@ -1,0 +1,32 @@
+name: analytical_student
+persona: "19yo maths undergrad in London, gravitates to theory over applied work"
+seed_facts:
+  age: 19
+  location: London
+  education_stage: undergrad
+  major: Mathematics
+turns:
+  - role: user
+    text: "I find proofs much more interesting than programming projects."
+  - role: assistant
+    text: "That pull toward abstraction is worth noting. Most people find implementation satisfying — you seem wired differently. What draws you to the proof side specifically?"
+  - role: user
+    text: "When I had to do a group software project I hated every moment of it."
+  - role: assistant
+    text: "Is that the group element, the software element, or both?"
+  - role: user
+    text: "Mostly the software, actually. Working with people is fine. I just don't enjoy building things."
+  - role: assistant
+    text: "That sharpens it — it's the applied nature, not the collaboration. Have you explored what careers let you work mostly at the theoretical level?"
+  - role: user
+    text: "I'm considering academia but worried about the job market. Research in finance maybe?"
+  - role: assistant
+    text: "Quantitative research roles in finance involve substantial theoretical work — deriving models, not just running them. Worth investigating alongside academic paths."
+expected_hypotheses:
+  - theme: "prefers abstract / theoretical work over applied implementation"
+    min_confidence: 0.35
+  - theme: "has reservations about or dislikes software engineering / building systems"
+    min_confidence: 0.25
+forbidden_hypotheses:
+  - "user dislikes working with other people or collaboration"
+  - "user is not intellectually engaged"

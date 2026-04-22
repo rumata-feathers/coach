@@ -1,0 +1,32 @@
+name: indecisive_drifter
+persona: "20yo who has changed interests multiple times, paralysed by options, fears commitment"
+seed_facts:
+  age: 20
+  location: Manchester
+  education_stage: undergrad
+  major: Economics
+turns:
+  - role: user
+    text: "I've been trying to decide on a career for two years and I keep changing my mind."
+  - role: assistant
+    text: "Two years is a long time to stay stuck. When you settle on something, what typically makes you abandon it?"
+  - role: user
+    text: "I'll be excited for a few weeks then start seeing the downsides and lose interest. It happens with everything — I almost switched to history, then law, then back to economics."
+  - role: assistant
+    text: "That's a pattern worth examining. Is it the specific careers that lose appeal, or does the feeling of being 'decided' itself start to feel suffocating?"
+  - role: user
+    text: "Honestly the second one. Once I commit to something I start worrying I'm closing off other paths."
+  - role: assistant
+    text: "That's fear of foreclosure, not lack of direction. It's different from being genuinely undecided. Does that resonate?"
+  - role: user
+    text: "Yes completely. I actually know I like analytical problem-solving. I just don't want to be trapped."
+  - role: assistant
+    text: "So the real constraint is optionality, not uncertainty about what you enjoy. Careers with built-in pivotability might suit you better than narrowly defined tracks."
+expected_hypotheses:
+  - theme: "fears commitment to a single career path or foreclosing options"
+    min_confidence: 0.40
+  - theme: "has clarity about enjoying analytical problem-solving despite surface indecision"
+    min_confidence: 0.25
+forbidden_hypotheses:
+  - "user lacks self-awareness"
+  - "user has no genuine preferences or interests"

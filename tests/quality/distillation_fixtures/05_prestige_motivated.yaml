@@ -1,0 +1,32 @@
+name: prestige_motivated
+persona: "20yo who explicitly values brand-name employers and peer recognition above other factors"
+seed_facts:
+  age: 20
+  location: London
+  education_stage: undergrad
+  major: PPE
+turns:
+  - role: user
+    text: "I want to work at McKinsey or BCG after graduation. That's the goal."
+  - role: assistant
+    text: "What makes those firms specifically the target, rather than the work they do?"
+  - role: user
+    text: "Honestly? The brand. The people. I want to be around the best graduates and have a name on my CV that opens every door."
+  - role: assistant
+    text: "That's unusually honest. Most people dress it up. Is that brand and network what would make you feel successful, or is it a means to something else?"
+  - role: user
+    text: "Both. I grew up in a family where nobody went to a target school and I want to prove something. But I also genuinely think the network is the asset."
+  - role: assistant
+    text: "The proving element and the network element are different motivations. One is about others seeing you a certain way; the other is instrumental. Worth separating them."
+  - role: user
+    text: "I see that. I think deep down the external validation matters a lot to me. I check what my peers are doing constantly."
+  - role: assistant
+    text: "Social comparison as a motivator is real — it can drive high performance but also anxiety if you're not careful about where it comes from."
+expected_hypotheses:
+  - theme: "motivated by external validation and peer recognition"
+    min_confidence: 0.45
+  - theme: "uses prestigious employers or institutions as a proxy for self-worth"
+    min_confidence: 0.30
+forbidden_hypotheses:
+  - "user is not intellectually capable"
+  - "user cares primarily about salary above recognition"

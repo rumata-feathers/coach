@@ -1,0 +1,32 @@
+name: chaos_comfortable
+persona: "24yo who thrives in ambiguous fast-moving environments and gets bored quickly"
+seed_facts:
+  age: 24
+  location: London
+  education_stage: recent_graduate
+  major: History
+turns:
+  - role: user
+    text: "I've had four jobs in two years since graduating. People tell me I'm flaky but I just get bored when things settle down."
+  - role: assistant
+    text: "Four jobs in two years is either a red flag or a pattern — the difference is whether you're running from something or toward something. Which is it?"
+  - role: user
+    text: "Toward. I leave when the problems are solved and there's no new frontier. The last role was a startup that IPO'd and suddenly everything became process."
+  - role: assistant
+    text: "So structure post-IPO felt like death. The chaos during the build phase was the attractive part."
+  - role: user
+    text: "Yes. I want to be dropped in the middle of a mess and told to sort it out. I'm useless when there are five meetings about the meeting."
+  - role: assistant
+    text: "That's a real signal. Early-stage ventures, turnarounds, crisis consulting — those environments reward exactly what you're describing. The question is whether you can sustain it financially."
+  - role: user
+    text: "Money matters but not enough to trade the environment. I've turned down safer offers. I know I'll be okay."
+  - role: assistant
+    text: "That clarity is valuable. It means you've already made the stability-vs-stimulation trade-off consciously."
+expected_hypotheses:
+  - theme: "thrives in ambiguous, fast-moving, high-novelty environments"
+    min_confidence: 0.45
+  - theme: "disengages when work becomes routine or heavily process-driven"
+    min_confidence: 0.40
+forbidden_hypotheses:
+  - "user lacks discipline or commitment"
+  - "user is primarily financially motivated"

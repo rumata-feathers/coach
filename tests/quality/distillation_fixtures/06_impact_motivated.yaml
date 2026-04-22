@@ -1,0 +1,32 @@
+name: impact_motivated
+persona: "23yo who is explicitly driven by social impact, frustrated when work feels disconnected from real-world change"
+seed_facts:
+  age: 23
+  location: Bristol
+  education_stage: masters
+  major: Development Economics
+turns:
+  - role: user
+    text: "I did my undergrad in economics and spent a year working at a think tank. I felt like everything I wrote just went into a drawer."
+  - role: assistant
+    text: "That's a specific frustration — output without uptake. Did the work itself feel meaningful, or was it the lack of impact that made it hollow?"
+  - role: user
+    text: "The work was interesting but the disconnection from real people was hard. I want to see change happen."
+  - role: assistant
+    text: "What does 'seeing change happen' mean concretely to you — is it policy being passed, people's lives improving, or something else?"
+  - role: user
+    text: "People's lives. I did a summer in rural Kenya on a microfinance project and that felt more real than anything I'd done in an office."
+  - role: assistant
+    text: "So the proximity to the beneficiary matters, not just the causal chain. That's a useful filter — it rules out a lot of indirect roles."
+  - role: user
+    text: "Exactly. But I'm worried that the work that pays well in international development is still quite far from the ground."
+  - role: assistant
+    text: "That tension between financial sustainability and proximity to impact is real in the field. It's worth examining which constraint you'll hit first — money or distance."
+expected_hypotheses:
+  - theme: "driven by direct, visible impact on real people rather than indirect or policy-level influence"
+    min_confidence: 0.45
+  - theme: "experiences frustration when work output is not connected to concrete outcomes"
+    min_confidence: 0.30
+forbidden_hypotheses:
+  - "user is primarily motivated by salary or career advancement"
+  - "user does not value intellectual rigour"
