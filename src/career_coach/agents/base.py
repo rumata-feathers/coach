@@ -13,6 +13,7 @@ Python is explicitly banned (see ``CLAUDE.md``).
 
 from __future__ import annotations
 
+import json
 import time
 from pathlib import Path
 from typing import Any
@@ -100,8 +101,14 @@ class Agent:
         tokens_out: int | None,
         error: str | None = None,
     ) -> None:
-        """Append a row to ``agent_calls`` for observability."""
+        """Append a row to ``agent_calls`` for observability.
+
+        Payloads are round-tripped through JSON to coerce non-serialisable types
+        (UUID, datetime, …) to strings before asyncpg's JSONB codec sees them.
+        """
         pool = await get_pool()
+        safe_input = _jsonify(input_payload)
+        safe_output = _jsonify(output_payload) if output_payload is not None else None
         async with pool.acquire() as conn:
             await conn.execute(
                 """
@@ -113,8 +120,8 @@ class Agent:
                 turn_id,
                 self.name,
                 self._llm_config.model,
-                input_payload,
-                output_payload,
+                safe_input,
+                safe_output,
                 latency_ms,
                 tokens_in,
                 tokens_out,
@@ -125,3 +132,9 @@ class Agent:
     def now_ms() -> int:
         """Wall-clock time in milliseconds for latency measurement."""
         return int(time.monotonic() * 1000)
+
+
+def _jsonify(data: dict[str, Any]) -> dict[str, Any]:
+    """Round-trip through JSON to coerce UUID/datetime to strings."""
+    result: dict[str, Any] = json.loads(json.dumps(data, default=str))
+    return result
