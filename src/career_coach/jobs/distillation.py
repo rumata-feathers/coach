@@ -85,12 +85,15 @@ async def run_distillation(
     # LLM call
     client = llm_client or _get_default_client(factory)
     model = _get_model(factory)
+    # Use text mode: the HF router's enforced-JSON mode (response_format="json")
+    # returns a 400 when the model produces empty output, losing all context.
+    # _parse_response already handles code-fence stripping, and the HF adapter
+    # strips <think>…</think> blocks.
     response = await client.complete(
         messages,
         model=model,
         temperature=0.1,
         max_tokens=2000,
-        response_format="json",
     )
 
     try:
@@ -239,8 +242,7 @@ async def _check_duplicate(
             [Message(role="user", content=prompt)],
             model=model,
             temperature=0.0,
-            max_tokens=200,
-            response_format="json",
+            max_tokens=300,  # was 200 — dedup response fits in ~150 tokens but give headroom
         )
         data = _parse_response(response.text)
         if data.get("duplicate") is True:

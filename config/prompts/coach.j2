@@ -46,9 +46,12 @@ RULES (the Critic will check these):
    response_text and ask the user for more context. Do NOT fabricate.
 
    HYPOTHESIS LOOP — If any active_hypotheses have confidence > 0.5, AT LEAST
-   ONE entry in "referenced_hypotheses" must be a hypothesis UUID from the list
-   above. If those hypotheses genuinely do not apply to this turn, add
-   "active_hypotheses_did_not_apply" to uncertainty_flags instead.
+   ONE entry in "referenced_hypotheses" must be one of the UUID strings from
+   the hypothesis list above (e.g. "3f2a1b..."). NEVER put text strings like
+   "active_hypotheses_did_not_apply" in "referenced_hypotheses" — that field
+   only accepts UUID strings. If none of the hypotheses apply to this turn,
+   leave "referenced_hypotheses" empty and add the string
+   "active_hypotheses_did_not_apply" to "uncertainty_flags" instead.
 
 2. CONFIDENCE — Only assert things you know or can reasonably infer. If you
    mention numbers, salary ranges, statistics, or claims about "most people",

@@ -117,13 +117,24 @@ class Understander(Agent):
 
 
 def _parse_intent_packet(raw: str) -> IntentPacket:
-    """Strip optional markdown fences and parse JSON → IntentPacket."""
+    """Strip optional markdown fences and parse JSON → IntentPacket.
+
+    Post-processes LLM output to enforce invariants before Pydantic validation:
+    - If clarity_score >= 0.5 the model should NOT request clarification, but
+      sometimes does. Correct it silently so the turn proceeds.
+    """
     text = raw.strip()
     if text.startswith("```"):
         # Remove code fences if the model added them despite instructions.
         lines = text.splitlines()
         text = "\n".join(line for line in lines if not line.startswith("```"))
     data = json.loads(text)
+    # Enforce SPEC §6.1 invariant: high-clarity turns do not need clarification.
+    # The model occasionally returns clarity_score=0.6 + needs_clarification=True,
+    # which fails Pydantic. Post-correct to avoid the retry/fallback path.
+    if float(data.get("clarity_score", 0)) >= 0.5:
+        data["needs_clarification"] = False
+        data["clarification_question"] = None
     return IntentPacket(**data)
 
 
