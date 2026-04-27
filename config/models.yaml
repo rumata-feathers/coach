@@ -3,14 +3,12 @@
 # All agents use HuggingFace Inference Providers router.
 #
 # Thinking blocks: Qwen3 models emit <think>…</think> blocks by default.
-# The correct parameter to suppress them via OpenAI-compatible endpoints is
-# chat_template_kwargs.enable_thinking=false (NOT "thinking: false", which is
-# specific to Alibaba Cloud and causes 400 errors on the HF router).
-#
-# Whether the backend honours chat_template_kwargs depends on the underlying
-# provider (Novita/Together/etc.) exposing the vLLM reasoning toggle.
-# huggingface.py strips <think>…</think> blocks as a reliable fallback so the
-# system works regardless.
+# Neither "thinking: false" (Alibaba-specific) nor
+# "chat_template_kwargs: {enable_thinking: false}" (vLLM-level) is
+# forwarded by the HF Inference Providers router — both cause 400 errors
+# regardless of the underlying backend (Novita/Together/etc.).
+# huggingface.py strips <think>…</think> blocks unconditionally; that is
+# the only reliable suppression mechanism available here.
 #
 # Model tiers:
 #   coach / onboarder — Qwen3-235B-A22B (MoE, 22B active params, best quality)
@@ -21,42 +19,27 @@ understander:
   model: Qwen/Qwen3-32B
   temperature: 0.2
   max_tokens: 1500
-  extra_body:
-    chat_template_kwargs:
-      enable_thinking: false
 
 coach:
   provider: huggingface
   model: Qwen/Qwen3-235B-A22B
   temperature: 0.7
   max_tokens: 2500
-  extra_body:
-    chat_template_kwargs:
-      enable_thinking: false
 
 critic:
   provider: huggingface
   model: Qwen/Qwen3-32B
   temperature: 0.0
   max_tokens: 1200
-  extra_body:
-    chat_template_kwargs:
-      enable_thinking: false
 
 profiler:
   provider: huggingface
   model: Qwen/Qwen3-32B
   temperature: 0.1
   max_tokens: 1500
-  extra_body:
-    chat_template_kwargs:
-      enable_thinking: false
 
 onboarder:
   provider: huggingface
   model: Qwen/Qwen3-235B-A22B
   temperature: 0.7
   max_tokens: 2000
-  extra_body:
-    chat_template_kwargs:
-      enable_thinking: false
