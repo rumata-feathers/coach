@@ -9,7 +9,7 @@ v0.5 flows:
   B          — Coach + Critic retry loop. Standard coaching conversation.
   C          — Full deliberation (deferred to v1; routes to B for now).
 
-See SPEC §6.2 and SPEC_v0.5 §4.
+See SPEC.md §6.2 (flow routing) and SPEC.md §4 (v0.5 onboarding spec).
 """
 
 from __future__ import annotations

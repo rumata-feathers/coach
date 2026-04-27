@@ -59,8 +59,12 @@ class HuggingFaceClient(LLMClient):
         """Run a chat completion.
 
         ``extra_body`` is forwarded verbatim to the provider — useful for
-        model-specific parameters like ``{"thinking": false}`` on Qwen3 to
-        suppress the chain-of-thought block and halve token cost.
+        model-specific parameters like
+        ``{"chat_template_kwargs": {"enable_thinking": False}}`` on Qwen3 to
+        suppress the chain-of-thought block (correct HF/vLLM syntax; the
+        Alibaba-specific ``{"thinking": false}`` causes 400 errors here).
+        Whether the underlying backend honours it depends on the provider;
+        the ``<think>`` stripping below is a reliable fallback regardless.
         """
         kwargs: dict[str, Any] = {
             "model": model,

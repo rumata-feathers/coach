@@ -21,8 +21,19 @@ from career_coach.models.user_model import (
 class SemanticRepo:
     """CRUD for ``hypotheses`` and ``hypothesis_evidence``."""
 
-    async def get_active(self, user_id: UUID) -> list[Hypothesis]:
-        """Return all active hypotheses for ``user_id``, newest first."""
+    async def get_active(
+        self,
+        user_id: UUID,
+        limit: int = 10,
+    ) -> list[Hypothesis]:
+        """Return the most-recently-updated active hypotheses for ``user_id``.
+
+        Args:
+            user_id: Target user.
+            limit: Maximum hypotheses to return, ordered by confidence DESC
+                then last_updated DESC. Capped to prevent prompt bloat;
+                distillation dedup keeps the count low in practice.
+        """
         pool = await get_pool()
         async with pool.acquire() as conn:
             rows = await conn.fetch(
@@ -31,9 +42,11 @@ class SemanticRepo:
                        created_at, last_updated, last_reviewed
                 FROM hypotheses
                 WHERE user_id = $1 AND status = 'active'
-                ORDER BY last_updated DESC
+                ORDER BY confidence DESC, last_updated DESC
+                LIMIT $2
                 """,
                 user_id,
+                limit,
             )
         return [
             Hypothesis(

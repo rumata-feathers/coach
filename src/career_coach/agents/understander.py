@@ -27,10 +27,10 @@ _RETRY_PROMPT = (
     "Your previous response was not valid JSON. "
     "Return ONLY a JSON object matching this schema — "
     "no prose, no code fences, no think-blocks:\n"
-    '{"session_theory": "string", "turn_intent": "explore|decide|vent|reflect|challenge|other", '
+    '{"session_theory": "string", "turn_intent": "explore|decide|reflect|research|vent", '
     '"specific_ask": "string", "emotional_tenor": "string", "clarity_score": 0.0, '
     '"needs_clarification": false, "clarification_question": null, '
-    '"inferred_constraints": [], "budget_hint": "quick|standard"}'
+    '"inferred_constraints": [], "budget_hint": "quick|standard|deep"}'
 )
 
 

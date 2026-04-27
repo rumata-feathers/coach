@@ -4,7 +4,7 @@ New users (< 5 facts OR < 3 turns) are routed here instead of the standard
 Coach pipeline. The onboarder asks structured probe questions to gather the
 context the coach needs before it can give grounded advice.
 
-See SPEC_v0.5 §4.
+See SPEC.md §4 (v0.5 onboarding spec).
 """
 
 from __future__ import annotations
@@ -170,11 +170,17 @@ class OnboardingPipeline(Agent):
         return output
 
     async def _get_onboarding_turn_index(self, user_id: UUID) -> int:
-        """Return the number of turns this user has already had (0-indexed probe selector)."""
+        """Return how many onboarding turns this user has already completed.
+
+        Used as a 0-indexed probe selector: 0 → context probe, 1 → values
+        probe, 2+ → framing check.  Only counts rows where flow_used =
+        'onboarding' so that standard-flow turns from a previous session do
+        not advance the probe index.
+        """
         pool = await get_pool()
         async with pool.acquire() as conn:
             count: int = await conn.fetchval(
-                "SELECT COUNT(*) FROM turns WHERE user_id = $1",
+                "SELECT COUNT(*) FROM turns WHERE user_id = $1 AND flow_used = 'onboarding'",
                 user_id,
             )
         return count
