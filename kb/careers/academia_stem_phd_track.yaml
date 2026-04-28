@@ -1,0 +1,27 @@
+# DRAFTED BY CLAUDE CODE — user review of source_notes required before merge.
+# (This was in the "user writes" list per TASKS_v1.md but not yet authored.)
+name: academia_stem_phd_track
+display_name: "Academia (STEM PhD track)"
+tags: [academia, math_heavy, research_heavy, low_comp_early, long_training, independent_work, high_autonomy]
+variants: [maths_phd, physics_phd, cs_theory_phd, engineering_phd, postdoc, lecturer, research_fellow, professor]
+entry_paths:
+  - path: undergrad_stem → phd → postdoc → lectureship_or_research_fellow
+    typical_timeline_years: 10
+    selectivity: "very high for permanent academic posts; PhD entry moderate to high depending on supervisor and field"
+  - path: undergrad_stem → phd → industry_research_lab
+    typical_timeline_years: 5
+    selectivity: "high — strong publications expected"
+typical_hours_per_week: [45, 60]
+early_career_pay_uk:
+  band_p50_gbp: 20000
+  band_p90_gbp: 40000
+  year_ref: 2025
+  notes: "PhD stipends, not salary. Postdoc salaries approx £35k–£50k. Permanent lectureship approx £42k–£58k."
+typical_exits: [industry_research, data_science, quantitative_finance, consulting, civil_service_research_role, teaching, policy]
+risks: [long_low_paid_training, highly_competitive_permanent_posts, geographic_inflexibility, research_topic_may_narrow_options]
+required_signals: [genuine_intellectual_curiosity, tolerance_for_uncertainty, strong_writing_ability, self_direction, deep_interest_in_specific_domain]
+contra_indicators: [strong_compensation_motivation_early, need_for_geographic_stability, impatience_with_slow_progression, preference_for_applied_over_abstract_problems]
+source_notes:
+  pay: "UKRI stipend rates 2024-25 (£19,237 minimum for PhD); postdoc from UCEA academic pay scales 2024; lectureship from UCEA grade 7-8 bands — wide variation by institution and field"
+  hours: "Survey evidence mixed; official PhD expectations ~37.5h/wk but self-reported averages higher; Nature PhD survey 2019 and informal UK postdoc surveys"
+  entry_paths: "Approximate from HESA graduate outcomes data and REF career trajectory studies; attrition at each stage is high — majority of PhDs do not reach permanent academic posts"

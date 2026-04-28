@@ -1,0 +1,21 @@
+name: Software Engineering
+display_name: "Software Engineering"
+tags: [finance, math_heavy, cs_heavy, data_anaytics, good_comp, good_work_life_balance, competitive, technical]
+variants: [backend, frontend, full_stack, devops, data_engineering, machine_learning_engineering, site_reliability_engineering]
+entry_paths:
+  - path: undergrad_data_science → internship → grad_role
+    typical_timeline_years: 4
+    selectivity: "high — top universities, CS-related internships common"
+typical_hours_per_week: [60, 90]
+early_career_pay_uk:
+  band_p50_gbp: 50000
+  band_p90_gbp: 80000
+  year_ref: 2026
+typical_exits: [start_up, big_tech_senior_ic, own_firm, leave_industry, product_management, consulting]
+risks: [burnout_high, high_entrance_barrier, ai_impact]
+required_signals: [strong_mathematical_aptitude, strong_programming_skills, comfort_with_ambiguity, competition_history, interest_in_technology]
+contra_indicators: [strong_preference_for_collaborative_work, impracticality]
+source_notes:
+  pay: "levels.fyi UK 2024 snapshot; firm-dependent; London-centric"
+  hours: "anecdotal from glassdoor + practitioner blogs; varies wildly by firm"
+  entry_paths: "observed pattern, not exclusive"

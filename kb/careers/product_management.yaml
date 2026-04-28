@@ -1,0 +1,25 @@
+name: product_management
+display_name: "Product Management"
+tags: [tech, generalist, client_facing, moderate_comp, cross_functional, strategic, communication_heavy]
+variants: [consumer_pm, b2b_pm, platform_pm, growth_pm, technical_pm, senior_pm, vp_product, chief_product_officer]
+entry_paths:
+  - path: undergrad_any → associate_pm_program_or_swe → pm
+    typical_timeline_years: 4
+    selectivity: "high — APM programmes at top tech firms (Google, Meta, Microsoft) highly competitive; most PMs transition from SWE, UX, or analyst roles"
+  - path: undergrad_cs_or_business → startup_early_employee → pm
+    typical_timeline_years: 3
+    selectivity: "moderate — easier entry at smaller companies; earlier ownership"
+typical_hours_per_week: [45, 60]
+early_career_pay_uk:
+  band_p50_gbp: 60000
+  band_p90_gbp: 100000
+  year_ref: 2025
+  notes: "APM / junior PM at FAANG/large tech ~£65k–£90k total comp London; mid-size tech lower; startup PMs often below with equity upside. Senior PM significantly higher."
+typical_exits: [founder_or_startup, senior_pm, director_of_product, consulting, venture_capital, general_management, ceo_path]
+risks: [credit_for_outcomes_diffuse, dependence_on_engineering_relationships, ambiguous_career_ladder_outside_big_tech, harder_to_skill_up_technically_over_time]
+required_signals: [systems_thinking, empathy_for_users, ability_to_influence_without_authority, comfort_with_data, strong_written_communication, prioritisation_skills]
+contra_indicators: [preference_for_deep_individual_technical_contribution, low_tolerance_for_ambiguity_about_ownership, discomfort_with_competing_stakeholders]
+source_notes:
+  pay: "levels.fyi London PM comp 2024; LinkedIn Salary UK PM ranges; Glassdoor London PM — big tech vs mid-size tech gap is large, figures are approximate"
+  hours: "Self-reported in PM communities; varies by company stage and individual team culture"
+  entry_paths: "Product School and Lenny's Newsletter APM survey data 2023-24; Google/Meta/Microsoft APM programme sizes publicly available"
