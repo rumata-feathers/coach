@@ -1,0 +1,18 @@
+id: 013_teaching_bursaries_stem
+description: Teaching bursaries for STEM graduates
+question: What bursaries are available for STEM graduates who want to become secondary
+  school teachers?
+persona:
+  age: 23
+  degree: Physics BSc
+  interests:
+  - teaching
+  - education
+  location: England
+expected_min_findings: 2
+is_contrarian: false
+expected_kb_tags:
+- public_sector
+expected_careers_mentioned:
+- teaching
+notes: Government bursary schemes — web must find current DfE figures.

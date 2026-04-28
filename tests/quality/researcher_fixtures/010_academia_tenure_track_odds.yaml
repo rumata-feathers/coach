@@ -1,0 +1,17 @@
+id: 010_academia_tenure_track_odds
+description: Realistic odds of getting a tenure-track position in STEM
+question: What are the realistic odds of getting a permanent academic position after
+  a STEM PhD in the UK?
+persona:
+  age: 26
+  degree: PhD Chemistry (in progress)
+  publications: 3
+  location: UK
+expected_min_findings: 2
+is_contrarian: false
+expected_kb_tags:
+- academia
+- research_heavy
+expected_careers_mentioned:
+- academia_stem_phd_track
+notes: Statistics on academic job market — web-critical for fresh data.

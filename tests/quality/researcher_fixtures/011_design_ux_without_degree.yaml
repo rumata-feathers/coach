@@ -1,0 +1,18 @@
+id: 011_design_ux_without_degree
+description: Breaking into UX design without a design degree
+question: Can you realistically become a UX designer without a design degree, and
+  what do recruiters actually look for?
+persona:
+  age: 25
+  degree: Psychology BSc
+  skills:
+  - user research
+  - Figma basics
+  location: UK
+expected_min_findings: 2
+is_contrarian: false
+expected_kb_tags:
+- creative
+expected_careers_mentioned:
+- design_ux
+notes: Portfolio and bootcamp routes. KB provides structural context.

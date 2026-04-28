@@ -1,0 +1,21 @@
+id: 004_consulting_vs_ib_exit_options
+description: Consulting vs IB for PE exit options
+question: Between management consulting and investment banking, which gives better
+  exit options into private equity?
+persona:
+  age: 21
+  degree: PPE, Oxford
+  interests:
+  - finance
+  - private equity
+  - strategy
+  location: UK
+expected_min_findings: 2
+is_contrarian: false
+expected_kb_tags:
+- high_comp
+- competitive
+expected_careers_mentioned:
+- management_consulting
+- investment_banking
+notes: Tests KB exits.yaml usage alongside web.

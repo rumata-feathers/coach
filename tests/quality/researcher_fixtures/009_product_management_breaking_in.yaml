@@ -1,0 +1,16 @@
+id: 009_product_management_breaking_in
+description: How to break into product management without a tech background
+question: How do you break into product management if you don't have a software engineering
+  background?
+persona:
+  age: 24
+  degree: History, Cambridge
+  experience: 2 years marketing
+  location: UK
+expected_min_findings: 2
+is_contrarian: false
+expected_kb_tags:
+- tech_adjacent
+expected_careers_mentioned:
+- product_management
+notes: Should surface APM programmes and bootcamp routes from web.

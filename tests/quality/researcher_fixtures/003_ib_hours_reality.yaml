@@ -1,0 +1,17 @@
+id: 003_ib_hours_reality
+description: Investment banking hours and lifestyle check
+question: How bad are the hours in investment banking really, and does it get better
+  as you get more senior?
+persona:
+  age: 20
+  degree: Economics
+  interests:
+  - finance
+  - deals
+  - prestige
+  location: UK
+expected_min_findings: 2
+is_contrarian: false
+expected_kb_tags:
+- high_hours
+notes: Should find hours data from Glassdoor or similar. KB has typical_hours_per_week.

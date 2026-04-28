@@ -1,0 +1,18 @@
+id: 006_law_trainee_salary_magic_circle
+description: Magic Circle trainee solicitor compensation
+question: What do trainees at Magic Circle law firms actually earn, and how does it
+  compare to City boutiques?
+persona:
+  age: 21
+  degree: Law LLB
+  interests:
+  - corporate law
+  - M&A
+  location: London
+expected_min_findings: 2
+is_contrarian: false
+expected_kb_tags:
+- high_comp
+expected_careers_mentioned:
+- law_uk
+notes: Should find Legal Cheek or Roll on Friday data. Numeric claims need web citation.

@@ -43,3 +43,20 @@ onboarder:
   model: Qwen/Qwen3-235B-A22B
   temperature: 0.7
   max_tokens: 2000
+
+# Researcher — synthesis call: Coach-tier, strong reasoning, lower temperature
+# so citations are not hallucinated.
+researcher:
+  provider: huggingface
+  model: Qwen/Qwen3-235B-A22B
+  temperature: 0.2
+  max_tokens: 3000
+
+# Researcher planner — cheap Haiku-tier call to decide what to search for.
+# Uses the dense 32B model since the task is structured and doesn't require
+# the full MoE.
+researcher_planner:
+  provider: huggingface
+  model: Qwen/Qwen3-32B
+  temperature: 0.1
+  max_tokens: 800
