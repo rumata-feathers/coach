@@ -56,6 +56,9 @@ class CoachOutput(BaseModel):
 
     The Coach MUST list which facts and hypotheses it grounded the response
     on — the Critic uses these fields to verify the grounding rule.
+
+    ``chart_specs`` is populated on Flow B when the Coach emits a comparison
+    chart (§6.3). Maximum 1 chart in v1. Flow A never emits charts.
     """
 
     response_text: str = Field(..., min_length=1)
@@ -63,6 +66,17 @@ class CoachOutput(BaseModel):
     referenced_hypotheses: list[UUID] = Field(default_factory=list)
     proposed_challenge: Challenge | None = None
     uncertainty_flags: list[str] = Field(default_factory=list)
+    chart_specs: list[ChartSpec] = Field(default_factory=list)
+
+    @field_validator("chart_specs")
+    @classmethod
+    def _max_one_chart(cls, v: list[ChartSpec]) -> list[ChartSpec]:
+        """v1 allows at most 1 chart per Coach response."""
+        if len(v) > 1:
+            raise ValueError(
+                f"CoachOutput allows at most 1 chart in v1, got {len(v)}"
+            )
+        return v
 
 
 # -------- Critic --------------------------------------------------------
@@ -96,6 +110,63 @@ class CriticVerdict(BaseModel):
         if self.verdict == "pass" and self.failure_modes:
             raise ValueError("A 'pass' verdict must not list failure modes.")
         return self
+
+
+# -------- Charts --------------------------------------------------------
+
+
+class AxisSpec(BaseModel):
+    """Axis definition for a :class:`ChartSpec`.
+
+    Attributes:
+        label: Display label (e.g. ``"Career"`` or ``"Median salary (GBP)``).
+        unit: Physical unit of the axis values, e.g. ``"GBP"``, ``"years"``.
+            ``None`` for dimensionless quantities or categorical axes.
+        scale: ``"linear"`` (default) or ``"log"``.
+    """
+
+    label: str
+    unit: str | None = None
+    scale: Literal["linear", "log"] = "linear"
+
+
+class ChartSpec(BaseModel):
+    """Structured chart specification.
+
+    Produced by the Coach (Flow B) or Synthesizer (Flow C) when §6.4 conditions
+    hold. v2 frontend renders these; v1 persists them as structured output.
+
+    Attributes:
+        chart_type: Visual form of the chart.
+        title: Chart title.
+        description: One-sentence accessibility caption.
+        x_axis: X-axis definition. ``None`` for pie charts and tables.
+        y_axis: Y-axis definition. ``None`` for pie charts and tables.
+        data: List of row dicts. Column names should match axis labels for
+            bar/line/scatter charts.
+        source_citation_indices: 0-based indices into the parent response's
+            ``citations`` list. Must have at least one entry — uncited charts
+            are rejected by the Critic (``chart_uncited`` failure mode).
+    """
+
+    chart_type: Literal["bar", "line", "scatter", "pie", "table", "range"]
+    title: str
+    description: str
+    x_axis: AxisSpec | None = None
+    y_axis: AxisSpec | None = None
+    data: list[dict[str, Any]] = Field(default_factory=list)
+    source_citation_indices: list[int] = Field(default_factory=list)
+
+    @field_validator("source_citation_indices")
+    @classmethod
+    def _must_have_citation(cls, v: list[int]) -> list[int]:
+        """A chart without citations is structurally invalid (Critic: chart_uncited)."""
+        if not v:
+            raise ValueError(
+                "ChartSpec.source_citation_indices must have ≥1 entry. "
+                "Uncited charts are not permitted (see SPEC_v1.md §6.4)."
+            )
+        return v
 
 
 # -------- Researcher ----------------------------------------------------
@@ -303,6 +374,92 @@ class DevilsAdvocateInput(BaseModel):
     user_facts: dict[str, Any] = Field(default_factory=dict)
     active_hypotheses: list[Hypothesis] = Field(default_factory=list)
     intent_packet: IntentPacket
+
+
+# -------- Synthesizer ---------------------------------------------------
+
+
+class SynthesizerInput(BaseModel):
+    """Input to :class:`~career_coach.agents.synthesizer.Synthesizer`.
+
+    Attributes:
+        coach_output: The Coach's response (always present on Flow C).
+        da_output: The Devil's Advocate output.
+        research_brief: Research brief, or ``None`` if Researcher was not run
+            or produced an empty brief.
+        user_facts: Structured user model facts for grounding.
+        active_hypotheses: Current active hypotheses about the user.
+        intent_packet: The original intent packet.
+        critic_feedback: Populated on retry attempts — the Critic's complaints
+            from the previous Synthesizer pass.
+    """
+
+    coach_output: CoachOutput
+    da_output: DevilsAdvocateOutput
+    research_brief: ResearchBrief | None = None
+    user_facts: dict[str, Any] = Field(default_factory=dict)
+    active_hypotheses: list[Hypothesis] = Field(default_factory=list)
+    intent_packet: IntentPacket
+    critic_feedback: str | None = None
+
+
+class SynthesizedResponse(BaseModel):
+    """Output of the Synthesizer agent (Flow C user-facing voice).
+
+    Attributes:
+        response_text: User-facing response with inline citation numerals
+            ``[1]``, ``[2]`` indexing into ``citations`` (1-based in text).
+        referenced_facts: Fact keys from user_facts used in the response.
+        referenced_hypotheses: Hypothesis UUIDs used in the response.
+        referenced_findings: ``finding.claim`` strings from the ResearchBrief
+            that the response draws on.
+        citations: All sources cited in this response (deduped). Indexed by
+            the ``[N]`` numerals in ``response_text`` (1-based, so ``[1]``
+            is ``citations[0]``).
+        surfaced_tradeoffs: Tradeoff statements that integrate Coach + DA + Research.
+            Must have ≥1 entry when DA disagreed (``agrees_with_coach=False``).
+        integrated_from: Which agent outputs were actually used. Critic checks
+            this for completeness (``unintegrated`` failure mode).
+        chart_specs: Optional chart. At most 1 in v1. Only present when §6.4
+            conditions hold.
+        proposed_challenge: Populated by v1.5 Initiator; v1 leaves this ``None``.
+        uncertainty_flags: Hedges and caveats to flag to the user.
+    """
+
+    response_text: str = Field(..., min_length=1)
+    referenced_facts: list[str] = Field(default_factory=list)
+    referenced_hypotheses: list[UUID] = Field(default_factory=list)
+    referenced_findings: list[str] = Field(default_factory=list)
+    citations: list[Citation] = Field(default_factory=list)
+    surfaced_tradeoffs: list[str] = Field(default_factory=list)
+    integrated_from: list[Literal["coach", "devils_advocate", "researcher"]] = Field(
+        default_factory=list
+    )
+    chart_specs: list[ChartSpec] = Field(default_factory=list)
+    proposed_challenge: Challenge | None = None
+    uncertainty_flags: list[str] = Field(default_factory=list)
+
+    @field_validator("chart_specs")
+    @classmethod
+    def _max_one_chart(cls, v: list[ChartSpec]) -> list[ChartSpec]:
+        """v1 allows at most 1 chart per synthesized response."""
+        if len(v) > 1:
+            raise ValueError(
+                f"SynthesizedResponse allows at most 1 chart in v1, got {len(v)}"
+            )
+        return v
+
+    @field_validator("integrated_from")
+    @classmethod
+    def _coach_always_integrated(
+        cls, v: list[Literal["coach", "devils_advocate", "researcher"]]
+    ) -> list[Literal["coach", "devils_advocate", "researcher"]]:
+        """Coach output is always present on Flow C — must be in integrated_from."""
+        if "coach" not in v:
+            raise ValueError(
+                "SynthesizedResponse.integrated_from must always include 'coach'."
+            )
+        return v
 
 
 # -------- Profiler ------------------------------------------------------

@@ -69,3 +69,12 @@ devils_advocate:
   model: Qwen/Qwen3-235B-A22B
   temperature: 0.3
   max_tokens: 1500
+
+# Synthesizer — Coach-tier. This is the user-facing voice on Flow C; quality
+# must match the Coach. Temperature 0.5 to produce coherent integrated prose
+# without being too conservative.
+synthesizer:
+  provider: huggingface
+  model: Qwen/Qwen3-235B-A22B
+  temperature: 0.5
+  max_tokens: 3000
