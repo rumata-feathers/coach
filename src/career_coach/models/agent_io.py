@@ -221,6 +221,90 @@ class ResearcherInput(BaseModel):
         return v
 
 
+# -------- Devil's Advocate ----------------------------------------------
+
+
+class CounterPoint(BaseModel):
+    """One counter-point raised by the Devil's Advocate.
+
+    Attributes:
+        point: A concise statement of the counter-argument.
+        reasoning: One or two sentences explaining why this matters to this user.
+        severity: How significant the counter-point is: ``"low"``, ``"med"``, or ``"high"``.
+        source_type: Where the counter-point originates:
+            ``"user_profile"`` (grounded in user facts/hypotheses),
+            ``"research"`` (from research brief findings), or
+            ``"general"`` (common knowledge about the career path).
+    """
+
+    point: str = Field(..., min_length=5)
+    reasoning: str = Field(..., min_length=10)
+    severity: Literal["low", "med", "high"]
+    source_type: Literal["user_profile", "research", "general"]
+
+
+class Risk(BaseModel):
+    """One structured risk raised by the Devil's Advocate.
+
+    Attributes:
+        scenario: A concrete description of what could go wrong.
+        likelihood: Estimated likelihood of this scenario: ``"low"``, ``"med"``, ``"high"``.
+        impact: Estimated impact if this scenario occurs: ``"low"``, ``"med"``, ``"high"``.
+    """
+
+    scenario: str = Field(..., min_length=10)
+    likelihood: Literal["low", "med", "high"]
+    impact: Literal["low", "med", "high"]
+
+
+class DevilsAdvocateOutput(BaseModel):
+    """Output of the Devil's Advocate agent.
+
+    Attributes:
+        counter_points: Structured counter-arguments. Must have ≥2 unless
+            ``agrees_with_coach`` is ``True``.
+        blind_spots: Observations about what the Coach may have overlooked.
+        risks: Concrete downside scenarios with likelihood/impact estimates.
+        agrees_with_coach: ``True`` if the DA genuinely agrees with the Coach
+            response after honest assessment. When ``True``, ``counter_points``
+            may be empty — this is an intentional "honest agreement" path.
+    """
+
+    counter_points: list[CounterPoint] = Field(default_factory=list)
+    blind_spots: list[str] = Field(default_factory=list)
+    risks: list[Risk] = Field(default_factory=list)
+    agrees_with_coach: bool = False
+
+    @model_validator(mode="after")
+    def _enough_counter_points(self) -> DevilsAdvocateOutput:
+        """Require ≥2 counter_points unless agrees_with_coach is True."""
+        if not self.agrees_with_coach and len(self.counter_points) < 2:
+            raise ValueError(
+                "When agrees_with_coach is False, counter_points must have ≥2 entries "
+                f"(got {len(self.counter_points)})."
+            )
+        return self
+
+
+class DevilsAdvocateInput(BaseModel):
+    """Input to :class:`~career_coach.agents.devils_advocate.DevilsAdvocate`.
+
+    Attributes:
+        coach_output: The Coach's response to critique.
+        research_brief: Optional ResearchBrief from the Researcher (may be absent on
+            Flow B or if Researcher produced an empty brief).
+        user_facts: Structured user model facts for personalised counter-points.
+        active_hypotheses: Current active hypotheses about the user.
+        intent_packet: The original intent packet for context.
+    """
+
+    coach_output: CoachOutput
+    research_brief: ResearchBrief | None = None
+    user_facts: dict[str, Any] = Field(default_factory=dict)
+    active_hypotheses: list[Hypothesis] = Field(default_factory=list)
+    intent_packet: IntentPacket
+
+
 # -------- Profiler ------------------------------------------------------
 
 

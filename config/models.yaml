@@ -60,3 +60,12 @@ researcher_planner:
   model: Qwen/Qwen3-32B
   temperature: 0.1
   max_tokens: 800
+
+# Devil's Advocate — Coach-tier per spec §8.
+# Haiku-tier produces generic risk-list slop; strong model needed for
+# user-profile-grounded counter-points.
+devils_advocate:
+  provider: huggingface
+  model: Qwen/Qwen3-235B-A22B
+  temperature: 0.3
+  max_tokens: 1500
