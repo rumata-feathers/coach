@@ -22,7 +22,17 @@ from career_coach.models.user_model import (
     TurnSummary,
 )
 
-CriticFailureMode = Literal["generic", "ungrounded", "false_confidence", "off_intent"]
+CriticFailureMode = Literal[
+    "generic",
+    "ungrounded",
+    "false_confidence",
+    "off_intent",
+    # Flow C — added in v1 (§7.3)
+    "unintegrated",
+    "uncontested",
+    "chart_uncited",
+    "chart_data_invented",
+]
 
 
 # -------- Understander --------------------------------------------------
@@ -83,12 +93,21 @@ class CoachOutput(BaseModel):
 
 
 class CriticInput(BaseModel):
-    """Input to :class:`~career_coach.agents.critic.Critic`."""
+    """Input to :class:`~career_coach.agents.critic.Critic`.
+
+    On Flow B: ``is_flow_c=False``, ``synthesizer_output=None``, ``da_output=None``.
+    On Flow C: ``is_flow_c=True``; ``synthesizer_output`` and ``da_output`` are
+    populated so the four additional failure modes (§7.3) can be checked.
+    """
 
     coach_output: CoachOutput
     user_facts: dict[str, Any] = Field(default_factory=dict)
     active_hypotheses: list[Hypothesis] = Field(default_factory=list)
     intent_packet: IntentPacket
+    # Flow C extensions (§7.3)
+    is_flow_c: bool = False
+    synthesizer_output: SynthesizedResponse | None = None
+    da_output: DevilsAdvocateOutput | None = None
 
 
 class CriticVerdict(BaseModel):
@@ -480,3 +499,8 @@ class ProfilerOutput(BaseModel):
     new_facts: list[FactUpdate] = Field(default_factory=list)
     fact_updates: list[FactUpdate] = Field(default_factory=list)
     hypothesis_evidence: list[EvidenceDraft] = Field(default_factory=list)
+
+
+# Resolve forward references: CriticInput references SynthesizedResponse and
+# DevilsAdvocateOutput which are defined later in this module.
+CriticInput.model_rebuild()

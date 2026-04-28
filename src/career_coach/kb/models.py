@@ -11,7 +11,6 @@ from __future__ import annotations
 
 from pydantic import BaseModel, field_validator, model_validator
 
-
 # ---------------------------------------------------------------------------
 # Career entry
 # ---------------------------------------------------------------------------
@@ -60,7 +59,7 @@ class EarlyCareerPay(BaseModel):
         return v
 
     @model_validator(mode="after")
-    def p90_gte_p50(self) -> "EarlyCareerPay":
+    def p90_gte_p50(self) -> EarlyCareerPay:
         """p90 must be ≥ p50 (otherwise the data is wrong)."""
         if self.band_p90_gbp < self.band_p50_gbp:
             raise ValueError(
@@ -180,7 +179,7 @@ class PayBand(BaseModel):
         return v
 
     @model_validator(mode="after")
-    def ordered_bands(self) -> "PayBand":
+    def ordered_bands(self) -> PayBand:
         """p25 ≤ p50 ≤ p75."""
         if not (self.band_p25_gbp <= self.band_p50_gbp <= self.band_p75_gbp):
             raise ValueError("pay bands must satisfy p25 ≤ p50 ≤ p75")

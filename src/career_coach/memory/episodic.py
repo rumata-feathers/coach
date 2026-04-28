@@ -93,13 +93,24 @@ class EpisodicRepo:
         flow_used: str | None,
         critic_verdicts: list[dict[str, Any]] | None,
         tokens_used: dict[str, int] | None,
+        # Flow C extras (§7.2) — None on flows A, B, onboarding
+        research_brief_id: UUID | None = None,
+        devils_advocate_output: dict[str, Any] | None = None,
+        synthesizer_output: dict[str, Any] | None = None,
+        chart_specs: list[dict[str, Any]] | None = None,
     ) -> UUID:
         """Insert a new turn. Auto-assigns the next ``turn_index`` per session.
 
         Returns the new ``turn_id``. Embeddings are stored separately via
         :meth:`save_turn_embedding` so the write path stays synchronous and
         cheap; the embedding API call happens off the critical path.
+
+        The four ``*_output``/``*_id`` parameters are Flow C-only and may be
+        ``None`` for all other flows — the corresponding DB columns default to
+        ``NULL`` or ``'[]'::jsonb``.
         """
+        import json as _json  # local to avoid top-level import noise
+
         pool = await get_pool()
         async with pool.acquire() as conn, conn.transaction():
             next_index = await conn.fetchval(
@@ -111,9 +122,15 @@ class EpisodicRepo:
                 INSERT INTO turns (
                     session_id, user_id, turn_index,
                     user_message, assistant_message,
-                    intent_packet, flow_used, critic_verdicts, tokens_used
+                    intent_packet, flow_used, critic_verdicts, tokens_used,
+                    research_brief_id, devils_advocate_output,
+                    synthesizer_output, chart_specs
                 )
-                VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7, $8::jsonb, $9::jsonb)
+                VALUES (
+                    $1, $2, $3, $4, $5,
+                    $6::jsonb, $7, $8::jsonb, $9::jsonb,
+                    $10, $11::jsonb, $12::jsonb, $13::jsonb
+                )
                 RETURNING turn_id
                 """,
                 session_id,
@@ -125,6 +142,10 @@ class EpisodicRepo:
                 flow_used,
                 critic_verdicts,
                 tokens_used,
+                research_brief_id,
+                _json.dumps(devils_advocate_output) if devils_advocate_output else None,
+                _json.dumps(synthesizer_output) if synthesizer_output else None,
+                _json.dumps(chart_specs) if chart_specs is not None else "[]",
             )
         assert turn_id is not None
         return turn_id  # type: ignore[no-any-return]
