@@ -36,6 +36,9 @@ class Settings(BaseSettings):
     anthropic_api_key: str | None = Field(default=None, alias="ANTHROPIC_API_KEY")
     huggingface_api_token: str | None = Field(default=None, alias="HUGGINGFACE_API_TOKEN")
 
+    # Web search providers
+    tavily_api_key: str | None = Field(default=None, alias="TAVILY_API_KEY")
+
     # Supabase / Postgres
     supabase_url: str | None = Field(default=None, alias="SUPABASE_URL")
     supabase_service_key: str | None = Field(default=None, alias="SUPABASE_SERVICE_KEY")

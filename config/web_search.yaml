@@ -1,0 +1,14 @@
+# Per-agent web search configuration.
+#
+# Providers in v1: tavily (default).
+# Swapping to Exa or another provider requires changing `provider:` and adding
+# the relevant API key to .env. No agent code changes needed.
+#
+# depth controls in Researcher:
+#   shallow = max_results_default results, recency_days_default
+#   deep    = 2 × max_results_default results (overridden per-call in Researcher)
+
+researcher:
+  provider: tavily
+  max_results_default: 5
+  recency_days_default: null   # null = no recency restriction
