@@ -1,0 +1,29 @@
+# Category: PhD vs industry (2/3)
+fixture_id: "002"
+category: phd_vs_industry
+question: >
+  Should I do a PhD in economics or go straight into policy consulting?
+  I care about having real-world impact but also find the academic
+  research exciting.
+persona:
+  age: 23
+  degree: "Economics, LSE"
+  education_stage: "postgraduate_taught"
+  location: "London"
+  interests: ["development_economics", "policy", "research"]
+  career_goals: "work on international economic policy"
+seed_facts:
+  age: "23"
+  degree: '"Economics, LSE"'
+  education_stage: '"MSc_year1"'
+  location: '"London"'
+  interests: '["development_economics", "policy", "research"]'
+  career_goals: '"international economic policy work"'
+is_contrarian: false
+expected_tradeoffs:
+  - academic_vs_applied_impact
+  - time_cost_of_phd
+  - policy_consulting_route
+notes: >
+  Should contrast the IMF/World Bank route via PhD against MBB policy
+  practice. Cite stipend figures and policy consulting salaries.

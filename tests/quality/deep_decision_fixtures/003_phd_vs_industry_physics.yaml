@@ -1,0 +1,30 @@
+# Category: PhD vs industry (3/3)
+fixture_id: "003"
+category: phd_vs_industry
+question: >
+  I have a physics degree and I'm torn between doing a PhD in particle
+  physics versus switching to quantitative finance. Is it worth spending
+  4+ years on a physics PhD that may not directly lead to the career
+  I want?
+persona:
+  age: 22
+  degree: "Physics, Imperial College London"
+  education_stage: "final_year"
+  location: "London"
+  interests: ["theoretical_physics", "mathematics", "markets"]
+  career_goals: "uncertain between academia and quant finance"
+seed_facts:
+  age: "22"
+  degree: '"Physics, Imperial College London"'
+  education_stage: '"final_year"'
+  location: '"London"'
+  interests: '["theoretical_physics", "mathematics", "markets"]'
+  career_goals: '"uncertain between academia and finance"'
+is_contrarian: false
+expected_tradeoffs:
+  - opportunity_cost_of_phd
+  - physics_to_quant_route
+  - academic_market_odds
+notes: >
+  A physics-to-quant fixture. Should discuss HFT receptiveness to physics
+  PhDs, opportunity cost, and the narrow academic job market.

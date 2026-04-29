@@ -1,0 +1,30 @@
+# Category: Early-career firm selection (2/3)
+fixture_id: "011"
+category: early_career_firm_selection
+question: >
+  I have consulting offers from McKinsey, BCG, and a boutique strategy
+  firm that focuses on my specific area of interest (healthcare). The
+  boutique pays 20% less. I genuinely can't decide and I need help
+  thinking about this systematically.
+persona:
+  age: 22
+  degree: "Natural Sciences (Biology), Cambridge"
+  education_stage: "final_year"
+  location: "London"
+  interests: ["healthcare", "life_sciences", "strategy"]
+  career_goals: "senior strategy role in healthcare or biotech"
+seed_facts:
+  age: "22"
+  degree: '"Natural Sciences Biology, University of Cambridge"'
+  education_stage: '"final_year"'
+  location: '"London"'
+  interests: '["healthcare", "life_sciences", "strategy"]'
+  career_goals: '"senior healthcare strategy role"'
+is_contrarian: false
+expected_tradeoffs:
+  - generalist_vs_specialist_brand
+  - compensation_vs_mission_fit
+  - network_quality
+notes: >
+  MBB vs niche boutique. Should model the prestige vs specialism tradeoff
+  specifically for someone targeting healthcare strategy long-term.

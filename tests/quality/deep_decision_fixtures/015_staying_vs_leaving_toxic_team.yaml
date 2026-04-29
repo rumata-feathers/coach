@@ -1,0 +1,30 @@
+# Category: Staying vs leaving (1/2)
+fixture_id: "015"
+category: staying_vs_leaving
+question: >
+  I've been at this investment bank for 18 months and I'm miserable —
+  terrible culture, poor management. But my bonus vests in 6 months
+  and it's worth £25k. Do I stay for it or leave now for a better role?
+persona:
+  age: 24
+  degree: "Economics, LSE"
+  education_stage: "early_career"
+  location: "London"
+  interests: ["finance", "career_decisions"]
+  career_goals: "move to a firm with better culture, still in finance"
+seed_facts:
+  age: "24"
+  degree: '"Economics, LSE"'
+  education_stage: '"early_career"'
+  location: '"London"'
+  interests: '["finance", "career_progression"]'
+  career_goals: '"better culture in finance, long-term career growth"'
+is_contrarian: false
+expected_tradeoffs:
+  - financial_cost_of_leaving_early
+  - wellbeing_vs_money
+  - leverage_in_negotiation
+notes: >
+  Should model the £25k decision against wellbeing and the realistic
+  timeline for finding the next role. Should also discuss whether you
+  can negotiate a start date to capture the bonus.

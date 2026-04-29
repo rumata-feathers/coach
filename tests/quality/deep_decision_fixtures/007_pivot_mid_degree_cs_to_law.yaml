@@ -1,0 +1,30 @@
+# Category: Pivot decisions mid-degree (1/3)
+fixture_id: "007"
+category: pivot_mid_degree
+question: >
+  I'm halfway through a Computer Science degree and I'm seriously
+  considering switching to Law. I enjoyed CS but I keep being drawn
+  to intellectual property and tech law. Is this a sensible pivot
+  or am I making a mistake?
+persona:
+  age: 20
+  degree: "Computer Science (Year 2), Bristol"
+  education_stage: "second_year_undergrad"
+  location: "Bristol"
+  interests: ["technology", "intellectual_property", "law", "writing"]
+  career_goals: "work in tech law or IP litigation"
+seed_facts:
+  age: "20"
+  degree: '"Computer Science Year 2, University of Bristol"'
+  education_stage: '"second_year_undergrad"'
+  location: '"Bristol"'
+  interests: '["technology", "intellectual_property", "law"]'
+  career_goals: '"tech law or IP litigation"'
+is_contrarian: false
+expected_tradeoffs:
+  - sunk_cost_vs_future_fit
+  - cs_law_hybrid_paths
+  - graduate_diploma_in_law_route
+notes: >
+  Should explore the GDL conversion route, CS + law hybrid roles,
+  and challenge the binary framing (can finish CS then do GDL).

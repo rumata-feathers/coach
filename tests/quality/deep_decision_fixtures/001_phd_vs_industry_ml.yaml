@@ -1,0 +1,29 @@
+# Category: PhD vs industry (1/3)
+fixture_id: "001"
+category: phd_vs_industry
+question: >
+  I'm weighing a machine learning PhD at a top-3 UK lab versus joining
+  a London AI startup as an ML engineer. Help me think through the
+  full tradeoffs carefully.
+persona:
+  age: 22
+  degree: "Computer Science, University of Edinburgh"
+  education_stage: "final_year"
+  location: "London"
+  interests: ["machine_learning", "research", "deep_learning"]
+  career_goals: "research scientist or senior ML engineer at a leading AI lab"
+seed_facts:
+  age: "22"
+  degree: '"Computer Science, University of Edinburgh"'
+  education_stage: '"final_year"'
+  location: '"London"'
+  interests: '["machine_learning", "research", "deep_learning"]'
+  career_goals: '"research scientist at a leading AI lab"'
+is_contrarian: false
+expected_tradeoffs:
+  - compensation_gap
+  - research_depth
+  - career_optionality
+notes: >
+  Classic PhD vs industry for an ML student. Should cite salary data,
+  research publication norms, and the DeepMind/Google route.

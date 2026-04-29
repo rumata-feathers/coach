@@ -1,0 +1,31 @@
+# Category: Prestige vs fit (1/2)
+fixture_id: "017"
+category: prestige_vs_fit
+question: >
+  I have a job offer from a well-known brand name company that everyone
+  would recognise and a smaller company where I'd have 3x the
+  responsibility and a more interesting product. The brand pays 15%
+  more. How do I think about prestige vs genuine learning opportunity?
+persona:
+  age: 22
+  degree: "Computer Science, UCL"
+  education_stage: "final_year"
+  location: "London"
+  interests: ["product_management", "startups", "technology"]
+  career_goals: "become a product leader at a tech company"
+seed_facts:
+  age: "22"
+  degree: '"Computer Science, UCL"'
+  education_stage: '"final_year"'
+  location: '"London"'
+  interests: '["product_management", "technology"]'
+  career_goals: '"product leader at a tech company"'
+is_contrarian: false
+expected_tradeoffs:
+  - prestige_option_value
+  - learning_rate
+  - product_responsibility
+notes: >
+  Prestige vs breadth for early PM. Should evaluate whether brand name
+  opens doors enough to offset narrower role scope, especially for
+  someone targeting product leadership.

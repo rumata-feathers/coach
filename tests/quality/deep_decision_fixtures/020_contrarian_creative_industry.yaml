@@ -1,0 +1,32 @@
+# Category: Contrarian / KB+web gaps (2/2)
+# Tests graceful degradation — creative industry with highly variable outcomes.
+fixture_id: "020"
+category: contrarian_gap
+question: >
+  I've been offered a place on a prestigious creative writing MA at
+  a top UK university. It costs £18k and I'd have to quit my decent
+  marketing job to do it. I want to write literary fiction. Is this
+  worth it financially and professionally?
+persona:
+  age: 27
+  degree: "English Literature, Manchester"
+  education_stage: "mid_career"
+  location: "London"
+  interests: ["creative_writing", "literature", "storytelling"]
+  career_goals: "published literary fiction author"
+seed_facts:
+  age: "27"
+  degree: '"English Literature, University of Manchester"'
+  education_stage: '"mid_career"'
+  location: '"London"'
+  interests: '["creative_writing", "literature"]'
+  career_goals: '"published literary fiction author"'
+is_contrarian: true
+expected_tradeoffs:
+  - roi_of_creative_mfa
+  - network_and_mentorship_value
+  - alternative_writing_paths
+notes: >
+  MFA/MA creative writing ROI. Outcome data is genuinely sparse and
+  highly skewed. Should acknowledge uncertainty, discuss the non-financial
+  value (network, dedicated time), and avoid false precision on outcomes.

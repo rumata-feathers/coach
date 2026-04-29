@@ -1,0 +1,30 @@
+# Category: Early-career firm selection (3/3)
+fixture_id: "012"
+category: early_career_firm_selection
+question: >
+  I have graduate offers from a top hedge fund (Point72 Academy) and
+  a bulge bracket bank (JPMorgan S&T). Both are in London. I want to
+  eventually run my own fund. Which is the better starting point?
+persona:
+  age: 22
+  degree: "Mathematics and Statistics, Warwick"
+  education_stage: "final_year"
+  location: "London"
+  interests: ["quantitative_trading", "statistics", "markets"]
+  career_goals: "start or run an investment fund"
+seed_facts:
+  age: "22"
+  degree: '"Mathematics and Statistics, University of Warwick"'
+  education_stage: '"final_year"'
+  location: '"London"'
+  interests: '["quantitative_trading", "statistics", "markets"]'
+  career_goals: '"run own investment fund"'
+is_contrarian: false
+expected_tradeoffs:
+  - structured_program_vs_direct_exposure
+  - brand_for_fundraising
+  - learning_curve
+notes: >
+  Hedge fund academy vs S&T at BB for someone who wants to run a fund.
+  Should discuss P72's pod structure, S&T skill portability, and the
+  fundraising value of different brand signals.

@@ -1,0 +1,31 @@
+# Category: Geographic tradeoffs (2/2)
+fixture_id: "014"
+category: geographic_tradeoff
+question: >
+  My firm wants to send me to their Singapore office for 2 years.
+  I'm early-career in asset management. Is this a career accelerant
+  or does it put me in a career backwater away from the London
+  decision-makers?
+persona:
+  age: 25
+  degree: "Finance, Bristol"
+  education_stage: "early_career"
+  location: "London"
+  interests: ["asset_management", "emerging_markets", "Asia"]
+  career_goals: "become a fund manager in 10 years"
+seed_facts:
+  age: "25"
+  degree: '"Finance, University of Bristol"'
+  education_stage: '"early_career"'
+  location: '"London"'
+  interests: '["asset_management", "emerging_markets", "Asia"]'
+  career_goals: '"fund manager within 10 years"'
+is_contrarian: false
+expected_tradeoffs:
+  - asia_market_exposure
+  - career_visibility
+  - personal_disruption
+notes: >
+  Singapore for asset management. Should discuss the EM exposure benefit,
+  whether Asia ex-Japan AUM is growing enough to justify the career
+  visibility risk, and the tax/lifestyle upsides.
