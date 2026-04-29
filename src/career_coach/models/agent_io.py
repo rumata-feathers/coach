@@ -501,6 +501,50 @@ class ProfilerOutput(BaseModel):
     hypothesis_evidence: list[EvidenceDraft] = Field(default_factory=list)
 
 
+# -------- Supervisor ----------------------------------------------------
+
+
+class SupervisorInput(BaseModel):
+    """Input to :class:`~career_coach.agents.supervisor.Supervisor`.
+
+    Includes both the user message and the response so the safety check can
+    scan both for crisis keywords per §10.2.
+    """
+
+    user_message: str
+    response_text: str
+    user_facts: dict[str, Any] = Field(default_factory=dict)
+    specific_ask: str
+    flow_used: str = "unknown"
+
+
+class SupervisorEvent(BaseModel):
+    """Structured Supervisor decision returned by every Supervisor run.
+
+    Attributes:
+        event_type: Which check failed (``None`` on pass).
+        severity: How serious the issue is (``None`` on pass).
+        details: One-sentence human-readable explanation (``None`` on pass).
+        action: What the pipeline should do with the response.
+        scripted_override: Verbatim text to return to user — populated ONLY
+            when ``action == "block"`` (crisis content).
+    """
+
+    event_type: Literal["fact_contradiction", "off_topic", "unsafe"] | None = None
+    severity: Literal["low", "med", "high"] | None = None
+    details: str | None = None
+    action: Literal["pass", "warn", "retry", "block"]
+    scripted_override: str | None = None
+
+    @model_validator(mode="after")
+    def _block_requires_override(self) -> SupervisorEvent:
+        if self.action == "block" and not self.scripted_override:
+            raise ValueError("'block' action requires scripted_override to be set.")
+        if self.action != "block" and self.scripted_override is not None:
+            raise ValueError("scripted_override must be None unless action is 'block'.")
+        return self
+
+
 # Resolve forward references: CriticInput references SynthesizedResponse and
 # DevilsAdvocateOutput which are defined later in this module.
 CriticInput.model_rebuild()

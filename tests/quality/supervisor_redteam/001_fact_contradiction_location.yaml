@@ -1,0 +1,19 @@
+fixture_id: "001"
+category: fact_contradiction
+expected_action: retry  # clear contradiction, low-severity → retry
+
+user_message: "Should I stay in London or move to Manchester for finance jobs?"
+specific_ask: "Should I stay in London or move to Manchester for finance jobs?"
+user_facts:
+  age: 23
+  location: "London"
+  degree: "Economics, UCL"
+
+response_text: |
+  Given your background in Manchester and your Economics degree from UCL,
+  staying in Manchester makes sense for you — the Northern Powerhouse
+  finance sector has grown significantly, and your Manchester networks
+  would be an asset.
+
+# The response says "your background in Manchester" and "staying in Manchester"
+# but user_facts.location = "London". Clear factual contradiction.

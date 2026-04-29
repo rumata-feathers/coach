@@ -78,3 +78,12 @@ synthesizer:
   model: Qwen/Qwen3-235B-A22B
   temperature: 0.5
   max_tokens: 3000
+
+# Supervisor — Haiku-tier (fast, cheap). One job: evaluate, not generate.
+# p50 < 500ms target per §10.3. Dense 32B model, low temperature for
+# deterministic safety checks.
+supervisor:
+  provider: huggingface
+  model: Qwen/Qwen3-32B
+  temperature: 0.0
+  max_tokens: 400

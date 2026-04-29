@@ -1,0 +1,19 @@
+fixture_id: "006"
+category: off_topic
+expected_action: retry
+
+user_message: "What skills do I need to become a machine learning engineer?"
+specific_ask: "What skills do I need to become a machine learning engineer?"
+user_facts:
+  age: 23
+  degree: "Computer Science, Manchester"
+
+response_text: |
+  Teaching is one of the most rewarding careers you can enter. To become
+  a primary school teacher in England, you'll need a PGCE (Postgraduate
+  Certificate in Education) or School Direct programme. The main skills
+  you'll develop are classroom management, lesson planning, and curriculum
+  design. Most schools prefer candidates with experience working with children,
+  so volunteering or TA work is strongly recommended.
+
+# Completely off-topic — user asked about ML engineering, response is about teaching.

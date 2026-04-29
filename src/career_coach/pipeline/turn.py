@@ -13,7 +13,9 @@ Flow:
   6b. Flow B: Coach + Critic retry loop (max 3 attempts).
   6c. Flow C: parallel Researcher + Coach → DA → Synthesizer + Critic retry
       (max 2 attempts), all within a 25 s latency budget.
+  6.5. Supervisor runs on every flow as final pre-response check.
   7. Persist turn (with Flow C extras if applicable).
+  7.5. Persist non-pass Supervisor event to supervisor_events.
   8. Update session theory.
   9. Queue Profiler as a background task (not awaited).
 """
@@ -21,6 +23,7 @@ Flow:
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 from dataclasses import dataclass
 from typing import Any
@@ -32,9 +35,10 @@ from career_coach.agents.devils_advocate import DevilsAdvocate
 from career_coach.agents.orchestrator import Orchestrator
 from career_coach.agents.profiler import Profiler
 from career_coach.agents.researcher import Researcher
+from career_coach.agents.supervisor import Supervisor
 from career_coach.agents.synthesizer import Synthesizer
 from career_coach.agents.understander import Understander
-from career_coach.kb.repo import WorldKBRepo
+from career_coach.db import get_pool
 from career_coach.llm.factory import LLMFactory
 from career_coach.memory.episodic import EpisodicRepo, Session
 from career_coach.memory.semantic import SemanticRepo
@@ -44,6 +48,8 @@ from career_coach.models.agent_io import (
     CriticInput,
     DevilsAdvocateInput,
     ResearcherInput,
+    SupervisorEvent,
+    SupervisorInput,
     SynthesizerInput,
     UnderstanderInput,
 )
@@ -54,6 +60,12 @@ logger = logging.getLogger("career_coach.pipeline.turn")
 _MAX_COACH_RETRIES = 3   # Flow B: 1 attempt + 2 retries
 _MAX_SYNTH_RETRIES = 2   # Flow C Synthesizer loop: 1 attempt + 1 retry
 _FLOW_C_BUDGET_S = 25.0  # §7.2 latency budget
+
+# Appended to response when Supervisor action is "warn".
+_SUPERVISOR_CAVEAT = (
+    "\n\n*Note: some aspects of this response may benefit from additional "
+    "verification. If you have concerns, consider consulting a relevant expert.*"
+)
 
 
 @dataclass(slots=True)
@@ -83,6 +95,7 @@ class TurnPipeline:
         self._onboarding_pipeline = OnboardingPipeline(factory)
         self._coach = Coach(factory)
         self._critic = Critic(factory)
+        self._supervisor = Supervisor(factory)
         self._profiler = Profiler(factory)
         # Flow C agents.  Researcher is initialised lazily on first use so the
         # Tavily API key is not required at startup (e.g. in test environments
@@ -158,7 +171,10 @@ class TurnPipeline:
         flow = self._orchestrator.decide(
             intent_packet, is_new_user=is_new, fact_count=fact_count
         )
-        logger.debug("Orchestrator chose flow %s (is_new=%s, fact_count=%d).", flow, is_new, fact_count)
+        logger.debug(
+            "Orchestrator chose flow %s (is_new=%s, fact_count=%d).",
+            flow, is_new, fact_count,
+        )
 
         # 6. Route to onboarding, Flow A, B, or C
         critic_verdicts: list[dict[str, Any]] = []
@@ -170,7 +186,6 @@ class TurnPipeline:
         chart_specs_list: list[dict[str, Any]] | None = None
 
         if flow == "onboarding":
-            # Onboarding bypasses the Critic — probe questions need no grounding check.
             coach_out = await self._onboarding_pipeline.process_turn(
                 user_id=user_id,
                 session_id=session.session_id,
@@ -190,13 +205,11 @@ class TurnPipeline:
                 recent_turns=recent_turns,
                 critic_verdicts=critic_verdicts,
                 session_id=session.session_id,
-                # out-params populated by reference via mutable lists
                 _research_brief_id_out=[None],
                 _da_output_dict_out=[None],
                 _synth_output_dict_out=[None],
                 _chart_specs_list_out=[None],
             )
-            # Un-pack from mutable carriers
             research_brief_id = self._flow_c_state.get("research_brief_id")
             da_output_dict = self._flow_c_state.get("da_output_dict")
             synth_output_dict = self._flow_c_state.get("synth_output_dict")
@@ -212,19 +225,36 @@ class TurnPipeline:
                 critic_verdicts=critic_verdicts,
             )
 
-        assert coach_out is not None  # always set by every branch above
+        assert coach_out is not None
 
-        # 7. Persist turn
-        response_text = (
+        # Determine initial response text
+        initial_response = (
             synth_output_dict["response_text"]
             if synth_output_dict and "response_text" in synth_output_dict
             else coach_out.response_text
         )
+
+        # 6.5. Supervisor — runs on every flow as final pre-response check.
+        final_response, supervisor_event = await self._apply_supervisor(
+            response_text=initial_response,
+            user_message=user_message,
+            user_facts=user_facts,
+            specific_ask=intent_packet.specific_ask,
+            flow=flow,
+            intent_packet=intent_packet,
+            active_hypotheses=active_hypotheses,
+            recent_turns=recent_turns,
+        )
+        # If the Supervisor retry changed the response, keep synth_output_dict in sync.
+        if flow == "C" and final_response != initial_response and synth_output_dict:
+            synth_output_dict = dict(synth_output_dict, response_text=final_response)
+
+        # 7. Persist turn
         turn_id = await self._episodic.save_turn(
             session_id=session.session_id,
             user_id=user_id,
             user_message=user_message,
-            assistant_message=response_text,
+            assistant_message=final_response,
             intent_packet=intent_packet.model_dump(),
             flow_used=flow,
             critic_verdicts=critic_verdicts if critic_verdicts else None,
@@ -234,6 +264,10 @@ class TurnPipeline:
             synthesizer_output=synth_output_dict,
             chart_specs=chart_specs_list,
         )
+
+        # 7.5. Persist non-pass Supervisor event (turn now exists in DB).
+        if supervisor_event.action != "pass":
+            await self._save_supervisor_event(turn_id, supervisor_event)
 
         # 8. Update session theory
         await self._episodic.update_session_theory(
@@ -246,7 +280,7 @@ class TurnPipeline:
                 user_id=user_id,
                 turn_id=turn_id,
                 user_message=user_message,
-                assistant_message=response_text,
+                assistant_message=final_response,
                 existing_facts=user_facts,
             ),
             name=f"profiler-{turn_id}",
@@ -255,7 +289,7 @@ class TurnPipeline:
         task.add_done_callback(self._background_tasks.discard)
 
         return TurnResult(
-            response=response_text,
+            response=final_response,
             turn_id=turn_id,
             session_id=session.session_id,
         )
@@ -286,7 +320,6 @@ class TurnPipeline:
             coach_out = await self._coach.run(coach_input)
 
             if flow == "A":
-                # Flow A skips the Critic entirely.
                 return coach_out
 
             # Flow B: run Critic
@@ -302,7 +335,6 @@ class TurnPipeline:
             if verdict.verdict == "pass":
                 return coach_out
 
-            # Rejected — build feedback for next attempt
             critic_feedback = verdict.suggested_fix or "; ".join(
                 verdict.specific_complaints
             )
@@ -338,7 +370,6 @@ class TurnPipeline:
         recent_turns: list[Any],
         critic_verdicts: list[dict[str, Any]],
         session_id: UUID,
-        # unused positional out-param dicts kept for clarity
         _research_brief_id_out: list[Any],
         _da_output_dict_out: list[Any],
         _synth_output_dict_out: list[Any],
@@ -346,13 +377,7 @@ class TurnPipeline:
     ) -> Any:
         """Run Flow C: parallel Researcher + Coach → DA → Synthesizer + Critic.
 
-        Stores Flow C extras in ``self._flow_c_state`` before returning the
-        Coach output (used as fallback or context).  The caller reads:
-          ``self._flow_c_state["research_brief_id"]``
-          ``self._flow_c_state["da_output_dict"]``
-          ``self._flow_c_state["synth_output_dict"]``
-          ``self._flow_c_state["chart_specs_list"]``
-
+        Stores Flow C extras in ``self._flow_c_state`` before returning.
         On timeout, falls back to Coach output and logs ``flow_c_timeout``.
         """
         self._flow_c_state = {}
@@ -374,7 +399,6 @@ class TurnPipeline:
                 elapsed,
                 _FLOW_C_BUDGET_S,
             )
-            # Return a Coach-only fallback response.
             coach_out = await self._coach.run(
                 CoachInput(
                     intent_packet=intent_packet,
@@ -384,7 +408,6 @@ class TurnPipeline:
                     critic_feedback=None,
                 )
             )
-            # Record fallback reason in state so it can be persisted.
             self._flow_c_state["fallback_reason"] = "flow_c_timeout"
             return coach_out
 
@@ -426,7 +449,10 @@ class TurnPipeline:
         )
         da_out = await self._devils_advocate.run(da_input)
 
-        # Persist DA output in state
+        # Store objects for potential Supervisor retry
+        self._flow_c_state["coach_out_obj"] = coach_out
+        self._flow_c_state["da_out_obj"] = da_out
+        self._flow_c_state["research_brief_obj"] = research_brief
         self._flow_c_state["da_output_dict"] = da_out.model_dump(mode="json")
         if research_brief and research_brief.brief_id:
             self._flow_c_state["research_brief_id"] = research_brief.brief_id
@@ -447,7 +473,6 @@ class TurnPipeline:
             )
             synth_out = await self._synthesizer.run(synth_input)
 
-            # Flow C Critic check
             critic_input = CriticInput(
                 coach_output=coach_out,
                 synthesizer_output=synth_out,
@@ -471,15 +496,179 @@ class TurnPipeline:
                 critic_feedback,
             )
 
-        assert synth_out is not None  # loop always runs at least once
+        assert synth_out is not None
 
-        # Persist Synthesizer output in state
         self._flow_c_state["synth_output_dict"] = synth_out.model_dump(mode="json")
         self._flow_c_state["chart_specs_list"] = [
             c.model_dump(mode="json") for c in synth_out.chart_specs
         ]
 
-        return coach_out  # pipeline uses coach_out for Profiler; response comes from synth_out
+        return coach_out
+
+    # ---- Supervisor --------------------------------------------------------
+
+    async def _apply_supervisor(
+        self,
+        *,
+        response_text: str,
+        user_message: str,
+        user_facts: dict[str, Any],
+        specific_ask: str,
+        flow: str,
+        intent_packet: Any,
+        active_hypotheses: list[Any],
+        recent_turns: list[Any],
+    ) -> tuple[str, SupervisorEvent]:
+        """Run Supervisor check and handle the action.
+
+        Returns ``(final_response_text, supervisor_event)``.
+
+        Actions:
+          pass   → return response unchanged.
+          warn   → return response + caveat suffix.
+          retry  → re-run Coach/Synthesizer once; if retry also trips,
+                   return retry_response + caveat (fall through to warn).
+          block  → return scripted_override verbatim.
+        """
+        sup_input = SupervisorInput(
+            user_message=user_message,
+            response_text=response_text,
+            user_facts=user_facts,
+            specific_ask=specific_ask,
+            flow_used=flow,
+        )
+        event = await self._supervisor.run(sup_input)
+
+        if event.action == "pass":
+            return response_text, event
+
+        if event.action == "block":
+            override = event.scripted_override or response_text
+            logger.warning(
+                "Supervisor BLOCK on flow %s: %s", flow, event.details
+            )
+            return override, event
+
+        if event.action == "warn":
+            logger.info("Supervisor WARN on flow %s: %s", flow, event.details)
+            return response_text + _SUPERVISOR_CAVEAT, event
+
+        # action == "retry"
+        logger.info(
+            "Supervisor RETRY on flow %s: %s — re-running agent once.", flow, event.details
+        )
+        retry_response = await self._supervisor_rerun(
+            flow=flow,
+            supervisor_feedback=event.details or "Supervisor flagged an issue.",
+            intent_packet=intent_packet,
+            user_facts=user_facts,
+            active_hypotheses=active_hypotheses,
+            recent_turns=recent_turns,
+            original_response=response_text,
+        )
+
+        # Re-check the retry response
+        retry_event = await self._supervisor.run(
+            SupervisorInput(
+                user_message=user_message,
+                response_text=retry_response,
+                user_facts=user_facts,
+                specific_ask=specific_ask,
+                flow_used=flow,
+            )
+        )
+        if retry_event.action == "pass":
+            return retry_response, event  # return original event for logging
+        # Retry still tripped — fall through to warn
+        logger.info(
+            "Supervisor retry also tripped (%s); falling through to warn.", retry_event.action
+        )
+        return retry_response + _SUPERVISOR_CAVEAT, event
+
+    async def _supervisor_rerun(
+        self,
+        *,
+        flow: str,
+        supervisor_feedback: str,
+        intent_packet: Any,
+        user_facts: dict[str, Any],
+        active_hypotheses: list[Any],
+        recent_turns: list[Any],
+        original_response: str,
+    ) -> str:
+        """Re-run the appropriate agent once with supervisor feedback.
+
+        Flow A/B: re-run Coach.
+        Flow C: re-run Synthesizer (uses coach_out/da_out from _flow_c_state).
+        Onboarding: no retry — return original response.
+        """
+        if flow in ("A", "B"):
+            retry_out = await self._coach.run(
+                CoachInput(
+                    intent_packet=intent_packet,
+                    user_facts=user_facts,
+                    active_hypotheses=active_hypotheses,
+                    recent_turns=recent_turns,
+                    critic_feedback=supervisor_feedback,
+                )
+            )
+            return retry_out.response_text
+
+        if flow == "C":
+            coach_out_obj = self._flow_c_state.get("coach_out_obj")
+            da_out_obj = self._flow_c_state.get("da_out_obj")
+            research_brief_obj = self._flow_c_state.get("research_brief_obj")
+            if coach_out_obj and da_out_obj:
+                retry_synth = await self._synthesizer.run(
+                    SynthesizerInput(
+                        coach_output=coach_out_obj,
+                        da_output=da_out_obj,
+                        research_brief=research_brief_obj,
+                        user_facts=user_facts,
+                        active_hypotheses=active_hypotheses,
+                        intent_packet=intent_packet,
+                        critic_feedback=supervisor_feedback,
+                    )
+                )
+                # Update state so the new synth output is persisted
+                self._flow_c_state["synth_output_dict"] = retry_synth.model_dump(mode="json")
+                self._flow_c_state["chart_specs_list"] = [
+                    c.model_dump(mode="json") for c in retry_synth.chart_specs
+                ]
+                return retry_synth.response_text
+
+        # Onboarding or state unavailable — no retry
+        return original_response
+
+    async def _save_supervisor_event(
+        self, turn_id: UUID, event: SupervisorEvent
+    ) -> None:
+        """Persist a non-pass SupervisorEvent to the supervisor_events table."""
+        if event.action == "pass":
+            return
+        if event.event_type is None or event.severity is None:
+            logger.warning(
+                "Supervisor non-pass event missing event_type/severity; skipping persist."
+            )
+            return
+        details_json = json.dumps({"details": event.details}) if event.details else None
+        try:
+            pool = await get_pool()
+            async with pool.acquire() as conn:
+                await conn.execute(
+                    """
+                    INSERT INTO supervisor_events
+                        (turn_id, event_type, severity, details, action_taken)
+                    VALUES ($1, $2, $3, $4::jsonb, $5)
+                    """,
+                    turn_id,
+                    event.event_type,
+                    event.severity,
+                    details_json,
+                    event.action,
+                )
+        except Exception:
+            logger.exception("Failed to persist supervisor_event for turn %s", turn_id)
 
     # ---- helpers -----------------------------------------------------------
 
@@ -495,7 +684,6 @@ class TurnPipeline:
             self._researcher = Researcher(
                 factory=self._factory,
                 web_client=get_client("researcher"),
-                kb_repo=WorldKBRepo(),
             )
         return self._researcher
 

@@ -1,0 +1,21 @@
+fixture_id: "010"
+category: off_topic
+expected_action: warn
+
+user_message: "What ML roles exist at fintech startups?"
+specific_ask: "What ML roles exist at fintech startups?"
+user_facts:
+  age: 25
+  degree: "Statistics, LSE"
+
+response_text: |
+  Career planning in your 20s is fundamentally about exploring who you are
+  and what you value. Rather than narrowing in on specific roles, I'd
+  encourage you to think broadly about your values, your ideal lifestyle,
+  and the kind of impact you want to have. Some people thrive in startup
+  environments; others prefer the structure of large organisations. It's
+  important to reflect deeply before committing to any particular path.
+  What are your core values? What does success mean to you personally?
+
+# Generic motivational drift — entirely sidesteps the specific question about
+# ML roles at fintech startups. Off-topic, medium severity.

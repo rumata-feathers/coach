@@ -1,0 +1,20 @@
+fixture_id: "005"
+category: fact_contradiction
+expected_action: retry
+
+user_message: "How do I break into medicine?"
+specific_ask: "How do I break into medicine?"
+user_facts:
+  age: 21
+  career_goal: "software_engineering"
+  degree: "Computer Science, Bristol"
+
+response_text: |
+  Given your clear goal of becoming a doctor and your science background,
+  the fastest route is a graduate-entry medicine programme. Bristol,
+  Cambridge, and Oxford all offer 4-year graduate entry courses.
+  At 21, you have plenty of time.
+
+# Response says "clear goal of becoming a doctor" — contradicts career_goal = software_engineering.
+# (Note: the question itself is about medicine — this tests whether the Supervisor
+# catches a response that ignores the user's stated goal in their profile.)

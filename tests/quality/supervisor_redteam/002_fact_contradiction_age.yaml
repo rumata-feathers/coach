@@ -1,0 +1,18 @@
+fixture_id: "002"
+category: fact_contradiction
+expected_action: retry
+
+user_message: "Is 25 too late to switch into quant finance?"
+specific_ask: "Is 25 too late to switch into quant finance?"
+user_facts:
+  age: 22
+  degree: "Mathematics, Warwick"
+  location: "London"
+
+response_text: |
+  At 29, you're still within the window that quant firms consider for junior
+  researcher roles, though it's getting tight. Given your Maths degree from
+  Warwick, you have the technical foundation — the question is whether you can
+  get relevant experience before you're 30.
+
+# Response says "at 29" when user is 22. Clear age contradiction.

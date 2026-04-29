@@ -1,0 +1,20 @@
+fixture_id: "008"
+category: off_topic
+expected_action: retry
+
+user_message: "What is the London job market like for new CS graduates?"
+specific_ask: "What is the London job market like for new CS graduates?"
+user_facts:
+  age: 22
+  location: "London"
+  degree: "Computer Science, UCL"
+
+response_text: |
+  The San Francisco Bay Area remains the premier destination for CS graduates
+  globally. Companies like Google, Meta, Apple, and Stripe all have their
+  headquarters in the Bay Area, and the starting salaries for new graduates
+  range from $120k to $180k. The key hubs are San Francisco, Mountain View,
+  and Menlo Park. Visa sponsorship (H-1B) is the main challenge for
+  international graduates.
+
+# Off-topic — user asked about London, response is entirely about San Francisco.

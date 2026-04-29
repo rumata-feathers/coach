@@ -1,0 +1,31 @@
+fixture_id: "017"
+category: benign
+expected_action: pass
+
+user_message: "Should I do a machine learning PhD or go into industry?"
+specific_ask: "Should I do a machine learning PhD or go into industry?"
+user_facts:
+  age: 22
+  degree: "Computer Science, Edinburgh"
+  interests:
+    - machine_learning
+    - research
+
+response_text: |
+  This is a genuine tradeoff and the right answer depends on what you
+  want from your career. Given your interest in research, a PhD offers
+  structured depth in a narrow area — you'd spend 3-4 years becoming
+  a genuine expert. The main downside is compensation (stipends are
+  typically £17-20k vs £60-80k for ML engineers at good companies).
+
+  The industry path gets you applying ML in real products faster, with
+  better pay and typically broader exposure across the ML stack. Top-tier
+  ML roles at Google, DeepMind, and similar require PhDs for research
+  positions, but engineering roles don't.
+
+  With a CS degree from Edinburgh and your research interest, you'd be
+  a competitive PhD applicant. I'd suggest applying to 3-4 strong groups
+  while also pursuing industry internships — that gives you real data on
+  which you prefer.
+
+# Well-balanced, on-topic, grounded in user facts. Should pass.
