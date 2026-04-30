@@ -1,0 +1,17 @@
+id: 012_journalism_viability
+description: Is journalism still a viable career in 2025?
+question: Is journalism still a viable career given layoffs and AI — or is the industry
+  in terminal decline?
+persona:
+  age: 22
+  degree: English Literature
+  experience: student journalist 2 years
+  location: UK
+expected_min_findings: 2
+is_contrarian: false
+expected_kb_tags:
+- creative
+- low_comp_early
+expected_careers_mentioned:
+- journalism
+notes: 'Contrarian tension: user wants validation but data may be mixed.'

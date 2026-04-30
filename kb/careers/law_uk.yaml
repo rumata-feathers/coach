@@ -1,0 +1,25 @@
+name: law_uk
+display_name: "Law (UK Solicitor track)"
+tags: [law, regulated, client_facing, high_comp_city, competitive, detail_oriented, long_training, professional_services]
+variants: [city_solicitor, regional_solicitor, barrister, in_house_counsel, public_sector_lawyer, legal_tech, ngo_lawyer]
+entry_paths:
+  - path: undergrad_any → sqe1_sqe2 → training_contract
+    typical_timeline_years: 5
+    selectivity: "very high for City training contracts (Magic Circle, Silver Circle); training contract securing is the primary bottleneck"
+  - path: undergraduate_law_llb → sqe → training_contract
+    typical_timeline_years: 5
+    selectivity: "high — law degree provides academic advantage but non-law routes via SQE increasingly viable"
+typical_hours_per_week: [55, 80]
+early_career_pay_uk:
+  band_p50_gbp: 50000
+  band_p90_gbp: 100000
+  year_ref: 2025
+  notes: "Trainee solicitor at Magic Circle firms ~£55k–£60k; NQ (newly qualified) solicitor at top City firms £105k–£125k (2024 NQ pay rounds). Regional and public sector significantly lower. Barrister pupillage: highly variable, £15k–£65k stipend."
+typical_exits: [in_house_counsel, legal_director, general_counsel, private_equity_legal, ngo_advocacy, politics, legal_tech_founder, compliance]
+risks: [very_competitive_training_contract_market, billable_hours_pressure, high_client_expectations, risk_of_staying_in_track_you_chose_at_21]
+required_signals: [analytical_rigour, precision_with_language, resilience_under_high_stakes_deadlines, client_empathy, attention_to_detail]
+contra_indicators: [preference_for_technical_building_work, low_tolerance_for_repetitive_document_review, discomfort_with_adversarial_contexts, short_term_financial_motivation]
+source_notes:
+  pay: "RollOnFriday and Legal Cheek NQ salary survey 2024; Magic Circle NQ pay announcements; The Lawyer UK market data — Magic Circle vs rest-of-market gap is very large"
+  hours: "Legal Cheek survey 2023; Glassdoor trainee solicitor reviews; Magic Circle hours famously high, varies by seat"
+  entry_paths: "Law Society Annual Statistics Report 2023; RollOnFriday training contract success rates; SQE pass rate data from Kaplan"

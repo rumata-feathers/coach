@@ -1,0 +1,25 @@
+name: data_science
+display_name: "Data Science"
+tags: [data, math_heavy, analytical, moderate_comp, technical, cross_functional, growing_field]
+variants: [data_scientist, data_analyst, analytics_engineer, decision_scientist, applied_scientist, ml_engineer, research_analyst]
+entry_paths:
+  - path: undergrad_stem_or_quantitative → grad_role_data_analyst_or_ds
+    typical_timeline_years: 3
+    selectivity: "moderate — field has expanded; strong Python/SQL and statistics foundation required; top firms (tech, finance) still competitive"
+  - path: undergrad_any → msc_data_science → data_scientist
+    typical_timeline_years: 4
+    selectivity: "moderate to high — MSc from a strong university differentiates"
+typical_hours_per_week: [40, 55]
+early_career_pay_uk:
+  band_p50_gbp: 45000
+  band_p90_gbp: 75000
+  year_ref: 2025
+  notes: "Wide variance by sector: finance/tech higher (~£60k–£90k), public sector/charity lower (~£30k–£45k). Analyst vs scientist title carries a pay gap at most companies."
+typical_exits: [ml_engineer, data_engineering, product_analytics, ml_research, product_management, business_intelligence_lead, analytics_manager]
+risks: [ai_tooling_shifting_role_requirements, title_inflation_obscures_skill_level, cross_functional_influence_can_be_limited, highly_variable_impact_by_organisation]
+required_signals: [statistical_thinking, programming_fluency_python_sql, curiosity_about_data_stories, comfort_presenting_to_non_technical_stakeholders]
+contra_indicators: [primarily_interested_in_novel_ml_research, discomfort_with_messy_real_world_data, preference_for_purely_theoretical_work]
+source_notes:
+  pay: "ONS Annual Survey of Hours and Earnings 2023 for data analyst SOC codes; LinkedIn Salary UK data scientist 2024; Glassdoor London ranges — sector gap is real and large"
+  hours: "Generally better work-life balance than finance roles; self-reported in data science communities; tech companies higher end of range"
+  entry_paths: "HESA graduate outcomes; data science job posting analysis; observed industry entry patterns"

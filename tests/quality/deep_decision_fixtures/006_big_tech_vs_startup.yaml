@@ -1,0 +1,30 @@
+# Category: Finance vs tech vs consulting (3/3)
+fixture_id: "006"
+category: finance_tech_consulting
+question: >
+  I have a software engineering offer from Meta and an early-stage
+  Series A startup (20 people, strong team, decent equity). I care
+  more about financial upside than prestige but I'm risk-averse.
+  How do I think about this properly?
+persona:
+  age: 23
+  degree: "Computer Science, UCL"
+  education_stage: "recent_graduate"
+  location: "London"
+  interests: ["software_engineering", "startups", "financial_independence"]
+  career_goals: "financial independence through career or equity"
+seed_facts:
+  age: "23"
+  degree: '"Computer Science, UCL"'
+  education_stage: '"recent_graduate"'
+  location: '"London"'
+  interests: '["software_engineering", "startups", "financial_independence"]'
+  career_goals: '"financial independence"'
+is_contrarian: false
+expected_tradeoffs:
+  - expected_value_equity
+  - risk_profile
+  - learning_environment
+notes: >
+  Should model the expected-value calculation for early-stage equity,
+  discuss base comp differential, and acknowledge risk aversion.

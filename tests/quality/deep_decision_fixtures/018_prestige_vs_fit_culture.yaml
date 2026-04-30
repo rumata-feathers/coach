@@ -1,0 +1,32 @@
+# Category: Prestige vs fit (2/2)
+fixture_id: "018"
+category: prestige_vs_fit
+question: >
+  I've been offered a role at a top-tier VC-backed startup that's moving
+  fast and feels culturally perfect, and also at a FAANG company that's
+  more bureaucratic but would look incredible on my CV. The FAANG role
+  pays significantly more. I care about doing meaningful work but also
+  being financially secure.
+persona:
+  age: 24
+  degree: "Engineering, Imperial College London"
+  education_stage: "early_career"
+  location: "London"
+  interests: ["technology", "startups", "product_management", "financial_security"]
+  career_goals: "meaningful work and financial security"
+seed_facts:
+  age: "24"
+  degree: '"Engineering, Imperial College London"'
+  education_stage: '"early_career"'
+  location: '"London"'
+  interests: '["technology", "startups", "product"]'
+  career_goals: '"meaningful work with financial security"'
+is_contrarian: false
+expected_tradeoffs:
+  - mission_alignment
+  - compensation_and_security
+  - cv_value
+notes: >
+  FAANG prestige vs startup culture fit. Should discuss RSU vesting,
+  the long-term career signal from FAANG brand, and ways to weigh
+  mission against financial security explicitly.

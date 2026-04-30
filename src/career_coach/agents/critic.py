@@ -62,6 +62,9 @@ class Critic(Agent):
             user_facts=input_data.user_facts,
             active_hypotheses=input_data.active_hypotheses,
             intent_packet=input_data.intent_packet,
+            is_flow_c=input_data.is_flow_c,
+            synthesizer_output=input_data.synthesizer_output,
+            da_output=input_data.da_output,
         )
         messages = [Message(role="user", content=prompt)]
         t0 = self.now_ms()
@@ -136,4 +139,6 @@ def _serialize_input(inp: CriticInput) -> dict[str, Any]:
         "num_hypotheses": len(inp.active_hypotheses),
         "referenced_facts_count": len(inp.coach_output.referenced_facts),
         "referenced_hypotheses_count": len(inp.coach_output.referenced_hypotheses),
+        "is_flow_c": inp.is_flow_c,
+        "has_synthesizer_output": inp.synthesizer_output is not None,
     }

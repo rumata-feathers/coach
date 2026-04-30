@@ -1,0 +1,25 @@
+name: civil_service_uk
+display_name: "Civil Service (UK)"
+tags: [public_sector, policy, analytical, moderate_comp, high_job_security, generalist, london_centric_fast_stream]
+variants: [fast_stream, policy_advisor, economist_gse, statistician_gss, digital_data_technology_ddat, operational_delivery, senior_civil_servant]
+entry_paths:
+  - path: undergrad_any → civil_service_fast_stream
+    typical_timeline_years: 3
+    selectivity: "high — Fast Stream acceptance rate ~3-5%; generalist stream most competitive; specialist streams (economist, statistician) somewhat easier"
+  - path: undergrad_any → direct_entry_heo_or_seo
+    typical_timeline_years: 2
+    selectivity: "moderate — below Fast Stream but still competitive; progression slower"
+typical_hours_per_week: [37, 50]
+early_career_pay_uk:
+  band_p50_gbp: 30000
+  band_p90_gbp: 42000
+  year_ref: 2025
+  notes: "Fast Stream starting salary ~£30k–£32k (London weighting ~£35k); progression to Grade 7 (~£54k–£68k) over 5-7 years via accelerated scheme. Pay significantly below private sector comparators at same grade."
+typical_exits: [senior_civil_servant, policy_think_tank, ngo_or_charity_director, consulting, second_sector_secondment, politics, international_organisations]
+risks: [compensation_significantly_below_private_sector, bureaucratic_environment, policy_implementation_cycle_long, frequent_ministerial_churn_affects_priorities]
+required_signals: [genuine_public_service_motivation, strong_written_communication, structured_analysis, resilience_to_slow_pace_of_change, interest_in_policy_or_economics]
+contra_indicators: [primarily_compensation_driven, preference_for_fast_moving_environment, strong_desire_for_individual_product_ownership, discomfort_with_hierarchical_structures]
+source_notes:
+  pay: "Civil Service pay scales published by Cabinet Office 2024-25; Fast Stream pay confirmed in GOV.UK graduate scheme pages; London allowance rates from Pay Remit guidance"
+  hours: "Civil Service nominal working week 37h; Fast Streamers self-report higher during busy periods; GOV.UK working hours guidance"
+  entry_paths: "Civil Service Fast Stream Annual Report 2023; acceptance rate from CSFS published statistics; IPSOS/IFG civil service workforce data"

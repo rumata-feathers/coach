@@ -1,0 +1,30 @@
+{
+  "query": "quant finance careers UK 2026",
+  "follow_up_questions": null,
+  "answer": null,
+  "images": [],
+  "results": [
+    {
+      "title": "Quantitative Finance Careers in the UK: 2026 Guide",
+      "url": "https://example.com/quant-finance-2026",
+      "content": "Quant finance roles in the UK include quant analyst, quant developer, and risk quant positions. Most entry-level roles require a strong mathematics or physics background and programming skills. Starting salaries at tier-1 banks range from £60k–£90k in London.",
+      "score": 0.92,
+      "published_date": "2026-01-15"
+    },
+    {
+      "title": "How to Break Into Quant Finance UK",
+      "url": "https://example.com/break-into-quant",
+      "content": "The typical path into quant finance starts with a maths or physics degree, followed by either a masters in financial mathematics or direct applications to grad schemes at hedge funds and banks.",
+      "score": 0.87,
+      "published_date": "2025-11-20"
+    },
+    {
+      "title": "UK Hedge Fund Hiring Trends 2026",
+      "url": "https://example.com/hedge-fund-hiring",
+      "content": "London hedge funds continue to hire aggressively in quantitative roles despite broader market uncertainty. Man Group, Two Sigma, and Citadel remain the largest quant employers in the UK.",
+      "score": 0.83,
+      "published_date": "2026-02-01"
+    }
+  ],
+  "response_time": 0.8
+}

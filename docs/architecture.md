@@ -164,35 +164,109 @@ coach:
 
 ## Orchestrator flows
 
-| Flow | When | Critic | Latency |
-|------|------|--------|---------|
-| A | `budget_hint=quick` OR `turn_intent=vent` | No | Fast |
-| B | Everything else | Yes (≤2 retries) | Slower, higher quality |
+| Flow | When | Agents | Critic | Latency budget |
+|------|------|--------|--------|----------------|
+| A | `budget_hint=quick` OR `turn_intent=vent` | Coach only | No | Fast |
+| B | Everything else (standard) | Coach | Yes (≤2 retries) | ~5–10 s |
+| C | `budget_hint=deep` OR `turn_intent=decide` AND ≥5 structured facts | Researcher ∥ Coach → DA → Synthesizer | Yes on Synthesizer (≤2 retries) | ≤25 s p95 |
+| onboarding | New user (< 5 facts AND < 3 turns) | OnboardingPipeline | No | Fast |
 
 ---
 
 ## Quality gate (Critic)
 
-The Critic checks every Coach response (flow B) against four failure modes:
+The Critic checks every Coach response (Flow B) and every Synthesizer response
+(Flow C) against a rubric of failure modes. On `reject` the Critic provides a
+`suggested_fix` used on the next attempt. After 2 rejections, the pipeline
+escalates to an honest "I need more context" response.
+
+**Flows A and onboarding bypass the Critic** — they are on the fast path and
+the Critic's latency cost is not justified there.
+
+### Flow A/B failure modes
 
 | Mode | Meaning |
 |------|---------|
 | `generic` | Could apply to any user — no personalisation |
-| `ungrounded` | Claims facts not in the user model |
-| `false_confidence` | Specific numbers/claims without hedging |
+| `ungrounded` | < 2 user-specific items from facts + hypotheses |
+| `false_confidence` | Specific numbers/claims without hedging or sources |
 | `off_intent` | Doesn't address what the user actually asked |
 
-On `reject`, the Critic provides a `suggested_fix` that Coach uses on the next
-attempt. After 2 rejections, the pipeline escalates to an honest "I need more
-context" response.
+### Flow C additional failure modes
+
+| Mode | Meaning |
+|------|---------|
+| `unintegrated` | Synthesizer's `integrated_from` doesn't include all available sources |
+| `uncontested` | DA disagreed but no tradeoff surfaced in the response |
+| `chart_uncited` | Chart present without `source_citation_indices` populated |
+| `chart_data_invented` | Chart contains values absent from any cited finding |
 
 ---
 
 ## Database schema
 
-See [`migrations/001_initial.sql`](../migrations/001_initial.sql) for the
-authoritative schema. Key indexes:
+See `migrations/` for the authoritative schema. Migrations are applied in
+lexical order by `scripts/run_migrations.py`. Key indexes:
 
 - `turn_embeddings` has an `ivfflat` cosine index for similarity search
 - `structured_facts` has a `UNIQUE (user_id, key)` constraint for upsert
 - `hypothesis_evidence` uses `hypothesis_id IS NULL` as the distillation queue
+
+### Turns columns added in migration 004
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `research_brief_id` | `UUID NULL` | FK → `research_briefs.brief_id`. Set when Flow C Researcher ran. |
+| `synthesizer_output` | `JSONB NULL` | Full `SynthesizedResponse` payload. Flow C only. |
+| `devils_advocate_output` | `JSONB NULL` | Full `DevilsAdvocateOutput` payload. Flow C only. |
+| `chart_specs` | `JSONB DEFAULT '[]'` | List of `ChartSpec` objects emitted by Coach (Flow B) or Synthesizer (Flow C). Empty array on Flows A/onboarding. |
+
+### `research_briefs` (migration 004)
+
+One row per Researcher invocation (every Flow C turn, including graceful
+failures where `findings` is an empty array). Linked to `turns` via
+`turns.research_brief_id`.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `brief_id` | `UUID PK` | |
+| `turn_id` | `UUID FK` → `turns` | |
+| `question` | `TEXT` | The research question derived from the intent packet. |
+| `findings` | `JSONB` | Array of `Finding` objects (each with claim, confidence, citations). |
+| `caveats` | `JSONB` | Free-text caveats the Researcher returned (e.g. "research truncated"). |
+| `next_questions` | `JSONB` | Follow-up questions suggested by the Researcher. |
+| `used_kb_files` | `JSONB` | KB file paths that contributed to findings. |
+| `web_searches_run` | `JSONB` | Search queries actually issued to the web search adapter. |
+| `web_sources_consulted` | `JSONB` | URLs whose content fed into the findings synthesis. |
+
+Query research activity:
+```sql
+SELECT rb.question, jsonb_array_length(rb.findings) AS finding_count,
+       rb.web_searches_run, rb.created_at
+FROM research_briefs rb
+ORDER BY rb.created_at DESC
+LIMIT 20;
+```
+
+### `supervisor_events` (migration 004)
+
+One row per non-pass Supervisor event. `pass` verdicts are not persisted —
+they add noise without signal.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `event_id` | `UUID PK` | |
+| `turn_id` | `UUID FK` → `turns` | |
+| `event_type` | `TEXT` | `fact_contradiction` \| `off_topic` \| `unsafe` |
+| `severity` | `TEXT` | `low` \| `med` \| `high` |
+| `details` | `JSONB NULL` | Free-form evidence dict (e.g. which fact was contradicted). |
+| `action_taken` | `TEXT` | `pass` \| `warn` \| `retry` \| `block` |
+
+Query Supervisor catch rate:
+```sql
+SELECT event_type, action_taken, COUNT(*) AS events
+FROM supervisor_events
+WHERE created_at > now() - interval '14 days'
+GROUP BY event_type, action_taken
+ORDER BY events DESC;
+```

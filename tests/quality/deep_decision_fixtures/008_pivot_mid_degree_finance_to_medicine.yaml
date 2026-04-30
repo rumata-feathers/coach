@@ -1,0 +1,30 @@
+# Category: Pivot decisions mid-degree (2/3)
+fixture_id: "008"
+category: pivot_mid_degree
+question: >
+  I'm in my third year of a Finance degree and I've realised I
+  actually want to be a doctor. My parents think I'm crazy.
+  What are my realistic options at this point?
+persona:
+  age: 21
+  degree: "Finance (Year 3), King's College London"
+  education_stage: "third_year_undergrad"
+  location: "London"
+  interests: ["medicine", "healthcare", "human_biology"]
+  career_goals: "become a doctor"
+seed_facts:
+  age: "21"
+  degree: '"Finance Year 3, King''s College London"'
+  education_stage: '"third_year_undergrad"'
+  location: '"London"'
+  interests: '["medicine", "healthcare", "biology"]'
+  career_goals: '"become a doctor, possibly GP or surgeon"'
+is_contrarian: false
+expected_tradeoffs:
+  - graduate_medicine_entry_route
+  - time_and_financial_cost
+  - finish_vs_drop_degree
+notes: >
+  Should map the Graduate Entry Medicine (GEM) route (4-year GEM after
+  any degree), UCAT requirements, and the financial reality of 10+ years
+  of training.

@@ -1,0 +1,25 @@
+name: entrepreneurship_early
+display_name: "Entrepreneurship (early-stage)"
+tags: [startup, high_autonomy, high_risk, high_variance_comp, generalist, creative, execution_heavy, resilience_required]
+variants: [solo_founder, co_founder_technical, co_founder_commercial, indie_hacker, startup_employee_1_to_10, vc_backed_founder]
+entry_paths:
+  - path: undergrad_or_no_degree → build_something → founder
+    typical_timeline_years: 2
+    selectivity: "no formal gatekeeping — success distribution extremely skewed; execution and luck both matter; investor backing competitive"
+  - path: industry_experience_2_5yrs → founder
+    typical_timeline_years: 7
+    selectivity: "prior experience increases domain credibility; accelerator/VC programmes (YC, Entrepreneur First UK) competitive but accessible"
+typical_hours_per_week: [60, 80]
+early_career_pay_uk:
+  band_p50_gbp: 20000
+  band_p90_gbp: 60000
+  year_ref: 2025
+  notes: "Founder salary highly variable and self-determined. Pre-revenue: often zero or minimum wage. Post-seed: £40k–£80k common founder salary draw. p90 reflects successful seed+ stage companies. Equity value not included — expectation value positive but terminal distribution highly skewed."
+typical_exits: [acquihire, growth_stage_founder, startup_operator_at_another_company, vc_investor, product_leadership, back_to_corporate]
+risks: [high_failure_rate, income_instability, isolation, identity_tied_to_company_outcome, co_founder_conflict, investor_pressure]
+required_signals: [intrinsic_motivation_not_external_validation, comfort_with_prolonged_uncertainty, ability_to_sell, domain_insight_or_obsession, resilience_to_repeated_rejection]
+contra_indicators: [primarily_motivated_by_job_security, preference_for_structured_clear_expectations, discomfort_with_financial_risk, need_for_external_validation_of_progress]
+source_notes:
+  pay: "Docsend/Carta startup compensation surveys 2023-24; Entrepreneur First founder cohort data; AngelList UK salary data — pre-seed founders often pay themselves very little or nothing; figures are illustrative ranges only"
+  hours: "Widespread anecdotal evidence; First Round State of Startups survey; startup community surveys — actual range varies from healthy to extreme"
+  entry_paths: "Entrepreneur First and Seedcamp UK cohort data; YC stats on applicant background; Crunchbase UK first-time founder data — no reliable selectivity statistic exists as there is no single gate"

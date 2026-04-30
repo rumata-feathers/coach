@@ -1,0 +1,30 @@
+# Category: Early-career firm selection (1/3)
+fixture_id: "010"
+category: early_career_firm_selection
+question: >
+  I have training contract offers from a Magic Circle firm and a
+  US firm in London. Both are paying roughly the same (£50k first year
+  NQ going to £150k+ eventually). How should I decide between them?
+persona:
+  age: 22
+  degree: "Law, Oxford"
+  education_stage: "final_year"
+  location: "London"
+  interests: ["corporate_law", "M&A", "private_equity"]
+  career_goals: "top corporate lawyer, potentially in-house at PE later"
+seed_facts:
+  age: "22"
+  degree: '"Law, University of Oxford"'
+  education_stage: '"final_year"'
+  location: '"London"'
+  interests: '["corporate_law", "M&A", "private_equity"]'
+  career_goals: '"top corporate lawyer, possibly in-house at PE fund"'
+is_contrarian: false
+expected_tradeoffs:
+  - culture_and_hours
+  - nq_salary_trajectory
+  - brand_and_exits
+notes: >
+  Magic Circle vs US firm at London. Should address culture differences,
+  NQ salary curves (US firms now often match or beat MC), and PE in-house
+  exit options.

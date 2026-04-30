@@ -1,0 +1,25 @@
+name: teaching
+display_name: "Teaching (UK, state schools)"
+tags: [education, public_sector, vocational, moderate_comp, high_job_security, people_facing, impactful, regulated]
+variants: [secondary_teacher, primary_teacher, sen_teacher, head_of_department, deputy_head, headteacher, further_education_lecturer]
+entry_paths:
+  - path: undergrad_any → pgce_or_school_direct → nqt → qualified_teacher
+    typical_timeline_years: 4
+    selectivity: "moderate — teacher supply shortages in STEM and languages mean entry is not highly competitive; PGCE or School Direct both viable"
+  - path: undergrad_any → teach_first → teacher
+    typical_timeline_years: 4
+    selectivity: "high — Teach First is selective graduate programme (~15% acceptance rate)"
+typical_hours_per_week: [50, 60]
+early_career_pay_uk:
+  band_p50_gbp: 31000
+  band_p90_gbp: 38000
+  year_ref: 2025
+  notes: "Qualified teacher starting salary outside London ~£31,650 (2024 pay award); Inner London ~£38,766. Upper pay range £46k–£55k; leadership spine higher. Large gap between inner London and rest of England."
+typical_exits: [senior_leadership_school, edtech, curriculum_developer, education_policy, charity_education_sector, tutoring_business, hei_lecturing]
+risks: [high_workload_significant_out_of_hours, pupil_behaviour_challenges, administrative_burden, staffing_shortages_in_school_create_pressure, limited_salary_ceiling_relative_to_other_professions]
+required_signals: [genuine_interest_in_young_people_development, subject_expertise, communication_and_patience, resilience, ability_to_manage_a_classroom]
+contra_indicators: [low_tolerance_for_repetitive_content_delivery, primarily_compensation_driven, discomfort_with_highly_regulated_environment, preference_for_individual_contributor_technical_work]
+source_notes:
+  pay: "DfE School Teachers' Pay and Conditions Document 2024; NASUWT/NEU published pay scales; Inner London vs Outer London vs England differential from DfE official tables"
+  hours: "DfE teacher workload survey 2024; NEU annual survey — directed time 1,265h/yr plus substantial additional prep and marking"
+  entry_paths: "UCAS teacher training applicant statistics 2023; DfE Initial Teacher Training census; Teach First published intake size"

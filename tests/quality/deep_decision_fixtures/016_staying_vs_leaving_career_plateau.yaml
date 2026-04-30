@@ -1,0 +1,30 @@
+# Category: Staying vs leaving (2/2)
+fixture_id: "016"
+category: staying_vs_leaving
+question: >
+  I've been a software engineer at the same company for 3 years.
+  I've had two promotions and I'm well-liked, but I feel like I'm
+  not learning anymore. My gut says I should leave but I feel loyal
+  to the team. How do I think through this?
+persona:
+  age: 26
+  degree: "Computer Science, Sheffield"
+  education_stage: "mid_career"
+  location: "Manchester"
+  interests: ["software_engineering", "learning", "career_growth"]
+  career_goals: "senior / staff engineer at a high-growth company"
+seed_facts:
+  age: "26"
+  degree: '"Computer Science, University of Sheffield"'
+  education_stage: '"mid_career_early"'
+  location: '"Manchester"'
+  interests: '["software_engineering", "learning", "career_growth"]'
+  career_goals: '"senior or staff engineer at high-growth company"'
+is_contrarian: false
+expected_tradeoffs:
+  - learning_plateau_cost
+  - loyalty_vs_self_interest
+  - negotiation_before_leaving
+notes: >
+  Should discuss the learning-plateau opportunity cost, whether to ask
+  for new responsibilities first, and the salary premium for job-switching.

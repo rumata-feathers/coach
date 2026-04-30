@@ -1,0 +1,17 @@
+id: 019_obscure_niche_career
+description: 'Contrarian: career not in KB with limited web data'
+question: What are the career prospects for a UK specialist in maritime insurance
+  law in 2025?
+persona:
+  age: 25
+  degree: Law LLB
+  interests:
+  - maritime
+  - insurance
+  - niche law
+  location: UK
+expected_min_findings: 0
+is_contrarian: true
+expected_kb_tags: []
+notes: Maritime insurance law is a niche not covered in KB. Should degrade gracefully
+  with honest caveats.

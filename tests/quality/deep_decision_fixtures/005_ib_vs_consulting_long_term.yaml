@@ -1,0 +1,29 @@
+# Category: Finance vs tech vs consulting (2/3)
+fixture_id: "005"
+category: finance_tech_consulting
+question: >
+  I'm deciding between investment banking (M&A at a bulge bracket) and
+  management consulting (tier-1 firm). I want to be a CFO at a major
+  company in 15 years. Which path sets me up better?
+persona:
+  age: 21
+  degree: "Economics, Cambridge"
+  education_stage: "final_year"
+  location: "London"
+  interests: ["finance", "strategy", "corporate_leadership"]
+  career_goals: "CFO of a FTSE 100 company"
+seed_facts:
+  age: "21"
+  degree: '"Economics, University of Cambridge"'
+  education_stage: '"final_year"'
+  location: '"London"'
+  interests: '["finance", "strategy", "corporate_leadership"]'
+  career_goals: '"CFO of a large company"'
+is_contrarian: false
+expected_tradeoffs:
+  - ib_vs_consulting_for_cfo
+  - exit_options_comparison
+  - skill_building_differences
+notes: >
+  Goal-specific advice — CFO target. Should discuss CFO pathway stats,
+  PE/corp dev from IB vs strategy roles from consulting.

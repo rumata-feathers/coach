@@ -1,0 +1,21 @@
+name: quant_finance
+display_name: "Quantitative Finance"
+tags: [finance, math_heavy, cs_heavy, high_comp, high_hours, competitive]
+variants: [research_quant, dev_quant, systematic_trader, quantittive trader, desk_quant, risk_quant, quant_strategist, algo_trader]
+entry_paths:
+  - path: undergrad_math_physics → internship → grad_role
+    typical_timeline_years: 4
+    selectivity: "very high — top universities, Olympiad/competition background common"
+typical_hours_per_week: [60, 90]
+early_career_pay_uk:
+  band_p50_gbp: 90000
+  band_p90_gbp: 150000
+  year_ref: 2026
+typical_exits: [hedge_fund, porfolio_manager, own_firm, tech_senior_ic, leave_industry]
+risks: [burnout_high, narrow_skill_portability, market_cycle_exposure]
+required_signals: [strong_mathematical_aptitude, comfort_with_ambiguity, competition_history, interest_in_markets]
+contra_indicators: [strong_preference_for_collaborative_work, desire_for_creative_autonomy]
+source_notes:
+  pay: "levels.fyi UK 2024 snapshot + eFinancialCareers; firm-dependent; London-centric"
+  hours: "anecdotal from glassdoor + practitioner blogs; varies wildly by firm"
+  entry_paths: "observed pattern, not exclusive"

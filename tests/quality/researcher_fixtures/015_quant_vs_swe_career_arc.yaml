@@ -1,0 +1,20 @@
+id: 015_quant_vs_swe_career_arc
+description: 'Long-term career trajectory: quant vs SWE'
+question: At 35-40, what does a career look like in quant finance vs software engineering
+  — which has better optionality?
+persona:
+  age: 21
+  degree: Mathematics and Computer Science
+  interests:
+  - long_term_thinking
+  - optionality
+  location: UK
+expected_min_findings: 2
+is_contrarian: false
+expected_kb_tags:
+- math_heavy
+- cs_heavy
+expected_careers_mentioned:
+- quant_finance
+- software_engineering
+notes: Tests longer-horizon reasoning. KB exits important.

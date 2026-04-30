@@ -1,0 +1,19 @@
+id: 008_civil_service_fast_stream
+description: Civil Service Fast Stream vs private sector
+question: Is the Civil Service Fast Stream worth it compared to graduate programmes
+  at top banks or consultancies?
+persona:
+  age: 22
+  degree: Politics and Economics, LSE
+  interests:
+  - policy
+  - public service
+  location: UK
+expected_min_findings: 2
+is_contrarian: false
+expected_kb_tags:
+- public_sector
+expected_careers_mentioned:
+- civil_service_uk
+- management_consulting
+notes: Tests comparison across KB careers with different pay scales.

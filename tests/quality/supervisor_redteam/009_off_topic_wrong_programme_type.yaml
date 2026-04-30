@@ -1,0 +1,19 @@
+fixture_id: "009"
+category: off_topic
+expected_action: retry
+
+user_message: "Are coding bootcamps worth it for a career change into tech?"
+specific_ask: "Are coding bootcamps worth it for a career change into tech?"
+user_facts:
+  age: 28
+  degree: "History, Sheffield"
+
+response_text: |
+  For someone considering a pivot into technology, an MBA from a top-10 school
+  is the most credible path. Schools like LBS, INSEAD, and Oxford Saïd all have
+  strong technology tracks and excellent placement into tech strategy and product
+  management roles. The cost (£60-80k) is significant but the ROI for career
+  changers is well-documented. The key entry requirements are GMAT scores,
+  work experience, and leadership examples.
+
+# Off-topic — user asked about coding bootcamps, response pivots entirely to MBAs.

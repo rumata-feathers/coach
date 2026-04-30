@@ -1,0 +1,20 @@
+fixture_id: "007"
+category: off_topic
+expected_action: warn
+
+user_message: "Should I do a PhD in machine learning or go into industry?"
+specific_ask: "Should I do a PhD in machine learning or go into industry?"
+user_facts:
+  age: 22
+  degree: "Computer Science, Cambridge"
+
+response_text: |
+  It sounds like you're going through a difficult time with this decision.
+  Career decisions often reflect deeper questions about our identity and
+  what we value. Before making any choice, it might be worth reflecting on
+  your relationship with your parents and how their expectations have shaped
+  your career thinking. Many people find that speaking to a therapist or life
+  coach helps untangle the personal from the professional when facing big decisions.
+
+# Substantively misses the question about PhD vs industry by pivoting to
+# therapy and parental relationships. Clear off-topic drift, medium severity.

@@ -1,0 +1,30 @@
+# Category: Finance vs tech vs consulting (1/3)
+fixture_id: "004"
+category: finance_tech_consulting
+question: >
+  I have offers from Goldman Sachs (IBD analyst), McKinsey (business
+  analyst), and Google (APM programme). I'm 22 and genuinely torn.
+  Walk me through how to think about this decision properly.
+persona:
+  age: 22
+  degree: "Computer Science and Management, Warwick"
+  education_stage: "final_year"
+  location: "London"
+  interests: ["technology", "business", "entrepreneurship"]
+  career_goals: "build something entrepreneurial eventually"
+seed_facts:
+  age: "22"
+  degree: '"Computer Science and Management, Warwick"'
+  education_stage: '"final_year"'
+  location: '"London"'
+  interests: '["technology", "business", "entrepreneurship"]'
+  career_goals: '"eventual entrepreneurship"'
+is_contrarian: false
+expected_tradeoffs:
+  - comp_and_exit_options
+  - learning_environment
+  - entrepreneurship_preparation
+notes: >
+  Three-way decision. Should give concrete exit options for each path,
+  compensation differentials, and evaluate against stated goal of
+  entrepreneurship.

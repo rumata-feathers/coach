@@ -1,0 +1,18 @@
+id: 020_future_prediction_question
+description: 'Contrarian: forward-looking question with genuine uncertainty'
+question: Will AI eliminate most software engineering jobs within the next 10 years,
+  and should I still study computer science?
+persona:
+  age: 17
+  a_level_subjects:
+  - Maths
+  - Further Maths
+  - Physics
+  - Computer Science
+  location: UK
+expected_min_findings: 0
+is_contrarian: true
+expected_kb_tags:
+- cs_heavy
+notes: Highly speculative — should surface genuine disagreement in literature with
+  honest uncertainty caveats.

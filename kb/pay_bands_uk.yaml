@@ -1,0 +1,90 @@
+# UK pay band reference — broad sector ranges for context.
+#
+# These are approximate gross annual salary bands (GBP) for early-career
+# professionals (0–3 years qualified/post-graduation) in the relevant role.
+# They are NOT substitutes for the per-career YAML files; use career files
+# for citing specific claims.
+#
+# source_notes are required on every numeric field per SPEC_v1.md §13.
+
+pay_bands:
+
+  - sector: quantitative_finance
+    role_example: "Quant analyst (sell-side / hedge fund)"
+    band_p25_gbp: 70000
+    band_p50_gbp: 90000
+    band_p75_gbp: 130000
+    year_ref: 2025
+    source_notes: "levels.fyi London 2024; eFinancialCareers quant salary survey; London-centric, wide firm variance"
+
+  - sector: investment_banking
+    role_example: "Analyst (M&A / ECM)"
+    band_p25_gbp: 50000
+    band_p50_gbp: 65000
+    band_p75_gbp: 100000
+    year_ref: 2025
+    source_notes: "eFinancialCareers 2024; Glassdoor IB analyst London; base salary only, bonus can equal or exceed base at top banks"
+
+  - sector: software_engineering
+    role_example: "Junior/graduate SWE"
+    band_p25_gbp: 40000
+    band_p50_gbp: 55000
+    band_p75_gbp: 75000
+    year_ref: 2025
+    source_notes: "levels.fyi London SWE 2024; Glassdoor graduate developer UK — tech company vs other sector gap is large"
+
+  - sector: management_consulting
+    role_example: "Analyst (tier-2 and MBB blended)"
+    band_p25_gbp: 45000
+    band_p50_gbp: 58000
+    band_p75_gbp: 80000
+    year_ref: 2025
+    source_notes: "Management Consulted UK 2024; Glassdoor consulting analyst London; MBB at higher end, boutiques and tier-2 lower"
+
+  - sector: data_science
+    role_example: "Data scientist / analyst"
+    band_p25_gbp: 35000
+    band_p50_gbp: 48000
+    band_p75_gbp: 65000
+    year_ref: 2025
+    source_notes: "ONS ASHE 2023 data analyst SOC; LinkedIn salary data UK 2024; finance and tech sectors higher end of range"
+
+  - sector: law_uk_city
+    role_example: "Trainee solicitor (City firms)"
+    band_p25_gbp: 45000
+    band_p50_gbp: 55000
+    band_p75_gbp: 65000
+    year_ref: 2025
+    source_notes: "Legal Cheek NQ / trainee survey 2024; RollOnFriday pay data — Magic Circle trainees at high end; NQ at MC firms dramatically higher"
+
+  - sector: medicine_uk
+    role_example: "Foundation Year 1–2 doctor"
+    band_p25_gbp: 33000
+    band_p50_gbp: 36000
+    band_p75_gbp: 42000
+    year_ref: 2025
+    source_notes: "NHS pay scales 2024-25 (BMA Junior Doctor scales); includes banding supplements where applicable; large regional variation absent"
+
+  - sector: civil_service_uk
+    role_example: "Fast Stream (AA/HEO level)"
+    band_p25_gbp: 28000
+    band_p50_gbp: 31000
+    band_p75_gbp: 36000
+    year_ref: 2025
+    source_notes: "Cabinet Office Civil Service pay remit guidance 2024-25; Fast Stream published salary on GOV.UK; London weighting at upper end"
+
+  - sector: teaching_uk
+    role_example: "NQT / Early Career Teacher (England)"
+    band_p25_gbp: 29000
+    band_p50_gbp: 32000
+    band_p75_gbp: 38000
+    year_ref: 2025
+    source_notes: "DfE School Teachers Pay and Conditions Document 2024; Inner London significantly higher; figures for England only"
+
+  - sector: journalism_uk
+    role_example: "Junior/trainee reporter"
+    band_p25_gbp: 22000
+    band_p50_gbp: 27000
+    band_p75_gbp: 35000
+    year_ref: 2025
+    source_notes: "NUJ minimum rates 2024; NCTJ salary survey 2023; regional press lower, national press higher; freelance excluded"

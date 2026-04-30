@@ -1,0 +1,16 @@
+id: 007_medicine_foundation_year
+description: NHS Foundation Year doctor pay and conditions
+question: What is the pay and working conditions like for Foundation Year doctors
+  in the NHS, and has it improved after the strikes?
+persona:
+  age: 24
+  degree: MBBS, King's College London
+  year: FY1
+  location: UK
+expected_min_findings: 2
+is_contrarian: false
+expected_kb_tags:
+- long_training
+expected_careers_mentioned:
+- medicine_uk
+notes: BMA strike resolution is recent news — web-critical fixture.

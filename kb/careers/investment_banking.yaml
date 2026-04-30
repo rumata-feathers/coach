@@ -1,0 +1,21 @@
+name: investment_banking
+display_name: "Investment Banking"
+tags: [finance, high_comp, high_hours, competitive, client_facing, sales_heavy, less_technical, high_stress]
+variants: [m&a, equity_capital_markets, debt_capital_markets, leveraged_finance, restructuring, industry_groups, coverage_groups, financial_institutions, private_wealth_management]
+entry_paths:
+  - path: undergrad_political_sciences → internship → grad_role
+    typical_timeline_years: 4
+    selectivity: "very high — top universities, finance-related internships common"
+typical_hours_per_week: [70, 100]
+early_career_pay_uk:
+  band_p50_gbp: 60000
+  band_p90_gbp: 120000
+  year_ref: 2026
+typical_exits: [hedge_fund, porfolio_manager, own_firm, tech_senior_ic, leave_industry, private_equity, corporate_finance, consulting]
+risks: [burnout_high, market_cycle_exposure, reputation_risk, high_stress]
+required_signals: [competition_history, interest_in_markets, strong_communication_skills, client_relationship_experience, high_attention_to_detail, ability_to_work_under_pressure]
+contra_indicators: [unability_to_work_long_hours, preference_for_work_life_balance, desire_for_creative_autonomy, discomfort_with_sales_heavy_role]
+source_notes:
+  pay: "levels.fyi UK 2026 snapshot + eFinancialCareers; firm-dependent; London-centric"
+  hours: "anecdotal from glassdoor + practitioner blogs; varies wildly by firm"
+  entry_paths: "observed pattern, not exclusive"

@@ -1,0 +1,19 @@
+fixture_id: "003"
+category: fact_contradiction
+expected_action: retry
+
+user_message: "What quant roles suit my background?"
+specific_ask: "What quant roles suit my background?"
+user_facts:
+  age: 24
+  degree: "Mathematics, Imperial College London"
+  location: "London"
+
+response_text: |
+  Your Law degree from UCL is actually quite valuable in certain quant-adjacent
+  areas — particularly regulatory roles, compliance, and risk. While the pure
+  quant trading desk roles are more closed to law graduates, there's a strong
+  demand for people who combine legal understanding with quantitative literacy.
+
+# Response says "Your Law degree from UCL" when user has Mathematics from Imperial.
+# Double contradiction: wrong subject AND wrong university.

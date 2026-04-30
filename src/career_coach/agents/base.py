@@ -41,6 +41,55 @@ def _build_jinja_env() -> Environment:
 _JINJA_ENV = _build_jinja_env()
 
 
+async def log_agent_call(
+    *,
+    agent_name: str,
+    model_used: str | None,
+    turn_id: UUID | None,
+    input_payload: dict[str, Any],
+    output_payload: dict[str, Any] | None,
+    latency_ms: int,
+    tokens_in: int | None,
+    tokens_out: int | None,
+    error: str | None = None,
+    retry_count: int = 0,
+    fallback_reason: str | None = None,
+) -> None:
+    """Write a row to ``agent_calls``.
+
+    This standalone function allows non-LLM components (e.g. the web search
+    adapter) to log calls without subclassing :class:`Agent`. :meth:`Agent.log_call`
+    delegates to this function.
+
+    Payloads are round-tripped through JSON to coerce non-serialisable types
+    (UUID, datetime, …) to strings before asyncpg's JSONB codec sees them.
+    """
+    pool = await get_pool()
+    safe_input = _jsonify(input_payload)
+    safe_output = _jsonify(output_payload) if output_payload is not None else None
+    async with pool.acquire() as conn:
+        await conn.execute(
+            """
+            INSERT INTO agent_calls
+                (turn_id, agent_name, model_used, input_payload, output_payload,
+                 latency_ms, tokens_in, tokens_out, error,
+                 retry_count, fallback_reason)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+            """,
+            turn_id,
+            agent_name,
+            model_used,
+            safe_input,
+            safe_output,
+            latency_ms,
+            tokens_in,
+            tokens_out,
+            error,
+            retry_count,
+            fallback_reason,
+        )
+
+
 class Agent:
     """Base class for all career-coach agents.
 
@@ -106,39 +155,27 @@ class Agent:
     ) -> None:
         """Append a row to ``agent_calls`` for observability.
 
+        Delegates to the module-level :func:`log_agent_call` function.
+
         Args:
             retry_count: Number of retry attempts made (0 = first attempt succeeded).
             fallback_reason: Populated when a fallback path was used, e.g.
                 ``"empty_llm_response"``, ``"schema_validation_failed"``,
                 ``"retry_exhausted"``.  ``None`` means the happy path was taken.
-
-        Payloads are round-tripped through JSON to coerce non-serialisable types
-        (UUID, datetime, …) to strings before asyncpg's JSONB codec sees them.
         """
-        pool = await get_pool()
-        safe_input = _jsonify(input_payload)
-        safe_output = _jsonify(output_payload) if output_payload is not None else None
-        async with pool.acquire() as conn:
-            await conn.execute(
-                """
-                INSERT INTO agent_calls
-                    (turn_id, agent_name, model_used, input_payload, output_payload,
-                     latency_ms, tokens_in, tokens_out, error,
-                     retry_count, fallback_reason)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-                """,
-                turn_id,
-                self.name,
-                self._llm_config.model,
-                safe_input,
-                safe_output,
-                latency_ms,
-                tokens_in,
-                tokens_out,
-                error,
-                retry_count,
-                fallback_reason,
-            )
+        await log_agent_call(
+            agent_name=self.name,
+            model_used=self._llm_config.model,
+            turn_id=turn_id,
+            input_payload=input_payload,
+            output_payload=output_payload,
+            latency_ms=latency_ms,
+            tokens_in=tokens_in,
+            tokens_out=tokens_out,
+            error=error,
+            retry_count=retry_count,
+            fallback_reason=fallback_reason,
+        )
 
     @staticmethod
     def now_ms() -> int:

@@ -1,0 +1,31 @@
+# Category: Geographic tradeoffs (1/2)
+fixture_id: "013"
+category: geographic_tradeoff
+question: >
+  I've been offered a role in New York (finance) and I could also
+  take a similar role staying in London. I'm 24, no dependants.
+  How should I think about the New York vs London tradeoff for
+  my career over the next 5-10 years?
+persona:
+  age: 24
+  degree: "Economics, Durham"
+  education_stage: "early_career"
+  location: "London"
+  interests: ["finance", "international_experience", "career_growth"]
+  career_goals: "maximise career capital in finance"
+seed_facts:
+  age: "24"
+  degree: '"Economics, Durham University"'
+  education_stage: '"early_career"'
+  location: '"London"'
+  interests: '["finance", "international_experience"]'
+  career_goals: '"maximise career capital in finance over next decade"'
+is_contrarian: false
+expected_tradeoffs:
+  - market_size_and_pay
+  - visa_and_stability
+  - quality_of_life
+notes: >
+  Should address NYC vs London compensation (after tax and COL), visa
+  risk, the relative size of finance ecosystems, and re-entry to UK
+  market later.

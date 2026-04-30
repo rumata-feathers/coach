@@ -1,0 +1,33 @@
+# Category: Contrarian / KB+web gaps (1/2)
+# This fixture tests graceful degradation — niche career with limited KB coverage.
+fixture_id: "019"
+category: contrarian_gap
+question: >
+  I want to become a professional esports commentator and analyst.
+  I'm a History graduate who's been commentating semi-professionally
+  for two years. Should I keep pursuing this or is there no viable
+  career here?
+persona:
+  age: 22
+  degree: "History, Sheffield"
+  education_stage: "recent_graduate"
+  location: "Sheffield"
+  interests: ["esports", "gaming", "commentary", "content_creation"]
+  career_goals: "professional esports commentator or analyst"
+seed_facts:
+  age: "22"
+  degree: '"History, University of Sheffield"'
+  education_stage: '"recent_graduate"'
+  location: '"Sheffield"'
+  interests: '["esports", "gaming", "commentary", "content_creation"]'
+  career_goals: '"professional esports commentator"'
+is_contrarian: true
+expected_tradeoffs:
+  - market_size_vs_competition
+  - monetisation_paths
+  - parallel_career_hedging
+notes: >
+  Esports commentary is not well-covered in standard career KBs.
+  Tests graceful degradation — should acknowledge limited data, still
+  give useful structural advice about the market and hedging strategies,
+  rather than confabulating statistics.

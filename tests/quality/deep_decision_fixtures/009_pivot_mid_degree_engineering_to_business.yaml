@@ -1,0 +1,30 @@
+# Category: Pivot decisions mid-degree (3/3)
+fixture_id: "009"
+category: pivot_mid_degree
+question: >
+  I'm doing Mechanical Engineering but I've always wanted to work in
+  business strategy. I'm in my second year and wondering whether I
+  should push through the degree or switch to business. Is an
+  engineering degree actually a liability for strategy roles?
+persona:
+  age: 20
+  degree: "Mechanical Engineering (Year 2), University of Manchester"
+  education_stage: "second_year_undergrad"
+  location: "Manchester"
+  interests: ["business_strategy", "operations", "product_management"]
+  career_goals: "strategy consulting or operations leadership"
+seed_facts:
+  age: "20"
+  degree: '"Mechanical Engineering Year 2, University of Manchester"'
+  education_stage: '"second_year_undergrad"'
+  location: '"Manchester"'
+  interests: '["business_strategy", "operations", "product_management"]'
+  career_goals: '"strategy consulting or operations leadership"'
+is_contrarian: true
+expected_tradeoffs:
+  - engineering_degree_value_for_consulting
+  - pivot_cost_vs_benefit
+  - mba_route_later
+notes: >
+  Contrarian angle: engineering is actually an asset at MBB. Should
+  challenge the premise and explain why finishing is likely better.

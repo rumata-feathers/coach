@@ -1,0 +1,19 @@
+id: 016_ml_research_vs_applied_scientist
+description: ML researcher vs applied scientist distinction
+question: What is the actual difference between a research scientist and an applied
+  scientist role at companies like Google DeepMind or Meta?
+persona:
+  age: 24
+  degree: MSc Machine Learning, UCL
+  interests:
+  - research
+  - industry
+  publications: 1
+  location: UK
+expected_min_findings: 2
+is_contrarian: false
+expected_kb_tags:
+- research_heavy
+expected_careers_mentioned:
+- machine_learning_research
+notes: Industry lab org structure — web primary.

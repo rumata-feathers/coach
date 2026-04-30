@@ -1,0 +1,25 @@
+name: machine_learning_research
+display_name: "Machine Learning Research"
+tags: [research, math_heavy, cs_heavy, high_comp, competitive, independent_work, publication_driven]
+variants: [ml_researcher_industry_lab, phd_researcher, applied_scientist, ai_safety_researcher, nlp_researcher, computer_vision_researcher, rl_researcher]
+entry_paths:
+  - path: undergrad_cs_or_maths → phd → industry_research_lab
+    typical_timeline_years: 7
+    selectivity: "extremely high for top labs (DeepMind, Google Brain, OpenAI London); strong publication record expected"
+  - path: undergrad_cs → msc_ml → research_engineer_or_applied_scientist
+    typical_timeline_years: 5
+    selectivity: "high — competitive but accessible without PhD for applied roles"
+typical_hours_per_week: [45, 65]
+early_career_pay_uk:
+  band_p50_gbp: 75000
+  band_p90_gbp: 130000
+  year_ref: 2025
+  notes: "Industry research labs (DeepMind, Google, Meta UK) significantly above academia. PhD stipend route starts low (~£20k during PhD). Applied scientist/research engineer at mid-tier companies lower than top labs."
+typical_exits: [senior_researcher, research_lead, ml_engineering_manager, startup_founder, academia_faculty, ai_policy, independent_consultant]
+risks: [field_moves_very_fast, publication_pressure, research_taste_development_takes_time, top_lab_concentration_risk, ai_safety_uncertainty]
+required_signals: [mathematical_maturity, genuine_curiosity_about_fundamentals, comfort_reading_papers, programming_fluency, tolerance_for_open_ended_problems]
+contra_indicators: [preference_for_clear_deliverables, discomfort_with_ambiguous_success_criteria, primarily_product_or_business_motivated, impatience_with_multi_year_projects]
+source_notes:
+  pay: "levels.fyi London ML/research roles 2024; DeepMind published graduate salary data; Glassdoor applied scientist ranges — wide variance by lab tier and seniority"
+  hours: "Self-reported ranges from Twitter/X ML community and informal surveys; top labs nominally better than academia but deadline crunch periods common"
+  entry_paths: "DeepMind, Google DeepMind, Meta FAIR hiring patterns observed; NeurIPS/ICML author affiliation data for lab entry"

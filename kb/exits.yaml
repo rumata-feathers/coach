@@ -1,0 +1,68 @@
+# Exit path reference — what each exit destination means in practice.
+#
+# Used by the Researcher to contextualise "typical_exits" fields in career YAMLs.
+# Not a comprehensive list — covers exits referenced across the 15-career seed set.
+#
+# source_notes on description facts are inline where data is cited.
+
+exits:
+
+  - id: hedge_fund
+    label: "Hedge Fund (buy-side)"
+    description: "Move from sell-side or professional services into a long/short equity, macro, or systematic fund. Typically brings a pay step-up at the cost of higher performance pressure and leaner teams."
+    typical_from: [quant_finance, investment_banking, management_consulting, machine_learning_research]
+    source_notes: "Widely reported career trajectory; no single dataset — combination of LinkedIn career path analysis and practitioner accounts"
+
+  - id: private_equity
+    label: "Private Equity"
+    description: "Investment role acquiring and managing private companies, usually post-IB or post-consulting (2+2 model). Highly competitive; most PE firms recruit from top IB analyst classes."
+    typical_from: [investment_banking, management_consulting]
+    source_notes: "Private Equity Recruitment Industry survey data; Preqin LP/GP workforce reports 2023"
+
+  - id: startup_founder
+    label: "Startup / Founder"
+    description: "Starting a company or joining as an early employee. Equity upside, high variance outcome. Some professions (IB, consulting, SWE) provide more transferable founder skills than others."
+    typical_from: [software_engineering, product_management, management_consulting, data_science]
+    source_notes: "Crunchbase UK founder background data; Entrepreneur First alumni outcomes"
+
+  - id: big_tech_senior_ic
+    label: "Big Tech Senior IC"
+    description: "Individual contributor track at a large technology company (Meta, Google, Amazon, Apple, Microsoft). For engineers and researchers; strong comp, slower progression than startup but more stability."
+    typical_from: [software_engineering, machine_learning_research, data_science]
+    source_notes: "levels.fyi career progression data; widely discussed in SWE/ML communities"
+
+  - id: in_house_counsel
+    label: "In-House Counsel"
+    description: "Legal role inside a corporation rather than private practice. Usually pays less than City law but better hours; general counsel roles at large companies are senior and well-compensated."
+    typical_from: [law_uk]
+    source_notes: "Law Society in-house trends report 2023; Legal Week GC salary survey"
+
+  - id: industry_research
+    label: "Industry Research Lab"
+    description: "Research position at a technology company lab (DeepMind, Meta FAIR, Microsoft Research). Typically requires a PhD or equivalent publications record."
+    typical_from: [academia_stem_phd_track, machine_learning_research]
+    source_notes: "DeepMind and Meta FAIR publicly stated PhD hiring preferences; NeurIPS author affiliation data"
+
+  - id: policy
+    label: "Policy / Think Tank"
+    description: "Research and advisory roles at government bodies, international organisations, or independent think tanks. Often reached from academia, civil service, or journalism."
+    typical_from: [academia_stem_phd_track, civil_service_uk, journalism]
+    source_notes: "Observed career paths; no single dataset"
+
+  - id: senior_researcher
+    label: "Senior Researcher / Research Lead"
+    description: "Internal promotion within a research organisation. Requires a track record of published or applied research and ability to lead projects."
+    typical_from: [machine_learning_research, academia_stem_phd_track]
+    source_notes: "Standard academic/industry research career ladder"
+
+  - id: analytics_manager
+    label: "Analytics Manager"
+    description: "People management track within a data function. Transition from individual data science/analyst work to managing a team. Common at 5–8 years into a data career."
+    typical_from: [data_science]
+    source_notes: "LinkedIn career pathway data; O'Reilly Data and AI Salary Report 2024"
+
+  - id: ngo_advocacy
+    label: "NGO / Advocacy"
+    description: "Research, policy, or communications roles at charities, NGOs, or international bodies. Typically pays below private sector but offers mission-driven work."
+    typical_from: [journalism, law_uk, academia_stem_phd_track, civil_service_uk]
+    source_notes: "Observed career patterns; Charity Financials workforce data"

@@ -1,0 +1,25 @@
+name: management_consulting
+display_name: "Management Consulting"
+tags: [consulting, client_facing, high_comp, high_hours, competitive, analytical, generalist, travel_heavy]
+variants: [strategy_consulting, operations_consulting, technology_consulting, financial_advisory, public_sector_consulting, boutique_specialist]
+entry_paths:
+  - path: undergrad_any → analyst_role
+    typical_timeline_years: 3
+    selectivity: "very high at MBB (McKinsey/BCG/Bain); moderate at tier-2 firms; case-interview dominated"
+  - path: undergrad_any → mba → associate_role
+    typical_timeline_years: 6
+    selectivity: "high — top MBA programmes required for associate entry at MBB"
+typical_hours_per_week: [55, 80]
+early_career_pay_uk:
+  band_p50_gbp: 55000
+  band_p90_gbp: 90000
+  year_ref: 2025
+  notes: "Analyst at MBB ~£55k–£65k base + bonus; tier-2 firms lower; associate post-MBA ~£90k–£110k at MBB. Total comp including bonus can be 20-30% higher."
+typical_exits: [private_equity, strategy_role_in_industry, startup_operator, corporate_finance, investment_banking, own_firm, ngo_leadership]
+risks: [burnout_moderate_to_high, travel_lifestyle_impact, shallow_domain_expertise_early, frequent_staffing_changes, up_or_out_culture]
+required_signals: [structured_analytical_thinking, strong_communication, comfort_with_ambiguity, adaptability_across_industries, presentation_skills]
+contra_indicators: [desire_for_deep_technical_specialisation, strong_preference_for_stable_location, discomfort_with_up_or_out_culture, preference_for_execution_over_advice]
+source_notes:
+  pay: "Management Consulted UK salary report 2024; eFinancialCareers consulting salaries; Glassdoor London analyst/associate ranges — firm and tier dependent, all figures approximate"
+  hours: "Widely reported in consulting forums and Glassdoor; MBB analyst surveys; varies heavily by project and client"
+  entry_paths: "Observed industry pattern; case-interview selectivity from Management Consulted and firm published hiring data"

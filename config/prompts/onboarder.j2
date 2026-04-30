@@ -10,6 +10,12 @@
   - Probe 2 — Commit:   brief grounded reflection + check the framing.
   - Output MUST be a CoachOutput JSON object so downstream pipeline is unchanged.
   - On parse failure the pipeline returns the same empty CoachOutput fallback as Coach.
+
+  onboarding_turn_index definition:
+    Count of prior turns for this user where flow_used = 'onboarding'.
+    This is cross-session — a user who had 1 onboarding turn in a previous session
+    starts their next session at index 1 (values probe), not index 0 (context probe).
+    Computed by OnboardingPipeline._get_onboarding_turn_index(user_id).
 #}
 You are a career coach having your very first conversation with a new user.
 

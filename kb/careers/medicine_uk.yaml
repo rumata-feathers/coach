@@ -1,0 +1,27 @@
+# DRAFTED BY CLAUDE CODE — user review of source_notes required before merge.
+# (This was in the "user writes" list per TASKS_v1.md but not yet authored.)
+name: medicine_uk
+display_name: "Medicine (UK, NHS)"
+tags: [healthcare, long_training, vocational, patient_facing, high_responsibility, regulated, moderate_comp, high_job_security]
+variants: [foundation_doctor, gp, hospital_specialist, academic_clinician, private_medicine, psychiatry, surgery, emergency_medicine]
+entry_paths:
+  - path: a_levels → medical_school_5yr → foundation_training_2yr → core_or_specialty_training
+    typical_timeline_years: 12
+    selectivity: "very high — UK medical school places limited; UCAT/BMAT required; graduate-entry 4yr also available"
+  - path: undergrad_bioscience → graduate_entry_medicine_4yr → foundation → specialty
+    typical_timeline_years: 10
+    selectivity: "high — graduate entry more competitive per place than undergraduate entry at many schools"
+typical_hours_per_week: [48, 60]
+early_career_pay_uk:
+  band_p50_gbp: 35000
+  band_p90_gbp: 55000
+  year_ref: 2025
+  notes: "Foundation year 1 salary approx £35k; specialty training approx £40k–£52k; consultant circa £93k–£126k (not early career). Pay uplift under 2024 NHS pay deal."
+typical_exits: [gp_partner, nhs_consultant, private_practice, pharmaceutical_medtech, global_health_ngo, academic_clinician, healthcare_management]
+risks: [very_long_training, significant_emotional_burden, nhs_workforce_pressures, study_debt_if_graduate_entry, limited_geographic_flexibility_during_training]
+required_signals: [genuine_patient_care_motivation, resilience_under_pressure, scientific_aptitude, strong_communication, long_term_commitment_to_profession]
+contra_indicators: [motivated_primarily_by_compensation, low_tolerance_for_bureaucracy, discomfort_with_patient_facing_work, impatience_with_long_structured_training]
+source_notes:
+  pay: "NHS pay scales 2024-25 for foundation and specialty trainees (BMA Junior Doctor pay scales); consultant bands from NHS Agenda for Change 2024"
+  hours: "NHS contractual maximum 48h/week under EWTD; self-reported averages often higher; BMA Junior Doctor survey 2023"
+  entry_paths: "UK Medical Schools Council admissions data 2023; GMC medical workforce statistics 2024"

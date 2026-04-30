@@ -1,0 +1,16 @@
+id: 014_entrepreneurship_equity
+description: Typical equity for early startup employees
+question: 'What equity stake should I expect as an early employee (employee #5-10)
+  at a UK seed-stage startup?'
+persona:
+  age: 27
+  degree: Computer Science MSc
+  experience: 3 years SWE
+  location: UK
+expected_min_findings: 2
+is_contrarian: false
+expected_kb_tags:
+- high_variance
+expected_careers_mentioned:
+- entrepreneurship_early
+notes: Equity data is web-primary — Seedcamp, Index, Balderton data.

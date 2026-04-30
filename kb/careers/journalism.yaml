@@ -1,0 +1,25 @@
+name: journalism
+display_name: "Journalism"
+tags: [media, writing_heavy, low_comp, high_autonomy, public_interest, precarious, competitive, deadline_driven]
+variants: [news_reporter, feature_writer, investigative_journalist, broadcast_journalist, data_journalist, editor, foreign_correspondent, freelance]
+entry_paths:
+  - path: undergrad_any → nctj_qualification → junior_reporter
+    typical_timeline_years: 3
+    selectivity: "moderate to high — NCTJ is the key credential; local press remains main entry route but contracting fast"
+  - path: undergrad_journalism → internship → staff_reporter
+    typical_timeline_years: 3
+    selectivity: "high — few staff roles; unpaid or low-paid internships common barrier; personal network matters significantly"
+typical_hours_per_week: [40, 55]
+early_career_pay_uk:
+  band_p50_gbp: 26000
+  band_p90_gbp: 38000
+  year_ref: 2025
+  notes: "NUJ minimum rates for trainees ~£21k–£25k; staff reporter at regional press ~£24k–£30k; national press higher ~£35k–£55k but very competitive. Freelance income highly variable."
+typical_exits: [senior_journalist, editor, content_strategist, communications_and_pr, ngo_advocacy, author, documentary_maker, policy_analyst]
+risks: [industry_contraction_ongoing, low_pay_particularly_early, precarious_employment_especially_freelance, mental_health_burden_of_difficult_content, editorial_independence_pressures]
+required_signals: [genuine_curiosity_about_the_world, strong_writing_under_deadline, persistence_and_tenacity, comfort_with_public_criticism, source_relationship_building]
+contra_indicators: [primarily_compensation_driven, preference_for_stable_long_term_projects, discomfort_with_public_scrutiny, low_tolerance_for_editorial_direction]
+source_notes:
+  pay: "NUJ rate card and minimum rates 2024; NCTJ salary survey 2023; Press Gazette UK journalism salary data — wide variance, freelance rates particularly unreliable"
+  hours: "NCTJ journalist survey 2022; breaking news desks significantly above average; often includes weekend and evening work"
+  entry_paths: "NCTJ qualification statistics; Press Gazette journalism employment trend data; Reuters Institute Digital News Report UK hiring patterns"

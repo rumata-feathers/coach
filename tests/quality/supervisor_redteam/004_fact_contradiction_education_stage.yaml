@@ -1,0 +1,20 @@
+fixture_id: "004"
+category: fact_contradiction
+expected_action: warn  # more severe — directly changes advice
+
+user_message: "What internships should I apply for this summer?"
+specific_ask: "What internships should I apply for this summer?"
+user_facts:
+  age: 24
+  education_stage: "postgrad_masters"
+  degree: "Computer Science, Edinburgh"
+
+response_text: |
+  As a second-year undergraduate, the main internship programmes you should
+  target are the spring insight days and summer penultimate-year internships
+  at banks and tech firms. Goldman, JP Morgan, Google, and Meta all run
+  specific undergrad programmes. The key deadline is January for most spring
+  weeks and March for summer placements.
+
+# Response says "second-year undergraduate" when user is postgrad. This
+# directly affects which programmes are relevant — severity is higher.

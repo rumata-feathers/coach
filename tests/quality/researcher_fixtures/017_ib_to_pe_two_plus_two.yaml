@@ -1,0 +1,18 @@
+id: 017_ib_to_pe_two_plus_two
+description: 'IB analyst to PE: the 2+2 model'
+question: How does the 2+2 IB-to-PE recruitment process work in the UK, and what firms
+  recruit from which banks?
+persona:
+  age: 21
+  degree: Economics, LSE
+  internships:
+  - Goldman Sachs IBD
+  location: UK
+expected_min_findings: 2
+is_contrarian: false
+expected_kb_tags:
+- high_comp
+- competitive
+expected_careers_mentioned:
+- investment_banking
+notes: UK PE recruitment calendar — web primary, exits.yaml secondary.

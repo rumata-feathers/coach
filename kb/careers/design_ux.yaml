@@ -1,0 +1,25 @@
+name: design_ux
+display_name: "Design / UX"
+tags: [design, creative, user_facing, moderate_comp, collaborative, visual_thinking, growing_field]
+variants: [ux_designer, ui_designer, product_designer, service_designer, ux_researcher, interaction_designer, design_manager, head_of_design]
+entry_paths:
+  - path: undergrad_design_or_hci → junior_designer
+    typical_timeline_years: 3
+    selectivity: "moderate — portfolio quality is primary selection criterion, not degree prestige"
+  - path: undergrad_any → bootcamp_or_self_taught_with_portfolio → junior_designer
+    typical_timeline_years: 2
+    selectivity: "moderate to high — self-taught route viable but highly competitive without strong portfolio and adjacent experience"
+typical_hours_per_week: [40, 55]
+early_career_pay_uk:
+  band_p50_gbp: 38000
+  band_p90_gbp: 60000
+  year_ref: 2025
+  notes: "Junior/mid designer at tech companies in London ~£35k–£55k; senior designer ~£60k–£90k; top tech firms (Google, Meta) significantly above median. Agency rates lower than product companies."
+typical_exits: [senior_product_designer, head_of_design, ux_manager, design_director, product_management, design_systems_engineer, independent_consultant, design_founder]
+risks: [portfolio_quality_hard_to_evaluate_early, ai_tooling_changing_production_design_tasks, career_ceiling_lower_than_eng_at_many_companies, subjectivity_in_hiring_decisions]
+required_signals: [visual_and_spatial_thinking, user_empathy, structured_problem_framing, comfort_with_iterative_feedback, prototyping_curiosity]
+contra_indicators: [discomfort_with_subjective_critique, purely_technical_rather_than_user_orientation, preference_for_clearly_right_wrong_answers, low_tolerance_for_ambiguous_briefs]
+source_notes:
+  pay: "Glassdoor London UX/Product Designer 2024; LinkedIn Salary UK design roles; DesignerNews salary survey 2023 — product company vs agency gap meaningful"
+  hours: "Generally better than finance; self-reported in design community; crunch periods exist in product companies pre-launch"
+  entry_paths: "UCAS design subject enrolment data; bootcamp placement rates self-reported by providers (treat with caution); observed industry hiring patterns"
