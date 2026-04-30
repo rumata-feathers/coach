@@ -58,6 +58,18 @@ should_run() {
   return 0
 }
 
+# ---- load .env into the shell environment -----------------------------------
+# Keys set in .env are available to pytest (via load_dotenv in conftest.py),
+# but the shell itself won't see them unless we source the file here.
+# set -a / set +a auto-exports every assignment in .env; override=false means
+# a variable already exported in the parent shell wins over .env.
+if [[ -f "$REPO_ROOT/.env" ]]; then
+  set -a
+  # shellcheck source=/dev/null
+  source "$REPO_ROOT/.env"
+  set +a
+fi
+
 # ---- environment checks -----------------------------------------------------
 HAS_HF="${HUGGINGFACE_API_TOKEN:+yes}"
 HAS_TAVILY="${TAVILY_API_KEY:+yes}"
