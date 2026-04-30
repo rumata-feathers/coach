@@ -22,19 +22,19 @@ def test_factory_loads_agent_configs(tmp_path: Path) -> None:
         tmp_path,
         """
         understander:
-          provider: anthropic
-          model: claude-haiku-4-5-20251001
+          provider: huggingface
+          model: Qwen/Qwen3-32B
           temperature: 0.2
           max_tokens: 1500
         coach:
-          provider: anthropic
-          model: claude-sonnet-4-6
+          provider: huggingface
+          model: Qwen/Qwen3-235B-A22B
         """,
     )
     factory = LLMFactory(config_path=config_path)
     understander_cfg = factory.config_for("understander")
-    assert understander_cfg.provider == "anthropic"
-    assert understander_cfg.model == "claude-haiku-4-5-20251001"
+    assert understander_cfg.provider == "huggingface"
+    assert understander_cfg.model == "Qwen/Qwen3-32B"
     assert understander_cfg.temperature == pytest.approx(0.2)
     assert understander_cfg.max_tokens == 1500
 
@@ -62,13 +62,13 @@ def test_register_client_overrides_provider(tmp_path: Path) -> None:
         tmp_path,
         """
         understander:
-          provider: anthropic
-          model: claude-haiku-4-5-20251001
+          provider: huggingface
+          model: Qwen/Qwen3-32B
         """,
     )
     factory = LLMFactory(config_path=config_path)
     mock = MockLLMClient()
-    factory.register_client("anthropic", mock)
+    factory.register_client("huggingface", mock)
 
     assert factory.client_for("understander") is mock
 
@@ -78,8 +78,8 @@ def test_missing_agent_raises(tmp_path: Path) -> None:
         tmp_path,
         """
         understander:
-          provider: anthropic
-          model: claude-haiku-4-5-20251001
+          provider: huggingface
+          model: Qwen/Qwen3-32B
         """,
     )
     factory = LLMFactory(config_path=config_path)

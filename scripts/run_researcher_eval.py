@@ -17,7 +17,7 @@ Usage::
 
 Environment variables required:
   TAVILY_API_KEY
-  HUGGINGFACE_API_TOKEN (or ANTHROPIC_API_KEY depending on provider config)
+  HUGGINGFACE_API_TOKEN
 """
 
 from __future__ import annotations

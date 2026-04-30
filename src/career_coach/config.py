@@ -55,7 +55,7 @@ class Settings(BaseSettings):
     embedding_dim: int = Field(default=384, alias="EMBEDDING_DIM")
 
     # LLM defaults
-    llm_provider_default: LLMProvider = Field(default="anthropic", alias="LLM_PROVIDER_DEFAULT")
+    llm_provider_default: LLMProvider = Field(default="huggingface", alias="LLM_PROVIDER_DEFAULT")
 
     # Runtime
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")

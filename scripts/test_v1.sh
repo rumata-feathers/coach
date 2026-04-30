@@ -15,7 +15,7 @@
 #   2. Fast unit tests (no DB, no LLM)
 #   3. Agent unit tests — mocked LLM (no keys)
 #   4. Live agent tests (HUGGINGFACE_API_TOKEN required)
-#   5. Quality batteries (ANTHROPIC_API_KEY required for Critic/Supervisor)
+#   5. Quality batteries (HUGGINGFACE_API_TOKEN required for Critic/Supervisor)
 #   6. Integration tests (SUPABASE_DB_URL + HUGGINGFACE_API_TOKEN)
 #   7. Flow C eval script (all three keys: HF + Tavily + Supabase)
 # =============================================================================
@@ -60,7 +60,6 @@ should_run() {
 
 # ---- environment checks -----------------------------------------------------
 HAS_HF="${HUGGINGFACE_API_TOKEN:+yes}"
-HAS_ANTHROPIC="${ANTHROPIC_API_KEY:+yes}"
 HAS_TAVILY="${TAVILY_API_KEY:+yes}"
 HAS_DB="${SUPABASE_DB_URL:+yes}"
 
@@ -182,9 +181,9 @@ if should_run 5; then
     fi
   fi
 
-  # Critic battery (Anthropic)
-  if [[ -z "$HAS_ANTHROPIC" ]]; then
-    skip "Critic battery — ANTHROPIC_API_KEY not set"
+  # Critic battery (HuggingFace)
+  if [[ -z "$HAS_HF" ]]; then
+    skip "Critic battery — HUGGINGFACE_API_TOKEN not set"
   else
     echo "  Running critic battery..."
     if .venv/bin/pytest tests/quality/test_critic_battery.py -q 2>&1 | tail -5; then
@@ -195,9 +194,9 @@ if should_run 5; then
     fi
   fi
 
-  # Supervisor red-team battery (Anthropic)
-  if [[ -z "$HAS_ANTHROPIC" ]]; then
-    skip "Supervisor battery — ANTHROPIC_API_KEY not set"
+  # Supervisor red-team battery (HuggingFace)
+  if [[ -z "$HAS_HF" ]]; then
+    skip "Supervisor battery — HUGGINGFACE_API_TOKEN not set"
   else
     echo "  Running supervisor battery..."
     if .venv/bin/pytest tests/quality/test_supervisor_battery.py -q 2>&1 | tail -5; then

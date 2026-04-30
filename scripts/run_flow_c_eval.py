@@ -6,7 +6,7 @@ For each fixture:
   - Creates a test user seeded with the fixture's persona facts.
   - Sends the decision question as a turn (should trigger Flow C).
   - Asserts quality criteria against the DB row.
-  - Optionally runs an LLM-as-judge second-grader (Anthropic) comparing
+  - Optionally runs an LLM-as-judge second-grader comparing
     Flow C vs Flow B on the same fixture.
 
 Quality criteria per fixture:
@@ -35,7 +35,7 @@ Environment variables required:
   TAVILY_API_KEY         (web search in Flow C)
 
 Optional:
-  ANTHROPIC_API_KEY      (LLM-as-judge second grader)
+  HUGGINGFACE_API_TOKEN  (also used for LLM-as-judge second grader)
 """
 
 from __future__ import annotations
@@ -308,9 +308,9 @@ async def _run_judge(
                 result = await self.complete([Message(role="user", content=prompt)])
                 return result.text
 
-        # Only run if Anthropic key available (avoids same-model self-grading)
-        if not os.getenv("ANTHROPIC_API_KEY"):
-            return "skipped (no ANTHROPIC_API_KEY)"
+        # Only run if HuggingFace key is available
+        if not os.getenv("HUGGINGFACE_API_TOKEN"):
+            return "skipped (no HUGGINGFACE_API_TOKEN)"
 
         judge = _JudgeAgent()
         return await judge.run(fixture.get("question", ""), flow_c_response)
@@ -563,7 +563,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--judge",
         action="store_true",
-        help="Run LLM-as-judge second grader (requires ANTHROPIC_API_KEY).",
+        help="Run LLM-as-judge second grader (requires HUGGINGFACE_API_TOKEN).",
     )
     parser.add_argument(
         "--report",

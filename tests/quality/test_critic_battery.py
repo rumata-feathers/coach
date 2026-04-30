@@ -3,7 +3,7 @@
 10 hand-crafted CoachOutput specimens: 5 that should PASS and 5 that should
 REJECT. The Critic must correctly classify ≥ 8/10 to pass this battery.
 
-Auto-skipped when ``ANTHROPIC_API_KEY`` is not set.
+Auto-skipped when ``HUGGINGFACE_API_TOKEN`` is not set.
 
 Context: test user is a 19-year-old undergrad in London, weighing whether to
 study economics. Active hypothesis: "User gravitates toward analytical work."

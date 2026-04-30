@@ -351,7 +351,7 @@ Environment variables (set in `.env`):
 | `SUPABASE_DB_URL` | All turns (DB persistence) |
 | `HUGGINGFACE_API_TOKEN` | All LLM calls |
 | `TAVILY_API_KEY` | Flow C (Researcher web search) |
-| `ANTHROPIC_API_KEY` | LLM-as-judge second grader only |
+| `ANTHROPIC_API_KEY` | Optional — not required; HuggingFace is the primary backend |
 
 ---
 
@@ -394,11 +394,11 @@ WHERE flow_used IN ('B','C') AND created_at > now() - interval '14 days';
 
 | Battery | File | Threshold | Requires |
 |---------|------|-----------|---------|
-| Critic unit battery (Flow B) | `tests/quality/test_critic_battery.py` | ≥8/10 | `ANTHROPIC_API_KEY` |
-| Critic unit battery (Flow C) | same file | ≥4/5 | `ANTHROPIC_API_KEY` |
-| Supervisor red-team | `tests/quality/test_supervisor_battery.py` | ≥8/15 triggers, 0/5 FP | `ANTHROPIC_API_KEY` |
+| Critic unit battery (Flow B) | `tests/quality/test_critic_battery.py` | ≥8/10 | `HUGGINGFACE_API_TOKEN` |
+| Critic unit battery (Flow C) | same file | ≥4/5 | `HUGGINGFACE_API_TOKEN` |
+| Supervisor red-team | `tests/quality/test_supervisor_battery.py` | ≥8/15 triggers, 0/5 FP | `HUGGINGFACE_API_TOKEN` |
 | Onboarding battery | `tests/quality/test_onboarding_battery.py` | ≥8/10 | `HUGGINGFACE_API_TOKEN` |
-| Flow C deep-decision eval | `scripts/run_flow_c_eval.py` | ≥17/20, ≥5 charts, 0 bad charts | all three keys |
+| Flow C deep-decision eval | `scripts/run_flow_c_eval.py` | ≥17/20, ≥5 charts, 0 bad charts | HF + Tavily + Supabase |
 
 ---
 

@@ -4,8 +4,8 @@ Requires:
   - A live Postgres reachable at ``SUPABASE_DB_URL`` (skipped otherwise).
   - A valid ``HUGGINGFACE_API_TOKEN`` (skipped otherwise).
 
-The test does NOT require ANTHROPIC_API_KEY or TAVILY_API_KEY because it uses
-the HuggingFace LLM backend and only exercises Flow A/B/onboarding paths.
+The test does NOT require TAVILY_API_KEY because it only exercises
+Flow A/B/onboarding paths (no web search).
 
 For each flow we assert:
   - ``TurnResult.response`` is non-empty (pipeline completed)

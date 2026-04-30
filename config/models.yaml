@@ -22,7 +22,7 @@ understander:
 
 coach:
   provider: huggingface
-  model: Qwen/Qwen3-235B-A22B
+  model: Qwen/Qwen3-32B
   temperature: 0.7
   max_tokens: 2500
 
@@ -40,7 +40,7 @@ profiler:
 
 onboarder:
   provider: huggingface
-  model: Qwen/Qwen3-235B-A22B
+  model: Qwen/Qwen3-32B
   temperature: 0.7
   max_tokens: 2000
 
