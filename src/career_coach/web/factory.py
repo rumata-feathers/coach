@@ -19,7 +19,7 @@ from career_coach.web.client import WebSearchClient
 from career_coach.web.quota import QuotaTracker
 from career_coach.web.tavily import TavilyClient
 
-_CONFIG_PATH = Path(__file__).resolve().parents[4] / "config" / "web_search.yaml"
+_CONFIG_PATH = Path(__file__).resolve().parents[3] / "config" / "web_search.yaml"
 
 # Module-level singletons: one cache and one quota tracker per provider.
 _CACHES: dict[str, WebSearchCache] = {}

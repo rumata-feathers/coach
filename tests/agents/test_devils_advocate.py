@@ -433,6 +433,7 @@ class TestDAFallback:
 _SKIP_LIVE = not os.getenv("HUGGINGFACE_API_TOKEN")
 
 
+@pytest.mark.live
 @pytest.mark.skipif(_SKIP_LIVE, reason="HUGGINGFACE_API_TOKEN not set")
 @pytest.mark.asyncio
 async def test_da_live_integration() -> None:

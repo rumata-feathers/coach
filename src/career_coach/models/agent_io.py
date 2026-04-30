@@ -200,16 +200,32 @@ class Citation(BaseModel):
         url: Web URL; ``None`` for KB sources.
         kb_path: KB file path relative to the project root (e.g.
             ``"kb/careers/quant_finance.yaml"``); ``None`` for web sources.
-        title: Human-readable title of the source.
+        title: Human-readable title of the source. Defaults to ``""`` when the
+            LLM omits it; display code should treat empty title as "Source N".
         accessed_at: When the source was retrieved.
-        source_type: ``"web"`` or ``"kb"``.
+        source_type: ``"web"`` or ``"kb"``. Auto-inferred from whichever of
+            ``url`` / ``kb_path`` is set when the LLM omits this field.
     """
 
     url: str | None = None
     kb_path: str | None = None
-    title: str
+    title: str = ""
     accessed_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
-    source_type: Literal["web", "kb"]
+    source_type: Literal["web", "kb"] = "web"
+
+    @model_validator(mode="before")
+    @classmethod
+    def _infer_missing(cls, data: Any) -> Any:
+        """Fill in ``source_type`` and ``title`` when the LLM omits them."""
+        if not isinstance(data, dict):
+            return data
+        # Infer source_type from which pointer field is present.
+        if "source_type" not in data or data["source_type"] is None:
+            data["source_type"] = "kb" if data.get("kb_path") else "web"
+        # Default title to empty string; display layer shows "Source N".
+        if "title" not in data or data["title"] is None:
+            data["title"] = ""
+        return data
 
     @model_validator(mode="after")
     def _exactly_one_source(self) -> Citation:

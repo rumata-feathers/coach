@@ -108,8 +108,13 @@ if should_run 2; then
     [[ -e "$p" ]] && EXISTING+=("$p")
   done
 
-  # Run everything that doesn't need API keys (skip live tests via markers)
+  # Run everything that doesn't need API keys.
+  # -m "not live" excludes the handful of live-LLM agent tests that are in
+  # tests/agents/ but require HUGGINGFACE_API_TOKEN to actually call the API.
+  # Those run in Tier 4. Quality batteries and integration tests are ignored
+  # explicitly so their collection errors don't pollute this tier.
   if .venv/bin/pytest \
+      -m "not live" \
       --ignore=tests/integration \
       --ignore=tests/quality/test_critic_battery.py \
       --ignore=tests/quality/test_onboarding_battery.py \

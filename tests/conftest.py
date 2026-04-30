@@ -9,14 +9,20 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import AsyncIterator
+from pathlib import Path
 
 import asyncpg
 import pytest
 import pytest_asyncio
+from dotenv import load_dotenv
 from scripts.run_migrations import apply_migrations
 
 from career_coach.config import get_settings
 from career_coach.db import close_pool, get_pool
+
+# Load .env into os.environ so that os.getenv() skip-guards in tests work the
+# same whether the token was exported in the shell or only set in .env.
+load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=False)
 
 
 async def _postgres_reachable(dsn: str) -> bool:

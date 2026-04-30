@@ -481,6 +481,7 @@ _SKIP_LIVE = not (
 )
 
 
+@pytest.mark.live
 @pytest.mark.skipif(_SKIP_LIVE, reason="TAVILY_API_KEY and HUGGINGFACE_API_TOKEN not set")
 @pytest.mark.asyncio
 async def test_researcher_live_integration() -> None:
