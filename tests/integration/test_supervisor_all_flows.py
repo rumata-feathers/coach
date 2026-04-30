@@ -37,17 +37,11 @@ _CONFIG = Path(__file__).resolve().parents[2] / "config" / "models.yaml"
 
 
 @pytest.fixture(scope="module")
-def skip_if_missing() -> None:
+def skip_if_missing(migrated_db: str) -> None:
+    """Skip when HUGGINGFACE_API_TOKEN is absent; also ensures DB migrations are applied."""
     settings = get_settings()
-    missing = []
     if not settings.huggingface_api_token:
-        missing.append("HUGGINGFACE_API_TOKEN")
-    if not settings.supabase_db_url:
-        missing.append("SUPABASE_DB_URL")
-    if missing:
-        pytest.skip(
-            f"Skipping Supervisor integration tests — missing: {', '.join(missing)}"
-        )
+        pytest.skip("Skipping Supervisor integration tests — HUGGINGFACE_API_TOKEN not set")
 
 
 @pytest.fixture(scope="module")

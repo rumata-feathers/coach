@@ -44,7 +44,7 @@ from career_coach.web.client import SearchResult, WebSearchClient
 
 logger = logging.getLogger("career_coach.agents.researcher")
 
-_KB_ROOT = Path(__file__).resolve().parents[4] / "kb"
+_KB_ROOT = Path(__file__).resolve().parents[3] / "kb"
 _RETRY_PROMPT = (
     "Your previous response was not valid JSON matching the ResearchBrief schema. "
     "Return ONLY a JSON object — no prose, no code fences, no think-blocks. "

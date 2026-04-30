@@ -18,7 +18,7 @@ async def test_huggingface_responds() -> None:
     if not os.environ.get("HUGGINGFACE_API_TOKEN"):
         pytest.skip("HUGGINGFACE_API_TOKEN not set — skipping live HuggingFace call")
 
-    client = HuggingFaceClient()
+    client = HuggingFaceClient(api_token=os.environ["HUGGINGFACE_API_TOKEN"])
     response = await client.complete(
         [
             Message(role="system", content="Reply with a single short sentence."),

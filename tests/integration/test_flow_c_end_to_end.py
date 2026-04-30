@@ -58,16 +58,14 @@ _TRADEOFF_WORDS = frozenset(
 
 
 @pytest.fixture(scope="module")
-def skip_if_missing() -> None:
-    """Skip the whole module when required env vars are absent."""
+def skip_if_missing(migrated_db: str) -> None:
+    """Skip when required keys are absent; also ensures DB migrations are applied."""
     settings = get_settings()
     missing = []
     if not settings.huggingface_api_token:
         missing.append("HUGGINGFACE_API_TOKEN")
     if not settings.tavily_api_key:
         missing.append("TAVILY_API_KEY")
-    if not settings.supabase_db_url:
-        missing.append("SUPABASE_DB_URL")
     if missing:
         pytest.skip(f"Skipping Flow C integration test — missing: {', '.join(missing)}")
 
