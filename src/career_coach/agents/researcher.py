@@ -377,7 +377,12 @@ def _parse_plan(raw: str, *, max_queries: int) -> RetrievalPlan:
 
 
 def _parse_brief(raw: str, question: str) -> ResearchBrief:
-    """Parse the synthesis LLM response into a ResearchBrief."""
+    """Parse the synthesis LLM response into a ResearchBrief.
+
+    Strips findings that are missing ``citations`` (LLM sometimes omits them)
+    rather than rejecting the entire response.  A partial result with N good
+    findings is far better than an empty brief.
+    """
     text = raw.strip()
     if text.startswith("```"):
         lines = text.splitlines()
@@ -385,7 +390,22 @@ def _parse_brief(raw: str, question: str) -> ResearchBrief:
     data = json.loads(text)
     # Ensure question is preserved
     data["question"] = question
-    # Pydantic validates Citation/Finding structure
+
+    # Drop findings that lack citations — they fail the Finding schema and
+    # would invalidate the entire response.  Log the loss so it's visible.
+    findings = data.get("findings")
+    if isinstance(findings, list):
+        good = [f for f in findings if isinstance(f, dict) and f.get("citations")]
+        dropped = len(findings) - len(good)
+        if dropped:
+            logger.warning(
+                "Researcher: dropped %d/%d finding(s) missing citations before parse.",
+                dropped,
+                len(findings),
+            )
+            data["findings"] = good
+
+    # Pydantic validates the remaining Citation/Finding structure
     return ResearchBrief(**data)
 
 
