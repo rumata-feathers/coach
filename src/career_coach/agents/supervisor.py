@@ -88,31 +88,48 @@ class Supervisor(Agent):
         error_str: str | None = None
         retry_count = 0
         fallback_reason: str | None = None
-
-        response = await self.complete(messages, response_format="json")
+        # Initialise so log_call is always reached even if complete() raises.
+        event = _PASS_EVENT
+        tokens_in: int | None = None
+        tokens_out: int | None = None
 
         try:
-            event = _parse_event(response.text)
-        except (json.JSONDecodeError, ValidationError, KeyError, TypeError) as first_exc:
-            logger.warning(
-                "Supervisor parse error on first attempt (%s); retrying.", first_exc
-            )
-            retry_messages = [
-                *messages,
-                Message(role="assistant", content=response.text or "(empty)"),
-                Message(role="user", content=_RETRY_PROMPT),
-            ]
-            response = await self.complete(retry_messages, response_format="json")
-            retry_count = 1
+            response = await self.complete(messages, response_format="json")
+            tokens_in = response.tokens_in
+            tokens_out = response.tokens_out
             try:
                 event = _parse_event(response.text)
-            except (json.JSONDecodeError, ValidationError, KeyError, TypeError) as exc:
-                error_str = str(exc)
-                fallback_reason = "retry_exhausted"
+            except (json.JSONDecodeError, ValidationError, KeyError, TypeError) as first_exc:
                 logger.warning(
-                    "Supervisor parse error after retry (%s); failing open with pass.", exc
+                    "Supervisor parse error on first attempt (%s); retrying.", first_exc
                 )
-                event = _PASS_EVENT
+                retry_messages = [
+                    *messages,
+                    Message(role="assistant", content=response.text or "(empty)"),
+                    Message(role="user", content=_RETRY_PROMPT),
+                ]
+                response = await self.complete(retry_messages, response_format="json")
+                tokens_in = response.tokens_in
+                tokens_out = response.tokens_out
+                retry_count = 1
+                try:
+                    event = _parse_event(response.text)
+                except (json.JSONDecodeError, ValidationError, KeyError, TypeError) as exc:
+                    error_str = str(exc)
+                    fallback_reason = "retry_exhausted"
+                    logger.warning(
+                        "Supervisor parse error after retry (%s); failing open with pass.", exc
+                    )
+                    event = _PASS_EVENT
+        except Exception as llm_exc:
+            # LLM call itself failed (e.g. BadRequestError). Fail open — a
+            # broken Supervisor must never block the pipeline. Always log so
+            # the failure is visible in agent_calls.
+            error_str = str(llm_exc)
+            fallback_reason = "llm_exception"
+            logger.warning(
+                "Supervisor LLM call raised (%s); failing open with pass.", llm_exc
+            )
 
         latency = self.now_ms() - t0
         await self.log_call(
@@ -120,8 +137,8 @@ class Supervisor(Agent):
             input_payload=_serialize_input(input_data),
             output_payload=event.model_dump(mode="json"),
             latency_ms=latency,
-            tokens_in=response.tokens_in,
-            tokens_out=response.tokens_out,
+            tokens_in=tokens_in,
+            tokens_out=tokens_out,
             error=error_str,
             retry_count=retry_count,
             fallback_reason=fallback_reason,

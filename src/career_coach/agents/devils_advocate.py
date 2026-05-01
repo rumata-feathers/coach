@@ -34,9 +34,19 @@ _RETRY_PROMPT = (
     "Return ONLY a JSON object — no prose, no code fences, no think-blocks.\n"
     "Required fields: counter_points (list), blind_spots (list), risks (list), "
     "agrees_with_coach (bool).\n"
-    "Every counter_point MUST have: point (str), reasoning (str), "
-    "severity ('low'|'med'|'high'), source_type ('user_profile'|'research'|'general').\n"
-    "If agrees_with_coach is false you need ≥2 counter_points."
+    "Every counter_point MUST be an object with ALL FOUR of these fields:\n"
+    '  "point": "...",\n'
+    '  "reasoning": "one sentence explaining WHY this matters for this user",\n'
+    '  "severity": "low" | "med" | "high",\n'
+    '  "source_type": "user_profile" | "research" | "general"\n'
+    "Every risk MUST be an object (NOT a plain string) with ALL THREE fields:\n"
+    '  "scenario": "concrete description of what could go wrong",\n'
+    '  "likelihood": "low" | "med" | "high",\n'
+    '  "impact": "low" | "med" | "high"\n'
+    "If agrees_with_coach is false you need ≥2 counter_points.\n"
+    "Example risk object: "
+    '{"scenario": "The startup could fail within 2 years", '
+    '"likelihood": "med", "impact": "high"}'
 )
 
 # Honest-agreement fallback: returned when the model's agrees_with_coach path
@@ -163,19 +173,39 @@ class DevilsAdvocate(Agent):
 
 
 def _parse_da_output(raw: str) -> DevilsAdvocateOutput:
-    """Strip optional markdown fences, parse JSON, and validate."""
+    """Strip optional markdown fences, parse JSON, and validate.
+
+    Applies defensive coercions for common model output deviations:
+    - CounterPoint dict missing ``reasoning`` → filled from ``point`` text.
+    - Risk element is a plain string → wrapped into a Risk dict with defaults.
+    """
     text = raw.strip()
     if text.startswith("```"):
         lines = text.splitlines()
         text = "\n".join(line for line in lines if not line.startswith("```"))
     data = json.loads(text)
-    # Coerce nested dicts to typed models if needed
+
+    # Coerce counter_points: fill missing "reasoning" field when absent.
     raw_cps = data.get("counter_points", [])
+    counter_points: list[CounterPoint] = []
+    for cp in raw_cps:
+        if isinstance(cp, dict):
+            if "reasoning" not in cp:
+                # Model omitted reasoning — synthesise from point text.
+                cp = dict(cp, reasoning=cp.get("point", "No reasoning provided."))
+            counter_points.append(CounterPoint(**cp))
+        # Non-dict entries are silently skipped (model output error).
+
+    # Coerce risks: plain strings become Risk objects with neutral defaults.
     raw_risks = data.get("risks", [])
-    counter_points = [
-        CounterPoint(**cp) if isinstance(cp, dict) else cp for cp in raw_cps
-    ]
-    risks = [Risk(**r) if isinstance(r, dict) else r for r in raw_risks]
+    risks: list[Risk] = []
+    for r in raw_risks:
+        if isinstance(r, str):
+            risks.append(Risk(scenario=r, likelihood="med", impact="med"))
+        elif isinstance(r, dict):
+            risks.append(Risk(**r))
+        # Non-dict, non-string entries silently skipped.
+
     return DevilsAdvocateOutput(
         counter_points=counter_points,
         blind_spots=data.get("blind_spots", []),

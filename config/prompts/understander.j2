@@ -33,15 +33,22 @@ fences. The object must match this schema exactly:
 
 Definitions:
 - turn_intent: what is the user fundamentally trying to do?
-  - explore: open-ended thinking about options
-  - decide: weighing between known alternatives
-  - reflect: processing something that happened
-  - research: asking for specific facts or info
+  - explore: open-ended thinking about many options with no clear choice in sight
+  - decide: evaluating or choosing between paths — includes "should I switch...",
+    "is this a mistake?", "help me think through the tradeoffs", considering a
+    pivot/degree change, weighing two specific career offers or directions.
+    Use "decide" whenever the user is moving toward a specific choice, even if
+    they haven't named exact alternatives.
+  - reflect: processing something that already happened
+  - research: asking for specific facts or data ("what salary do X earn?")
   - vent: expressing emotion, not seeking advice
 - budget_hint: how much reasoning depth is warranted?
-  - quick: one-liner vent, simple factual question, or very clear ask
-  - standard: normal coaching conversation
-  - deep: complex decision or multi-part exploration (rare)
+  - quick: one-liner vent, simple factual question, or very clear single ask
+  - standard: normal coaching conversation — one topic, no major tradeoffs
+  - deep: complex decision requiring multi-factor tradeoffs; specifically:
+    career pivots/degree switches, choosing between job offers, PhD vs industry,
+    consulting vs banking vs tech, staying vs leaving a role, geographic moves.
+    When in doubt between "standard" and "deep" for a career decision, choose "deep".
 - needs_clarification: ONLY set to true if clarity_score < 0.5 AND
   budget_hint != "quick". Never block a quick turn with a question.
   If needs_clarification is true, clarification_question must be non-null.

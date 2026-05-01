@@ -52,9 +52,11 @@ _RETRY_PROMPT = (
 )
 
 # Depth → (max_queries, max_fetches_total, max_kb_careers, budget_seconds)
+# deep budget set to 28s: planning ~4s + parallel searches ~5s + synthesis ~15s
+# for Qwen3-235B, leaving a small margin.
 _DEPTH_CONFIG: dict[str, tuple[int, int, int, float]] = {
     "shallow": (3, 2, 1, 8.0),
-    "deep": (8, 5, 999, 15.0),
+    "deep": (8, 5, 999, 28.0),
 }
 
 

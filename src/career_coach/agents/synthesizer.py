@@ -197,7 +197,14 @@ class Synthesizer(Agent):
 
 
 def _parse_synthesized(raw: str) -> SynthesizedResponse:
-    """Strip optional markdown fences, parse JSON, and validate."""
+    """Strip optional markdown fences, parse JSON, and validate.
+
+    Applies defensive coercions:
+    - ``referenced_hypotheses`` entries that are not valid UUIDs are silently
+      dropped. The LLM sometimes returns slug strings instead of UUIDs.
+    """
+    import uuid as _uuid
+
     text = raw.strip()
     if text.startswith("```"):
         lines = text.splitlines()
@@ -225,10 +232,21 @@ def _parse_synthesized(raw: str) -> SynthesizedResponse:
         else raw_challenge
     )
 
+    # Filter referenced_hypotheses: drop any entry that is not a valid UUID.
+    # The model sometimes returns descriptive slugs rather than UUID strings.
+    valid_hyp_ids: list[str] = []
+    for h in data.get("referenced_hypotheses", []):
+        if isinstance(h, str):
+            try:
+                _uuid.UUID(h)
+                valid_hyp_ids.append(h)
+            except ValueError:
+                pass  # silently drop non-UUID strings
+
     return SynthesizedResponse(
         response_text=data.get("response_text", ""),
         referenced_facts=data.get("referenced_facts", []),
-        referenced_hypotheses=data.get("referenced_hypotheses", []),
+        referenced_hypotheses=valid_hyp_ids,
         referenced_findings=data.get("referenced_findings", []),
         citations=citations,
         surfaced_tradeoffs=data.get("surfaced_tradeoffs", []),

@@ -498,8 +498,8 @@ async def test_researcher_live_integration() -> None:
         depth="shallow",
     )
     # Real Tavily + LLM calls take longer than the 8 s shallow budget.
-    # Override to 30 s so the live test isn't killed by the internal timer.
-    brief = await researcher.run(inp, _budget_override_s=30.0)
+    # Qwen3-235B-A22B synthesis can take 30-60s; override to 90s.
+    brief = await researcher.run(inp, _budget_override_s=90.0)
 
     assert brief.question == inp.question
     assert len(brief.findings) >= 2, f"Expected ≥2 findings, got {len(brief.findings)}"
