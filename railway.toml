@@ -1,0 +1,23 @@
+# Railway deployment configuration.
+# Docs: https://docs.railway.com/reference/config-as-code
+
+[build]
+builder       = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+# Run database migrations before swapping traffic to the new container.
+# Railway runs releaseCommand inside the new image after a successful build.
+releaseCommand = "uv run python scripts/run_migrations_prod.py"
+
+# Railway injects $PORT; the Dockerfile CMD already handles ${PORT:-8000},
+# but we also set it here so Railway knows which port to route traffic to.
+startCommand = "uv run uvicorn career_coach.api.main:app --host 0.0.0.0 --port $PORT"
+
+# Liveness probe — Railway sends GET /health; expects HTTP 2xx.
+healthcheckPath    = "/health"
+healthcheckTimeout = 30        # seconds before Railway marks the deploy failed
+
+# Restart policy: restart on crash, give up after 3 attempts.
+restartPolicyType       = "ON_FAILURE"
+restartPolicyMaxRetries = 3

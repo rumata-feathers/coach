@@ -1,0 +1,41 @@
+# --- Virtual environments & package caches ---
+.venv/
+venv/
+env/
+.uv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+build/
+dist/
+
+# --- Secrets (never ship these) ---
+.env
+.env.*
+!.env.example
+
+# --- Version control ---
+.git/
+.github/
+
+# --- Tooling caches ---
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.hypothesis/
+.coverage
+coverage.xml
+htmlcov/
+
+# --- Dev-only directories ---
+tests/
+reports/
+.claude/
+
+# --- OS artefacts ---
+.DS_Store
+*.swp
+*.log
+logs/
+pgdata/

@@ -59,6 +59,8 @@ class Settings(BaseSettings):
 
     # Runtime
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
+    # Set by Railway from the deploying commit; useful for traceability.
+    git_sha: str | None = Field(default=None, alias="GIT_SHA")
 
 
 @lru_cache(maxsize=1)
