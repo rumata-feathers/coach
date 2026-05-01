@@ -18,9 +18,10 @@ releaseCommand = "uv run python scripts/run_migrations_prod.py"
 # Railway service variable. Both combine into the deployment_version column:
 #   DEPLOYMENT_TAG=v0.5.1 + RAILWAY_GIT_COMMIT_SHA=abc1234... → "v0.5.1@abc1234"
 
-# Railway injects $PORT; the Dockerfile CMD already handles ${PORT:-8000},
-# but we also set it here so Railway knows which port to route traffic to.
-startCommand = "uv run uvicorn career_coach.api.main:app --host 0.0.0.0 --port $PORT"
+# DO NOT set startCommand here for Dockerfile deployments.
+# Railway runs startCommand in exec form (no shell), so $PORT is passed as a
+# literal string and uvicorn rejects it. The Dockerfile CMD already uses
+# `sh -c "... --port ${PORT:-8000}"` which expands correctly at runtime.
 
 # Liveness probe — Railway sends GET /health; expects HTTP 2xx.
 healthcheckPath    = "/health"
