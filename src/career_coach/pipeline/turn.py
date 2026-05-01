@@ -281,7 +281,9 @@ class TurnPipeline:
 
         # --- After understander: clarification short-circuit or main path ---
         g.add_conditional_edges("understander", self._route_understander)
-        g.add_edge("clarification_reply", END)
+        # Clarification flows through supervisor (spec §10: runs on every flow)
+        # but skips persist/session_update (already persisted by clarification_reply).
+        g.add_edge("clarification_reply", "supervisor")
 
         # --- After orchestrator: route to onboarding, Flow A/B (coach only),
         #     or Flow C fan-out (researcher + coach in parallel) ---
@@ -310,7 +312,8 @@ class TurnPipeline:
         g.add_conditional_edges("critic", self._route_critic)
 
         # Supervisor → persist → session_update → profiler_dispatch → END
-        g.add_edge("supervisor", "persist")
+        # (clarification turns skip persist/session_update — already done above)
+        g.add_conditional_edges("supervisor", self._route_supervisor)
         g.add_edge("persist", "session_update")
         g.add_edge("session_update", "profiler_dispatch")
         g.add_edge("profiler_dispatch", END)
@@ -541,14 +544,23 @@ class TurnPipeline:
         return result
 
     async def _node_supervisor(self, state: TurnState) -> dict[str, Any]:
-        """Step 6.5: Supervisor — final pre-response safety/correctness check."""
+        """Step 6.5: Supervisor — final pre-response safety/correctness check.
+
+        Runs on every flow, including clarification turns.  When arriving from
+        ``clarification_reply``, ``coach_out`` may be absent — fall back to
+        the ``final_response`` already set in state.
+        """
         synth_out: SynthesizedResponse | None = state.get("synth_out")
-        coach_out: CoachOutput = state["coach_out"]
+        coach_out: CoachOutput | None = state.get("coach_out")
 
         initial_response = (
             synth_out.response_text
             if synth_out is not None and synth_out.response_text
-            else coach_out.response_text
+            else (
+                coach_out.response_text
+                if coach_out is not None
+                else state.get("final_response", "")
+            )
         )
 
         final_response, supervisor_event, new_synth_out = await self._apply_supervisor(
@@ -695,6 +707,12 @@ class TurnPipeline:
             if coach_attempt >= _MAX_COACH_RETRIES:
                 return "coach_escalation"
             return "coach"
+
+    def _route_supervisor(self, state: TurnState) -> str:
+        """After supervisor: skip persist for clarification turns (already persisted)."""
+        if state.get("clarification_only"):
+            return END
+        return "persist"
 
     # -------------------------------------------------------------------------
     # Supervisor helpers
