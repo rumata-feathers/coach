@@ -43,16 +43,29 @@ async def _init_connection(conn: asyncpg.Connection) -> None:
     await register_vector(conn)
 
 
+def _needs_ssl(dsn: str) -> bool:
+    """Return True when the DSN points at a remote host that requires SSL.
+
+    Supabase's Supavisor pooler mandates TLS.  Local docker-compose instances
+    do not — adding ssl='require' to a localhost connection causes asyncpg to
+    fail immediately, so we gate on the hostname.
+    """
+    return "localhost" not in dsn and "127.0.0.1" not in dsn
+
+
 async def get_pool() -> asyncpg.Pool:
     """Return the process-wide asyncpg pool, creating it on first call."""
     global _pool
     if _pool is None:
         settings = get_settings()
+        dsn = settings.supabase_db_url
+        ssl: str | None = "require" if _needs_ssl(dsn) else None
         _pool = await asyncpg.create_pool(
-            dsn=settings.supabase_db_url,
+            dsn=dsn,
             min_size=1,
             max_size=10,
             init=_init_connection,
+            ssl=ssl,
         )
     return _pool
 
