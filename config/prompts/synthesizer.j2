@@ -151,27 +151,57 @@ Write a **single integrated response** that:
 
 ## Chart emission (§6.4)
 
-Emit a chart ONLY if ALL of these hold:
-- The data needed for the chart exists in the research findings above
-  (NOT invented from general knowledge).
-- The data has ≥3 comparable quantitative items, OR a clear time series,
-  OR a numeric range being compared.
-- A chart would communicate faster than prose for this specific question.
+**Step 1 — scan for quantitative data.** Look at every finding above for:
+- Findings tagged `numeric` — these have strongly-sourced numbers.
+- Findings (whether tagged `numeric` or not) whose claim text contains specific
+  numbers: salary figures, percentage ranges, years, hours-per-week, acceptance
+  rates, etc. A finding saying "stipends range from £17k–£20k" contains usable
+  data even if not tagged `numeric`.
 
-**If conditions hold**, include one ChartSpec in `chart_specs`:
-  - `chart_type`: one of "bar", "line", "scatter", "pie", "table", "range"
-  - `title`: brief, descriptive
-  - `description`: one sentence for accessibility
-  - `x_axis` / `y_axis`: AxisSpec with label and optional unit
-  - `data`: list of row dicts with keys matching axis labels
-  - `source_citation_indices`: 0-based indices into `citations` (REQUIRED)
-    — which citations back up the chart's data values
+**Step 2 — decide.** Emit a chart if you have ≥2 numeric findings that compare
+the same type of quantity across ≥2 options AND a chart communicates that
+comparison faster than prose. Common examples that SHOULD produce a chart:
+- Salary or compensation comparisons across paths (PhD vs industry, role A vs B)
+- Working-hours or work-life estimates across options
+- Acceptance rates, promotion rates, or time-to-outcome across paths
+- Pay ranges across seniority levels or geographies
 
-**If conditions do NOT hold**: set `chart_specs: []`. Do not force a chart
-when the data isn't there. Maximum 1 chart.
+**Step 3 — build the chart.** Use only numbers that appear in the cited sources.
+Salary findings often state a range (e.g. "£60k–£90k") — use the midpoint or
+the representative figure stated in the source; that is NOT inventing data.
+Do NOT fabricate numbers that are absent from the findings entirely.
 
-**Do NOT invent data for a chart.** If the research findings have pay figures,
-use those exact figures. If they don't, don't emit a chart with numeric data.
+**If you decide to emit a chart**, include one ChartSpec in `chart_specs`:
+  - `chart_type`: "bar" for comparisons, "line" for time series, "range" for
+    min/max spans, "table" for multi-column structured data
+  - `title`: brief, descriptive (e.g. "Estimated annual compensation by path")
+  - `description`: one accessibility sentence
+  - `x_axis` / `y_axis`: `{"label": "...", "unit": "..."}` (unit may be null)
+  - `data`: list of row dicts whose keys match the axis labels exactly
+  - `source_citation_indices`: 0-based indices into your `citations` list
+    (REQUIRED — at least one entry; uncited charts are rejected by the Critic)
+
+**Concrete structure example** (fill with your actual finding data — do not
+copy these placeholder numbers):
+```json
+{
+  "chart_type": "bar",
+  "title": "Typical UK annual compensation by career path",
+  "description": "Comparison of estimated yearly income across the paths discussed.",
+  "x_axis": {"label": "Career path", "unit": null},
+  "y_axis": {"label": "Annual income", "unit": "GBP"},
+  "data": [
+    {"Career path": "Path A", "Annual income": 18000},
+    {"Career path": "Path B", "Annual income": 70000},
+    {"Career path": "Path C", "Annual income": 90000}
+  ],
+  "source_citation_indices": [0, 2]
+}
+```
+
+**If no quantitative data exists in any finding** (no specific numbers appear
+in any finding's claim text), set `chart_specs: []`. Never invent numeric data.
+Maximum 1 chart per response.
 
 ---
 
