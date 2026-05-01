@@ -72,6 +72,18 @@ def _critic_pass_json() -> str:
     )
 
 
+def _supervisor_pass_json() -> str:
+    return json.dumps(
+        {
+            "event_type": None,
+            "severity": None,
+            "details": None,
+            "action": "pass",
+            "scripted_override": None,
+        }
+    )
+
+
 def _profiler_json() -> str:
     return json.dumps(
         {
@@ -135,10 +147,11 @@ async def test_process_turn_returns_turn_result(
 ) -> None:
     mock, pipeline = pipeline_mocks
     mock.queue(
-        _intent_json(),    # Understander
-        _coach_json(),     # Coach (attempt 1)
+        _intent_json(),       # Understander
+        _coach_json(),        # Coach (attempt 1)
         _critic_pass_json(),  # Critic → pass
-        _profiler_json(),  # Profiler (background)
+        _supervisor_pass_json(),  # Supervisor
+        _profiler_json(),     # Profiler (background)
     )
 
     result = await pipeline.process_turn(
@@ -163,7 +176,8 @@ async def test_process_turn_clarification_short_circuits(
             needs_clarification=True,
             clarification_question="What aspect of economics interests you?",
             budget_hint="standard",
-        )
+        ),
+        _supervisor_pass_json(),  # Supervisor now runs on clarification too (SPEC §10)
     )
 
     result = await pipeline.process_turn(
@@ -173,8 +187,8 @@ async def test_process_turn_clarification_short_circuits(
 
     assert result.clarification_only
     assert "economics" in result.response.lower()
-    # Coach was never called
-    assert len(mock.calls) == 1
+    # Coach was never called — only Understander + Supervisor
+    assert len(mock.calls) == 2
 
 
 async def test_process_turn_flow_a_skips_critic(
@@ -185,6 +199,7 @@ async def test_process_turn_flow_a_skips_critic(
     mock.queue(
         _intent_json(turn_intent="explore", budget_hint="quick"),
         _coach_json(),
+        _supervisor_pass_json(),  # Supervisor (no Critic for flow A)
         _profiler_json(),
     )
 
@@ -194,17 +209,20 @@ async def test_process_turn_flow_a_skips_critic(
     )
 
     assert isinstance(result, TurnResult)
-    # Only Understander (1) + Coach (1) + Profiler (1) = 3 LLM calls; no Critic
+    # Understander (1) + Coach (1) + Supervisor (1) = 3 synchronous calls; no Critic
     # Profiler may not complete before assertion due to asyncio.create_task;
-    # assert at minimum understander + coach called
-    assert len(mock.calls) >= 2
+    # assert at minimum understander + coach + supervisor called
+    assert len(mock.calls) >= 3
 
 
 async def test_process_turn_creates_session_when_none_given(
     pipeline_mocks: tuple[MockLLMClient, TurnPipeline],
 ) -> None:
     mock, pipeline = pipeline_mocks
-    mock.queue(_intent_json(), _coach_json(), _critic_pass_json(), _profiler_json())
+    mock.queue(
+        _intent_json(), _coach_json(), _critic_pass_json(),
+        _supervisor_pass_json(), _profiler_json(),
+    )
 
     # Passing session_id=None should trigger create_session
     pipeline._episodic.get_session = AsyncMock(return_value=None)  # type: ignore[assignment]
@@ -239,10 +257,10 @@ async def test_concurrent_turns_background_tasks_all_complete(
     pipeline._profiler.run_and_save = slow_run_and_save  # type: ignore[method-assign]
 
     n = 20
-    # Each turn needs: Understander + Coach + Critic = 3 responses.
-    # Queue n * 3 responses (no profiler response needed — slow_run_and_save handles it).
+    # Each turn needs: Understander + Coach + Critic + Supervisor = 4 responses.
+    # Queue n * 4 responses (no profiler response needed — slow_run_and_save handles it).
     for _ in range(n):
-        mock.queue(_intent_json(), _coach_json(), _critic_pass_json())
+        mock.queue(_intent_json(), _coach_json(), _critic_pass_json(), _supervisor_pass_json())
 
     await asyncio.gather(
         *[
