@@ -1,3 +1,11 @@
+# ── Build-time arguments ──────────────────────────────────────────────────────
+# GIT_SHA is baked at build time so every image carries the commit it was built
+# from. Pass via: docker build --build-arg GIT_SHA=$(git rev-parse HEAD) ...
+# Railway also injects RAILWAY_GIT_COMMIT_SHA at runtime as a fallback (see
+# config.py Settings.deployment_version). Either is sufficient; baking it into
+# the image makes it available even in containers with no Railway env.
+ARG GIT_SHA=""
+
 # ── Stage: runtime image ──────────────────────────────────────────────────────
 FROM python:3.11-slim
 
@@ -7,6 +15,9 @@ FROM python:3.11-slim
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
 WORKDIR /app
+
+# Persist the build-time SHA as a runtime env var so the app can read it.
+ENV GIT_SHA=${GIT_SHA}
 
 # ── Dependency layer (cached unless pyproject.toml or uv.lock changes) ────────
 COPY pyproject.toml uv.lock ./

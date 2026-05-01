@@ -10,6 +10,14 @@ dockerfilePath = "Dockerfile"
 # Railway runs releaseCommand inside the new image after a successful build.
 releaseCommand = "uv run python scripts/run_migrations_prod.py"
 
+# Deployment version stamping
+# ----------------------------
+# Railway automatically injects RAILWAY_GIT_COMMIT_SHA into every container.
+# config.py reads it as a fallback when GIT_SHA is not baked into the image.
+# To also set a human-readable tag, add DEPLOYMENT_TAG (e.g. "v0.5.1") as a
+# Railway service variable. Both combine into the deployment_version column:
+#   DEPLOYMENT_TAG=v0.5.1 + RAILWAY_GIT_COMMIT_SHA=abc1234... → "v0.5.1@abc1234"
+
 # Railway injects $PORT; the Dockerfile CMD already handles ${PORT:-8000},
 # but we also set it here so Railway knows which port to route traffic to.
 startCommand = "uv run uvicorn career_coach.api.main:app --host 0.0.0.0 --port $PORT"

@@ -45,6 +45,7 @@ from career_coach.agents.researcher import Researcher
 from career_coach.agents.supervisor import Supervisor
 from career_coach.agents.synthesizer import Synthesizer
 from career_coach.agents.understander import Understander
+from career_coach.config import get_settings
 from career_coach.db import get_pool
 from career_coach.llm.factory import LLMFactory
 from career_coach.memory.episodic import EpisodicRepo, Session
@@ -367,6 +368,7 @@ class TurnPipeline:
             flow_used="clarification",
             critic_verdicts=None,
             tokens_used=None,
+            deployment_version=get_settings().deployment_version,
         )
         return {
             "final_response": intent_packet.clarification_question,
@@ -616,6 +618,7 @@ class TurnPipeline:
             devils_advocate_output=state.get("da_output_dict"),
             synthesizer_output=state.get("synth_output_dict"),
             chart_specs=state.get("chart_specs_list"),
+            deployment_version=get_settings().deployment_version,
         )
 
         # Supervisor events are persisted after the turn row exists (valid FK).

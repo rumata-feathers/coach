@@ -98,6 +98,8 @@ class EpisodicRepo:
         devils_advocate_output: dict[str, Any] | None = None,
         synthesizer_output: dict[str, Any] | None = None,
         chart_specs: list[dict[str, Any]] | None = None,
+        # Deployment traceability (migration 005)
+        deployment_version: str | None = None,
     ) -> UUID:
         """Insert a new turn. Auto-assigns the next ``turn_index`` per session.
 
@@ -108,6 +110,11 @@ class EpisodicRepo:
         The four ``*_output``/``*_id`` parameters are Flow C-only and may be
         ``None`` for all other flows — the corresponding DB columns default to
         ``NULL`` or ``'[]'::jsonb``.
+
+        Args:
+            deployment_version: Version string from ``Settings.deployment_version``
+                stamped on the row for transcript forensics (e.g. ``"v0.5.1@a1b2c3d"``
+                on Railway, ``"local"`` in development).
         """
         import json as _json  # local to avoid top-level import noise
 
@@ -124,12 +131,14 @@ class EpisodicRepo:
                     user_message, assistant_message,
                     intent_packet, flow_used, critic_verdicts, tokens_used,
                     research_brief_id, devils_advocate_output,
-                    synthesizer_output, chart_specs
+                    synthesizer_output, chart_specs,
+                    deployment_version
                 )
                 VALUES (
                     $1, $2, $3, $4, $5,
                     $6::jsonb, $7, $8::jsonb, $9::jsonb,
-                    $10, $11::jsonb, $12::jsonb, $13::jsonb
+                    $10, $11::jsonb, $12::jsonb, $13::jsonb,
+                    $14
                 )
                 RETURNING turn_id
                 """,
@@ -146,6 +155,7 @@ class EpisodicRepo:
                 _json.dumps(devils_advocate_output) if devils_advocate_output else None,
                 _json.dumps(synthesizer_output) if synthesizer_output else None,
                 _json.dumps(chart_specs) if chart_specs is not None else "[]",
+                deployment_version,
             )
         assert turn_id is not None
         return turn_id  # type: ignore[no-any-return]

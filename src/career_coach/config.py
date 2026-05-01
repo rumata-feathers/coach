@@ -59,8 +59,38 @@ class Settings(BaseSettings):
 
     # Runtime
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
-    # Set by Railway from the deploying commit; useful for traceability.
+
+    # Deployment identity — used to stamp every turn row for transcript forensics.
+    # GIT_SHA is baked into the Docker image at build time (see Dockerfile ARG).
+    # RAILWAY_GIT_COMMIT_SHA is injected by Railway at runtime and used as a
+    # fallback so un-rebuilt images still get the correct SHA.
     git_sha: str | None = Field(default=None, alias="GIT_SHA")
+    railway_git_commit_sha: str | None = Field(
+        default=None, alias="RAILWAY_GIT_COMMIT_SHA"
+    )
+    # Human-readable release tag, e.g. "v0.5.1". Optional — when set, the
+    # deployment_version property combines it with the SHA.
+    deployment_tag: str | None = Field(default=None, alias="DEPLOYMENT_TAG")
+
+    @property
+    def deployment_version(self) -> str:
+        """Return a compact version string stamped onto every turn row.
+
+        Priority / format:
+        - Both tag and SHA set → ``"v0.5.1@a1b2c3d"``
+        - SHA only             → ``"a1b2c3d"``
+        - Neither              → ``"local"``
+
+        SHA comes from ``GIT_SHA`` (baked at build time) or falls back to
+        ``RAILWAY_GIT_COMMIT_SHA`` (injected by Railway at runtime).
+        """
+        sha = self.git_sha or self.railway_git_commit_sha
+        sha_short = sha[:7] if sha else None
+        if sha_short and self.deployment_tag:
+            return f"{self.deployment_tag}@{sha_short}"
+        if sha_short:
+            return sha_short
+        return "local"
 
 
 @lru_cache(maxsize=1)
