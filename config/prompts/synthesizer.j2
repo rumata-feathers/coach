@@ -125,27 +125,47 @@ No research was available for this question.
 
 Write a **single integrated response** that:
 
-1. **References ≥2 user facts or hypotheses** from the profile above. Name them
-   specifically — not "based on your background" but "given your mathematics
-   degree from Warwick and your stated interest in markets".
+1. **Opens with a user-specific sentence.** Your very first sentence MUST name at
+   least one concrete user fact — their degree institution, current role, stated
+   goal, age, or location. Do NOT open with "As a recent graduate", "Given your
+   background", or any phrase that could apply to any user. Wrong: "Given your
+   background in tech, this is a common dilemma." Right: "With your CS degree
+   from UCL and your goal of becoming a product leader, the prestige-vs-fit
+   question has a specific answer for you."
 
-2. **Integrates the Coach's analysis** as the primary perspective.
+2. **References ≥2 user facts or hypotheses** from the profile above — name them
+   explicitly in the prose, not just in `referenced_facts`.
 
-3. **Integrates the DA's critique** if DA disagreed. Do NOT ignore counter-points.
+3. **Integrates the Coach's analysis** as the primary perspective.
+
+4. **Integrates the DA's critique** if DA disagreed. Do NOT ignore counter-points.
    Surface ≥1 tradeoff as a clear statement in `surfaced_tradeoffs`.
    If DA agreed, note this briefly — it strengthens the Coach's position.
 
-4. **Integrates research findings** if available. Reference ≥1 finding in
-   `referenced_findings` and cite it with [N] inline in the text.
+5. **Integrates research findings** if available. If research_findings is
+   non-empty, you MUST reference ≥1 finding in `referenced_findings` and cite
+   it with [N] inline in the text. If research_findings is empty (no research
+   was available), skip the `[N]` requirement but hedge all general claims.
 
-5. **Citation format**: build a `citations` list of all sources you reference.
+6. **Citation format**: build a `citations` list of all sources you reference.
    In `response_text`, cite inline using [1], [2] (1-based, sequential).
    [1] corresponds to citations[0], [2] to citations[1], etc.
    Only cite sources from the Research findings above — do NOT invent URLs.
 
-6. **`integrated_from`**: list which sources you drew on. Always include
+7. **`integrated_from`**: list which sources you drew on. Always include
    "coach". Include "devils_advocate" if DA ran. Include "researcher" if
-   research findings were non-empty and you used them.
+   research_findings was non-empty (even if you only used one finding).
+
+8. **Hedge all non-cited general claims.** Any claim about career outcomes —
+   salary levels, typical timelines, learning rates, brand value, promotion
+   speeds — that does NOT have a [N] citation MUST include an explicit qualifier
+   such as "though this varies significantly by company", "in many cases (but
+   not all)", "based on common patterns (not universal)", or must be added to
+   `uncertainty_flags`. Using "typically" or "usually" alone is NOT sufficient
+   hedging. Wrong: "FAANG experience typically opens doors to better
+   opportunities." Right: "FAANG experience often opens doors to better
+   opportunities — though outcomes vary widely by role and sector [N]." or add
+   to uncertainty_flags: "faang_career_premium_not_universal".
 
 ---
 

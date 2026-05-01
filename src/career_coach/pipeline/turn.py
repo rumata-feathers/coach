@@ -503,6 +503,10 @@ class TurnPipeline:
         is_flow_c = state.get("is_flow_c", False)
 
         if is_flow_c:
+            research_brief = state.get("research_brief")
+            has_research = (
+                research_brief is not None and bool(research_brief.findings)
+            )
             critic_input = CriticInput(
                 coach_output=state["coach_out"],
                 synthesizer_output=state.get("synth_out"),
@@ -511,6 +515,7 @@ class TurnPipeline:
                 active_hypotheses=state.get("active_hypotheses", []),
                 intent_packet=state["intent_packet"],
                 is_flow_c=True,
+                has_research=has_research,
             )
         else:
             critic_input = CriticInput(

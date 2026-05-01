@@ -108,6 +108,9 @@ class CriticInput(BaseModel):
     is_flow_c: bool = False
     synthesizer_output: SynthesizedResponse | None = None
     da_output: DevilsAdvocateOutput | None = None
+    # True when the Researcher produced ≥1 finding (not a timeout/empty brief).
+    # Passed to the Critic template to enable the INTEGRATION check (#5).
+    has_research: bool = False
 
 
 class CriticVerdict(BaseModel):

@@ -65,6 +65,7 @@ class Critic(Agent):
             is_flow_c=input_data.is_flow_c,
             synthesizer_output=input_data.synthesizer_output,
             da_output=input_data.da_output,
+            has_research=input_data.has_research,
         )
         messages = [Message(role="user", content=prompt)]
         t0 = self.now_ms()
