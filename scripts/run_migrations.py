@@ -29,17 +29,24 @@ CREATE TABLE IF NOT EXISTS schema_migrations (
 """
 
 
+_LOCAL_HOSTS = ("localhost", "127.0.0.1", "host.docker.internal")
+
+
 def _is_remote(dsn: str) -> bool:
-    return "localhost" not in dsn and "127.0.0.1" not in dsn
+    return not any(h in dsn for h in _LOCAL_HOSTS)
 
 
 async def apply_migrations(dsn: str) -> list[str]:
     """Apply pending migrations. Returns the versions newly applied."""
+    remote = _is_remote(dsn)
     conn = await asyncpg.connect(
         dsn=dsn,
         # Transaction-mode poolers (Supabase Supavisor port 6543) reject
         # named prepared statements. Using 0 forces the simple-query path.
-        statement_cache_size=0 if _is_remote(dsn) else 100,
+        statement_cache_size=0 if remote else 100,
+        # Supabase (both pooler and direct) requires TLS. Without ssl='require'
+        # asyncpg hangs waiting for the SSL upgrade handshake to complete.
+        ssl="require" if remote else None,
     )
     applied: list[str] = []
     try:
