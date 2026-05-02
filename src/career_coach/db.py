@@ -38,9 +38,18 @@ async def _init_connection(conn: asyncpg.Connection) -> None:
         decoder=json.loads,
         schema="pg_catalog",
     )
-    # Register the pgvector codec so list[float] round-trips to/from `vector`.
-    # The extension must already be installed (migration 001 does so).
-    await register_vector(conn)
+    # Supabase dashboard installs pgvector in the `extensions` schema, not
+    # `public`, so detect the schema at runtime rather than hardcoding it.
+    vector_schema: str | None = await conn.fetchval(
+        "SELECT nspname FROM pg_type "
+        "JOIN pg_namespace ON typnamespace = pg_namespace.oid "
+        "WHERE typname = 'vector' LIMIT 1"
+    )
+    if vector_schema is None:
+        raise RuntimeError(
+            "pgvector type not found. Enable it in Supabase Dashboard → Database → Extensions → vector"
+        )
+    await register_vector(conn, schema=vector_schema)
 
 
 _LOCAL_HOSTS = ("localhost", "127.0.0.1", "host.docker.internal")
