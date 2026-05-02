@@ -36,6 +36,7 @@ COPY config/    ./config/
 COPY kb/        ./kb/
 COPY migrations/ ./migrations/
 COPY scripts/   ./scripts/
+COPY frontend/  ./frontend/
 
 # Install our package (career-coach) into the already-synced venv.
 RUN uv sync --frozen --no-dev
