@@ -43,14 +43,16 @@ async def _init_connection(conn: asyncpg.Connection) -> None:
     await register_vector(conn)
 
 
+_LOCAL_HOSTS = ("localhost", "127.0.0.1", "host.docker.internal")
+
+
 def _needs_ssl(dsn: str) -> bool:
     """Return True when the DSN points at a remote host that requires SSL.
 
     Supabase's Supavisor pooler mandates TLS.  Local docker-compose instances
-    do not — adding ssl='require' to a localhost connection causes asyncpg to
-    fail immediately, so we gate on the hostname.
+    and Docker-for-Mac (host.docker.internal) do not.
     """
-    return "localhost" not in dsn and "127.0.0.1" not in dsn
+    return not any(h in dsn for h in _LOCAL_HOSTS)
 
 
 async def get_pool() -> asyncpg.Pool:
