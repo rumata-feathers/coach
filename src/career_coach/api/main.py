@@ -22,13 +22,18 @@ from __future__ import annotations
 import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from career_coach import __version__
 from career_coach.api.routes import router
 from career_coach.config import get_settings
 from career_coach.db import close_pool, get_pool
+
+_FRONTEND_DIR = Path(__file__).resolve().parents[3] / "frontend"
 
 logger = logging.getLogger("career_coach.api")
 
@@ -86,6 +91,17 @@ def create_app() -> FastAPI:
         lifespan=_lifespan,
     )
 
+    # Wide-open CORS for the friend-test phase: no auth, no cookies, so there
+    # is nothing sensitive to protect. Must be tightened to an explicit origin
+    # allowlist before any authentication or session cookies are introduced.
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=False,
+        allow_methods=["GET", "POST", "OPTIONS"],
+        allow_headers=["*"],
+    )
+
     @app.get("/health", tags=["meta"])
     async def health() -> dict[str, str]:
         """Liveness probe.
@@ -99,10 +115,19 @@ def create_app() -> FastAPI:
         return {
             "status": "ok",
             "version": __version__,
-            "git_sha": settings.git_sha or "unknown",
+            "git_sha": settings.deployment_version,
         }
 
     app.include_router(router)
+
+    # Static frontend — mounted LAST so API routes always take precedence.
+    # html=True makes FastAPI serve index.html for / and any unknown path,
+    # which is the standard SPA behaviour.
+    # CORS is wide-open for the friend-test phase (no auth, no cookies).
+    # Tighten to explicit origins before v2 / any auth is added.
+    if _FRONTEND_DIR.is_dir():
+        app.mount("/", StaticFiles(directory=_FRONTEND_DIR, html=True), name="frontend")
+
     return app
 
 
