@@ -9,6 +9,7 @@ Endpoints:
 from __future__ import annotations
 
 import logging
+from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException
@@ -54,6 +55,8 @@ class ChatResponse(BaseModel):
     turn_id: UUID | None
     session_id: UUID
     clarification_only: bool = False
+    chart_specs: list[dict[str, Any]] = Field(default_factory=list)
+    citations: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class DistillRequest(BaseModel):
@@ -128,6 +131,8 @@ async def chat(body: ChatRequest) -> ChatResponse:
         turn_id=result.turn_id,
         session_id=result.session_id,
         clarification_only=result.clarification_only,
+        chart_specs=result.chart_specs,
+        citations=result.citations,
     )
 
 

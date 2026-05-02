@@ -28,7 +28,7 @@ import asyncio
 import json
 import logging
 import operator
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Annotated, Any
 from uuid import UUID
 
@@ -156,6 +156,8 @@ class TurnResult:
     turn_id: UUID | None
     session_id: UUID
     clarification_only: bool = False
+    chart_specs: list[dict[str, Any]] = field(default_factory=list)
+    citations: list[dict[str, Any]] = field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------
@@ -244,11 +246,14 @@ class TurnPipeline:
         result_state: dict[str, Any] = await self._graph.ainvoke(initial_state)
 
         session: Session = result_state["session"]
+        synth_dict: dict[str, Any] = result_state.get("synth_output_dict") or {}
         return TurnResult(
             response=result_state.get("final_response", ""),
             turn_id=result_state.get("turn_id"),
             session_id=session.session_id,
             clarification_only=result_state.get("clarification_only", False),
+            chart_specs=result_state.get("chart_specs_list") or [],
+            citations=synth_dict.get("citations") or [],
         )
 
     # -------------------------------------------------------------------------
