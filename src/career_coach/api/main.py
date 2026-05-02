@@ -46,7 +46,25 @@ async def _lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     # Connect to DB pool at startup so we fail fast if the DB is unreachable
     # rather than discovering it on the first live request.
-    await get_pool()
+    dsn = settings.supabase_db_url
+    # Log the host (never the password) so misconfigured DSNs are obvious.
+    try:
+        from urllib.parse import urlparse as _urlparse
+        _p = _urlparse(dsn)
+        _host_hint = f"{_p.hostname}:{_p.port}"
+    except Exception:
+        _host_hint = "<unparseable DSN>"
+    logger.info("Connecting to DB at %s …", _host_hint)
+    try:
+        await get_pool()
+    except Exception as exc:
+        logger.critical(
+            "DB pool failed to initialise — check SUPABASE_DB_URL (target: %s). "
+            "Error: %s",
+            _host_hint,
+            exc,
+        )
+        raise
     logger.info("DB pool ready.")
 
     yield  # application is live

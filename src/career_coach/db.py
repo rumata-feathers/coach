@@ -66,6 +66,10 @@ async def get_pool() -> asyncpg.Pool:
             max_size=10,
             init=_init_connection,
             ssl=ssl,
+            # Supabase's transaction pooler (Supavisor) does not support
+            # asyncpg's named prepared statements. Setting cache size to 0
+            # makes asyncpg use the simple query protocol instead.
+            statement_cache_size=0 if ssl else 100,
         )
     return _pool
 

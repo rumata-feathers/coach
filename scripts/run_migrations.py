@@ -29,9 +29,18 @@ CREATE TABLE IF NOT EXISTS schema_migrations (
 """
 
 
+def _is_remote(dsn: str) -> bool:
+    return "localhost" not in dsn and "127.0.0.1" not in dsn
+
+
 async def apply_migrations(dsn: str) -> list[str]:
     """Apply pending migrations. Returns the versions newly applied."""
-    conn = await asyncpg.connect(dsn=dsn)
+    conn = await asyncpg.connect(
+        dsn=dsn,
+        # Transaction-mode poolers (Supabase Supavisor port 6543) reject
+        # named prepared statements. Using 0 forces the simple-query path.
+        statement_cache_size=0 if _is_remote(dsn) else 100,
+    )
     applied: list[str] = []
     try:
         await conn.execute(SCHEMA_MIGRATIONS_DDL)

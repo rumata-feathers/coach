@@ -44,12 +44,10 @@ _LOCAL_DEFAULT = "postgresql://coach:coach@localhost:5432/coach"
 
 async def _main() -> int:
     settings = get_settings()
-    dsn = settings.supabase_db_url
+    pooler_dsn = settings.supabase_db_url
 
     # ── Guard: reject the local docker-compose default in production ──────────
-    # If someone forgets to set SUPABASE_DB_URL on Railway, it would fall back
-    # to the default which points at localhost (unreachable in production).
-    if dsn == _LOCAL_DEFAULT and not os.getenv("ALLOW_LOCAL_DB"):
+    if pooler_dsn == _LOCAL_DEFAULT and not os.getenv("ALLOW_LOCAL_DB"):
         print(
             "ERROR: SUPABASE_DB_URL is not set (or is still the docker-compose "
             "default). Set it to your Supabase pooler URL before deploying.\n"
@@ -57,6 +55,18 @@ async def _main() -> int:
             file=sys.stderr,
         )
         return 1
+
+    # ── Prefer the direct URL for migrations ──────────────────────────────────
+    # SUPABASE_DIRECT_URL bypasses Supavisor and connects directly to Postgres,
+    # which is required for DDL that needs superuser (e.g. CREATE EXTENSION).
+    # Get it from: Supabase Dashboard → Project Settings → Database → URI.
+    # Falls back to the pooler URL for backwards compatibility.
+    dsn = settings.supabase_direct_url or pooler_dsn
+    if settings.supabase_direct_url:
+        print("[migrations] using direct connection (SUPABASE_DIRECT_URL)")
+    else:
+        print("[migrations] WARNING: SUPABASE_DIRECT_URL not set — using pooler URL.")
+        print("[migrations] CREATE EXTENSION may fail. Set SUPABASE_DIRECT_URL for reliable DDL.")
 
     # Mask credentials in logs — show host/db but not user:password.
     try:

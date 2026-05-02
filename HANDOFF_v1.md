@@ -16,20 +16,6 @@ If any of these isn't true, stop and complete it first.
 
 ## Step-by-step: what to put in Claude Code
 
-### Step 1 — Copy the new spec files into the repo
-
-In your `career_coach` repo:
-
-```bash
-cp /path/to/SPEC_v1.md SPEC_v1.md
-cp /path/to/TASKS_v1.md TASKS_v1.md
-cp /path/to/HANDOFF_v1.md HANDOFF_v1.md
-git add SPEC_v1.md TASKS_v1.md HANDOFF_v1.md
-git commit -m "docs: v1 spec, tasks, handoff"
-git push
-```
-
-This commit is the *plan*; no code yet.
 
 ### Step 2 — Open Claude Code in the repo
 
@@ -70,7 +56,7 @@ Copy this verbatim and paste into Claude Code:
 > - Charts are emitted as structured `ChartSpec` objects; rendering is v2 (frontend).
 >
 > **Week of v0.5 data:**
->
+> unfortunately i do not have a week full of data
 > - Flow distribution: [FILL IN: X% A, Y% B, Z% onboarding]
 > - Fallback rate: [FILL IN: X% of agent_calls with fallback_reason set]
 > - p50/p95 latency by agent: [FILL IN]

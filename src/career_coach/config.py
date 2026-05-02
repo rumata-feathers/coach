@@ -46,6 +46,13 @@ class Settings(BaseSettings):
         default="postgresql://coach:coach@localhost:5432/coach",
         alias="SUPABASE_DB_URL",
     )
+    # Direct (non-pooler) Postgres URL for migrations and other DDL that
+    # requires a full session or superuser access (e.g. CREATE EXTENSION).
+    # In Supabase: Project Settings → Database → Connection String → URI.
+    # Leave unset for local development; migrations fall back to supabase_db_url.
+    supabase_direct_url: str | None = Field(
+        default=None, alias="SUPABASE_DIRECT_URL"
+    )
 
     # Embeddings
     embedding_model: str = Field(
