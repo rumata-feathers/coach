@@ -7,8 +7,9 @@ dockerfilePath = "Dockerfile"
 
 [deploy]
 # Run database migrations before swapping traffic to the new container.
-# Railway runs releaseCommand inside the new image after a successful build.
-releaseCommand = "uv run python scripts/run_migrations_prod.py"
+# Railway runs preDeployCommand inside the new image after a successful build.
+# NOTE: releaseCommand is not a valid Railway field — use preDeployCommand.
+preDeployCommand = "uv run python scripts/run_migrations_prod.py"
 
 # Deployment version stamping
 # ----------------------------
