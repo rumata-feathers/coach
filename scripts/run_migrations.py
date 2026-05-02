@@ -44,9 +44,14 @@ async def apply_migrations(dsn: str) -> list[str]:
         # Transaction-mode poolers (Supabase Supavisor port 6543) reject
         # named prepared statements. Using 0 forces the simple-query path.
         statement_cache_size=0 if remote else 100,
-        # Supabase (both pooler and direct) requires TLS. Without ssl='require'
-        # asyncpg hangs waiting for the SSL upgrade handshake to complete.
+        # Supabase requires TLS for both direct and pooler connections.
         ssl="require" if remote else None,
+        # Fail fast instead of hanging for Railway's full deploy timeout.
+        # Connection establishment timeout (TCP + SSL + auth).
+        timeout=30.0,
+        # Per-query timeout — catches locks held by zombie connections from
+        # previous failed migration runs that weren't cleanly closed.
+        command_timeout=60.0,
     )
     applied: list[str] = []
     try:
