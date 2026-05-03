@@ -405,6 +405,11 @@ def _parse_brief(raw: str, question: str) -> ResearchBrief:
             )
             data["findings"] = good
 
+    # Coerce caveats: LLM sometimes returns a plain string instead of a list.
+    caveats = data.get("caveats")
+    if isinstance(caveats, str):
+        data["caveats"] = [caveats] if caveats.strip() else []
+
     # Pydantic validates the remaining Citation/Finding structure
     return ResearchBrief(**data)
 

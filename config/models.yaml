@@ -73,6 +73,9 @@ onboarder:
   max_tokens: 2000
 
 # coach — user-facing final response; think mode for quality.
+# DeepSeek sometimes writes the JSON answer inside <think> and leaves nothing
+# after </think> when response_format=json_object is active. The HuggingFace
+# adapter handles this with a backward-scanning rescue heuristic.
 coach:
   provider: huggingface
   model: deepseek-ai/DeepSeek-V4-Flash

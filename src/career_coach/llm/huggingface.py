@@ -18,6 +18,28 @@ from openai import AsyncOpenAI
 
 from career_coach.llm.client import LLMClient, LLMResponse, Message, ResponseFormat
 
+
+def _last_balanced_object(text: str) -> str | None:
+    """Return the last balanced ``{…}`` JSON object in *text*, or ``None``.
+
+    Scans backwards from the last ``}`` to find its matching ``{``, correctly
+    handling nested braces.  Used to rescue JSON that DeepSeek-V4-Flash
+    (thinking mode) sometimes writes inside ``<think>`` rather than after it.
+    """
+    last_close = text.rfind("}")
+    if last_close < 0:
+        return None
+    depth = 0
+    for i in range(last_close, -1, -1):
+        if text[i] == "}":
+            depth += 1
+        elif text[i] == "{":
+            depth -= 1
+            if depth == 0:
+                return text[i : last_close + 1]
+    return None
+
+
 # Inference Providers router (modern replacement for api-inference.huggingface.co/v1).
 # Serves Qwen3, Llama, Kimi, DeepSeek and others via Novita/Nscale/Together/etc.
 DEFAULT_HF_BASE_URL = "https://router.huggingface.co/v1"
@@ -85,7 +107,24 @@ class HuggingFaceClient(LLMClient):
         # MiMo-V2-Flash. The block appears as <think>...</think> before the answer.
         if "<think>" in text and "</think>" in text:
             end = text.rfind("</think>")
-            text = text[end + len("</think>"):].strip()
+            after_think = text[end + len("</think>"):].strip()
+            if after_think:
+                # Normal path: model wrote its answer after </think>.
+                text = after_think
+            else:
+                # Fallback: model wrote its answer *inside* the think block.
+                # This is a known DeepSeek quirk when response_format=json_object
+                # is active — the model embeds the JSON in its reasoning chain and
+                # produces nothing after </think>. Extract the last {...} object.
+                think_start = text.find("<think>") + len("<think>")
+                think_content = text[think_start:end]
+                # Find the last *balanced* JSON object by scanning backwards.
+                # A greedy regex would merge multiple objects; backward scan
+                # correctly isolates the final one (the model's actual answer).
+                last_json = _last_balanced_object(think_content)
+                # If we found JSON inside the think block, use it; otherwise
+                # yield empty string so the caller's parse-error retry kicks in.
+                text = last_json or ""
 
         usage = response.usage
         return LLMResponse(
