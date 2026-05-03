@@ -320,9 +320,9 @@ async function sendMessage(text, isRetry = false) {
       body: JSON.stringify(body),
     });
 
-    thinkEl.remove();
-
     if (!res.ok) {
+      // Non-2xx (e.g. 429 from rate limiter, 404 user not found) — plain JSON.
+      thinkEl.remove();
       const errData = await res.json().catch(() => ({}));
       const errText = res.status === 429
         ? 'Whoa, slow down — try again in a minute.'
@@ -330,19 +330,42 @@ async function sendMessage(text, isRetry = false) {
       if (res.status !== 429) console.error('API error', res.status, errData);
       appendMsg('coach', errText, { error: true });
     } else {
-      const data = await res.json();
-      if (data.session_id) {
-        sessionId = data.session_id;
-        sessionStorage.setItem('cc_session', sessionId);
+      // SSE stream: comment lines (": keepalive") keep Railway alive while the
+      // pipeline runs; the final "data: {…}" line carries the full response.
+      // Keep "Thinking…" until we have the payload.
+      const reader = res.body.getReader();
+      const dec    = new TextDecoder();
+      let buf = '';
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, { stream: true });
       }
-      appendMsg('coach', data.response, {
-        clarify:     data.clarification_only,
-        chartSpecs:  data.chart_specs  || [],
-        citations:   data.citations    || [],
-      });
+      thinkEl.remove();
+
+      // Extract the last "data: {…}" line.
+      const match = [...buf.matchAll(/^data: (.+)$/gm)].at(-1);
+      if (!match) throw new Error('empty SSE stream');
+      const data = JSON.parse(match[1]);
+
+      if (data.error) {
+        console.error('Pipeline error', data);
+        appendMsg('coach', 'Something broke. Try Retry, or refresh the page.', { error: true });
+      } else {
+        if (data.session_id) {
+          sessionId = data.session_id;
+          sessionStorage.setItem('cc_session', sessionId);
+        }
+        appendMsg('coach', data.response, {
+          clarify:     data.clarification_only,
+          chartSpecs:  data.chart_specs  || [],
+          citations:   data.citations    || [],
+        });
+      }
     }
-  } catch {
+  } catch (err) {
     thinkEl.remove();
+    console.error('Chat fetch error', err);
     appendMsg('coach', 'Something broke. Try Retry, or refresh the page.', { error: true });
   }
 
