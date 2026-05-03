@@ -103,28 +103,33 @@ class HuggingFaceClient(LLMClient):
         choice = response.choices[0]
         text = choice.message.content or ""
 
-        # Strip think-block present in DeepSeek-V4-Flash (think mode) and
-        # MiMo-V2-Flash. The block appears as <think>...</think> before the answer.
+        # ── Think-block handling ────────────────────────────────────────────
+        # HF Novita router behaviour for DeepSeek-V4-Flash with thinking_mode:
+        #   • content      = "" (empty)
+        #   • model_extra["reasoning_content"] = "<thinking>…answer…"
+        # When content is empty, try to rescue the answer from reasoning_content.
+        if not text:
+            reasoning: str = ""
+            extra = getattr(choice.message, "model_extra", None) or {}
+            if isinstance(extra, dict):
+                reasoning = extra.get("reasoning_content") or ""
+            if reasoning:
+                # The model embeds its answer (often JSON) at the end of the
+                # reasoning chain.  Extract the last balanced {…} object.
+                rescued = _last_balanced_object(reasoning)
+                text = rescued or ""
+
+        # Inline <think>…</think> tags: some providers/modes return the
+        # reasoning block inline in content rather than in reasoning_content.
         if "<think>" in text and "</think>" in text:
             end = text.rfind("</think>")
             after_think = text[end + len("</think>"):].strip()
             if after_think:
-                # Normal path: model wrote its answer after </think>.
                 text = after_think
             else:
-                # Fallback: model wrote its answer *inside* the think block.
-                # This is a known DeepSeek quirk when response_format=json_object
-                # is active — the model embeds the JSON in its reasoning chain and
-                # produces nothing after </think>. Extract the last {...} object.
                 think_start = text.find("<think>") + len("<think>")
                 think_content = text[think_start:end]
-                # Find the last *balanced* JSON object by scanning backwards.
-                # A greedy regex would merge multiple objects; backward scan
-                # correctly isolates the final one (the model's actual answer).
-                last_json = _last_balanced_object(think_content)
-                # If we found JSON inside the think block, use it; otherwise
-                # yield empty string so the caller's parse-error retry kicks in.
-                text = last_json or ""
+                text = _last_balanced_object(think_content) or ""
 
         usage = response.usage
         return LLMResponse(

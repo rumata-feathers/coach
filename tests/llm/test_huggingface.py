@@ -15,9 +15,12 @@ def _make_client() -> HuggingFaceClient:
     return HuggingFaceClient(client=MagicMock(spec=AsyncOpenAI))
 
 
-def _mock_response(content: str) -> MagicMock:
+def _mock_response(content: str, reasoning_content: str | None = None) -> MagicMock:
     choice = MagicMock()
     choice.message.content = content
+    choice.message.model_extra = (
+        {"reasoning_content": reasoning_content} if reasoning_content is not None else {}
+    )
     choice.finish_reason = "stop"
     usage = MagicMock()
     usage.prompt_tokens = 10
@@ -28,8 +31,12 @@ def _mock_response(content: str) -> MagicMock:
     return resp
 
 
-async def _complete(client: HuggingFaceClient, content: str) -> str:
-    mock_create = AsyncMock(return_value=_mock_response(content))
+async def _complete(
+    client: HuggingFaceClient,
+    content: str,
+    reasoning_content: str | None = None,
+) -> str:
+    mock_create = AsyncMock(return_value=_mock_response(content, reasoning_content))
     client._client.chat.completions.create = mock_create  # type: ignore[attr-defined]
     result = await client.complete(
         [Message(role="user", content="hi")],
@@ -53,8 +60,18 @@ async def test_think_block_stripped_when_answer_follows() -> None:
     assert text == '{"answer": 42}'
 
 
+async def test_reasoning_content_json_rescued_when_content_empty() -> None:
+    """HF Novita path: content='', reasoning_content has the JSON at the end."""
+    client = _make_client()
+    # Mirrors real DeepSeek-V4-Flash thinking_mode=thinking API response
+    reasoning = 'Let me think about this. The answer is {"response_text": "Hi!", "referenced_facts": []}'
+    text = await _complete(client, "", reasoning_content=reasoning)
+    assert '"response_text"' in text
+    assert '"Hi!"' in text
+
+
 async def test_think_block_json_rescued_when_nothing_after() -> None:
-    """Rescue path: model put JSON inside <think>; adapter extracts it."""
+    """Inline think-block path: model put JSON inside <think>; adapter extracts it."""
     client = _make_client()
     raw = (
         "<think>I'll produce the JSON here:\n"
