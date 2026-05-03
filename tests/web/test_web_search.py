@@ -253,6 +253,7 @@ async def test_mock_web_search_client_fetch() -> None:
 # ---- integration test (skipped without API key) ----------------------------
 
 
+@pytest.mark.live
 async def test_tavily_live_search() -> None:
     """Live Tavily integration: search returns ≥3 results with valid URLs."""
     from career_coach.config import get_settings

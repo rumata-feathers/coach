@@ -21,14 +21,17 @@ from __future__ import annotations
 
 import logging
 from collections.abc import AsyncGenerator
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from slowapi.errors import RateLimitExceeded
 
 from career_coach import __version__
+from career_coach.api.limiter import limiter
 from career_coach.api.routes import router
 from career_coach.config import get_settings
 from career_coach.db import close_pool, get_pool
@@ -78,6 +81,18 @@ async def _lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("DB pool closed.")
 
 
+async def _handle_rate_limit(request: Request, exc: RateLimitExceeded) -> JSONResponse:
+    """Return a structured JSON 429 instead of slowapi's default plain-text."""
+    retry_after = 3600
+    with suppress(Exception):
+        retry_after = exc.limit.limit.granularity.seconds
+    return JSONResponse(
+        status_code=429,
+        content={"error": "rate_limit", "retry_after_seconds": retry_after},
+        headers={"Retry-After": str(retry_after)},
+    )
+
+
 def create_app() -> FastAPI:
     """Build and return the FastAPI application.
 
@@ -90,6 +105,10 @@ def create_app() -> FastAPI:
         description="Longitudinal, personalised career coaching — see SPEC.md.",
         lifespan=_lifespan,
     )
+
+    # ── Rate limiting ──────────────────────────────────────────────────────
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, _handle_rate_limit)  # type: ignore[arg-type]
 
     # Wide-open CORS for the friend-test phase: no auth, no cookies, so there
     # is nothing sensitive to protect. Must be tightened to an explicit origin

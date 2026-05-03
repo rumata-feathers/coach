@@ -12,14 +12,32 @@ import logging
 from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, Header, HTTPException, Request
 from pydantic import BaseModel, Field
 
+from career_coach.api.limiter import limiter
+from career_coach.config import get_settings
 from career_coach.db import get_pool
 from career_coach.llm.factory import LLMFactory
 from career_coach.pipeline.turn import TurnPipeline
 
 logger = logging.getLogger("career_coach.api.routes")
+
+
+# ---- Admin gate ----------------------------------------------------------
+
+async def _require_admin(x_admin_token: str | None = Header(default=None)) -> None:
+    """Dependency: validate X-Admin-Token against ADMIN_TOKEN env var.
+
+    If ADMIN_TOKEN is unset the check is skipped so local dev works without
+    any additional configuration.
+    """
+    expected = get_settings().admin_token
+    if expected is None:
+        return
+    if x_admin_token != expected:
+        raise HTTPException(status_code=403, detail="Invalid or missing X-Admin-Token")
+
 
 # ---- Shared factory (one per process) ------------------------------------
 
@@ -77,7 +95,8 @@ router = APIRouter()
 
 
 @router.post("/users", response_model=CreateUserResponse, status_code=201, tags=["users"])
-async def create_user(body: CreateUserRequest) -> CreateUserResponse:
+@limiter.limit("5/hour")
+async def create_user(request: Request, body: CreateUserRequest) -> CreateUserResponse:
     """Create a new user and return their UUID."""
     pool = await get_pool()
     async with pool.acquire() as conn:
@@ -90,7 +109,8 @@ async def create_user(body: CreateUserRequest) -> CreateUserResponse:
 
 
 @router.post("/chat", response_model=ChatResponse, tags=["conversation"])
-async def chat(body: ChatRequest) -> ChatResponse:
+@limiter.limit("60/hour")
+async def chat(request: Request, body: ChatRequest) -> ChatResponse:
     """Process one user turn and return the assistant response.
 
     Runs the full agent pipeline: Understander → Orchestrator → Coach →
@@ -140,6 +160,7 @@ async def chat(body: ChatRequest) -> ChatResponse:
     "/admin/distill/{user_id}",
     response_model=DistillResponse,
     tags=["admin"],
+    dependencies=[Depends(_require_admin)],
 )
 async def distill(
     user_id: UUID,

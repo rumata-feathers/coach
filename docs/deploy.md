@@ -26,6 +26,7 @@ Set these in Railway's **Variables** panel for your service.
 | `ANTHROPIC_API_KEY` | Optional fallback if you add Anthropic models later | `sk-ant-…` |
 | `EMBEDDING_DIM` | Must match the vector dimension in your DB | `384` |
 | `LOG_LEVEL` | Logging verbosity | `INFO` |
+| `ADMIN_TOKEN` | Shared secret for `POST /admin/*` routes. Pass as `X-Admin-Token` header. If unset, admin routes are open (fine for local dev, **set this in production**). | `some-long-random-string` |
 
 Railway sets these automatically — **do not add them manually**:
 

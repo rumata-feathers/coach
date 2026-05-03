@@ -67,6 +67,10 @@ class Settings(BaseSettings):
     # Runtime
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
 
+    # Admin gate — set ADMIN_TOKEN in Railway Variables to protect /admin/* routes.
+    # If unset (local dev / staging without the var), the check is skipped entirely.
+    admin_token: str | None = Field(default=None, alias="ADMIN_TOKEN")
+
     # Deployment identity — used to stamp every turn row for transcript forensics.
     # GIT_SHA is baked into the Docker image at build time (see Dockerfile ARG).
     # RAILWAY_GIT_COMMIT_SHA is injected by Railway at runtime and used as a
