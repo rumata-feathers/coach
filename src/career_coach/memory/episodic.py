@@ -116,8 +116,11 @@ class EpisodicRepo:
                 stamped on the row for transcript forensics (e.g. ``"v0.5.1@a1b2c3d"``
                 on Railway, ``"local"`` in development).
         """
-        import json as _json  # local to avoid top-level import noise
-
+        # NOTE: the pool in db.py registers a jsonb codec (encoder=json.dumps,
+        # decoder=json.loads).  asyncpg applies that codec automatically when
+        # binding parameters to JSONB columns — do NOT pre-encode with
+        # json.dumps() here or every value ends up double-encoded (the stored
+        # JSONB becomes a JSON *string* instead of the intended object/array).
         pool = await get_pool()
         async with pool.acquire() as conn, conn.transaction():
             next_index = await conn.fetchval(
@@ -152,9 +155,9 @@ class EpisodicRepo:
                 critic_verdicts,
                 tokens_used,
                 research_brief_id,
-                _json.dumps(devils_advocate_output) if devils_advocate_output else None,
-                _json.dumps(synthesizer_output) if synthesizer_output else None,
-                _json.dumps(chart_specs) if chart_specs is not None else "[]",
+                devils_advocate_output,          # dict | None — codec encodes
+                synthesizer_output,              # dict | None — codec encodes
+                chart_specs if chart_specs is not None else [],  # list — codec encodes
                 deployment_version,
             )
         assert turn_id is not None

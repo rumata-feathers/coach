@@ -341,12 +341,12 @@ class Researcher(Agent):
                     """,
                     turn_id,
                     brief.question,
-                    json.dumps([f.model_dump(mode="json") for f in brief.findings]),
-                    json.dumps(brief.caveats),
-                    json.dumps(brief.next_questions),
-                    json.dumps(brief.used_kb_files),
-                    json.dumps(brief.web_searches_run),
-                    json.dumps(brief.web_sources_consulted),
+                    [f.model_dump(mode="json") for f in brief.findings],
+                    brief.caveats,
+                    brief.next_questions,
+                    brief.used_kb_files,
+                    brief.web_searches_run,
+                    brief.web_sources_consulted,
                 )
             brief = brief.model_copy(update={"brief_id": row["brief_id"]})
         except Exception as exc:
