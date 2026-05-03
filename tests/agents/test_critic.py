@@ -107,7 +107,7 @@ async def test_critic_uses_haiku_model() -> None:
     critic = Critic(_make_factory(mock))
     await critic.run(_critic_input())
 
-    assert mock.calls[0].model == "Qwen/Qwen3-32B"
+    assert mock.calls[0].model == "XiaomiMiMo/MiMo-V2-Flash"
 
 
 async def test_critic_fails_open_on_malformed_json() -> None:

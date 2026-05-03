@@ -80,7 +80,7 @@ async def test_coach_uses_sonnet_model() -> None:
     coach = Coach(_make_factory(mock))
     await coach.run(_make_input())
 
-    assert mock.calls[0].model == "Qwen/Qwen3-32B"
+    assert mock.calls[0].model == "deepseek-ai/DeepSeek-V4-Flash"
 
 
 async def test_coach_requests_json_format() -> None:

@@ -60,9 +60,9 @@ class HuggingFaceClient(LLMClient):
 
         ``extra_body`` is forwarded verbatim to the provider — useful for
         model-specific parameters like
-        ``{"chat_template_kwargs": {"enable_thinking": False}}`` on Qwen3 to
-        suppress the chain-of-thought block (correct HF/vLLM syntax; the
-        Alibaba-specific ``{"thinking": false}`` causes 400 errors here).
+        ``{"thinking_mode": "thinking"}`` on DeepSeek-V4-Flash to enable
+        think mode, or ``{"chat_template_kwargs": {"enable_thinking": False}}``
+        on MiMo-V2-Flash to suppress chain-of-thought.
         Whether the underlying backend honours it depends on the provider;
         the ``<think>`` stripping below is a reliable fallback regardless.
         """
@@ -81,8 +81,8 @@ class HuggingFaceClient(LLMClient):
         choice = response.choices[0]
         text = choice.message.content or ""
 
-        # Strip Qwen3 think-block if thinking was accidentally left enabled.
-        # The block appears as <think>...</think> before the actual answer.
+        # Strip think-block present in DeepSeek-V4-Flash (think mode) and
+        # MiMo-V2-Flash. The block appears as <think>...</think> before the answer.
         if "<think>" in text and "</think>" in text:
             end = text.rfind("</think>")
             text = text[end + len("</think>"):].strip()

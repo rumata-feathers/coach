@@ -71,7 +71,7 @@ async def test_understander_uses_correct_model() -> None:
     await understander.run(_make_input())
 
     assert len(mock.calls) == 1
-    assert mock.calls[0].model == "Qwen/Qwen3-32B"
+    assert mock.calls[0].model == "XiaomiMiMo/MiMo-V2-Flash"
 
 
 async def test_understander_requests_json_format() -> None:

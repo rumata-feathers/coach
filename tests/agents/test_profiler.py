@@ -95,7 +95,7 @@ async def test_profiler_uses_correct_model() -> None:
     profiler = Profiler(_make_factory(mock))
     await profiler.run(_make_input())
 
-    assert mock.calls[0].model == "Qwen/Qwen3-32B"
+    assert mock.calls[0].model == "XiaomiMiMo/MiMo-V2-Flash"
 
 
 async def test_profiler_prompt_contains_user_message() -> None:

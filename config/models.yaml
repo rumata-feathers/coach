@@ -1,89 +1,109 @@
 # Per-agent LLM configuration.
 #
-# All agents use HuggingFace Inference Providers router.
+# Smart agents  → deepseek-ai/DeepSeek-V4-Flash
+#   284B total / 13B active MoE, 1M context window, MIT license.
+#   Three thinking modes (all produce <think>…</think> blocks which
+#   huggingface.py strips unconditionally):
+#     non-think : no extra_body; temperature unconstrained; fast & cheap
+#     think     : extra_body.thinking_mode = "thinking"; temperature MUST be 1.0
+#     think-max : extra_body.thinking_mode = "thinking" + reasoning_effort = "max";
+#                 temperature MUST be 1.0; requires ≥384K context budget
+#   Recommended: top_p=1.0 with thinking enabled (defaults are fine here).
 #
-# Thinking blocks: Qwen3 models emit <think>…</think> blocks by default.
-# Neither "thinking: false" (Alibaba-specific) nor
-# "chat_template_kwargs: {enable_thinking: false}" (vLLM-level) is
-# forwarded by the HF Inference Providers router — both cause 400 errors
-# regardless of the underlying backend (Novita/Together/etc.).
-# huggingface.py strips <think>…</think> blocks unconditionally; that is
-# the only reliable suppression mechanism available here.
-#
-# Model tiers:
-#   coach / onboarder — Qwen3-235B-A22B (MoE, 22B active params, best quality)
-#   others            — Qwen3-32B  (dense, great instruction-following, cheaper)
+# Utility agents → XiaomiMiMo/MiMo-V2-Flash
+#   309B total / 15B active MoE, 256K context, MIT license.
+#   Thinking disabled via chat_template_kwargs.enable_thinking=false for
+#   speed and cost. Returns reasoning_content when enabled (separate field,
+#   not in content), so enable_thinking=true requires client changes.
+
+# ── Utility agents (MiMo-V2-Flash, thinking off) ─────────────────────────────
 
 understander:
   provider: huggingface
-  model: Qwen/Qwen3-32B
+  model: XiaomiMiMo/MiMo-V2-Flash
   temperature: 0.2
   max_tokens: 1500
-
-coach:
-  provider: huggingface
-  model: Qwen/Qwen3-32B
-  temperature: 0.7
-  max_tokens: 2500
+  extra_body:
+    chat_template_kwargs:
+      enable_thinking: false
 
 critic:
   provider: huggingface
-  model: Qwen/Qwen3-32B
+  model: XiaomiMiMo/MiMo-V2-Flash
   temperature: 0.0
   max_tokens: 1200
+  extra_body:
+    chat_template_kwargs:
+      enable_thinking: false
 
 profiler:
   provider: huggingface
-  model: Qwen/Qwen3-32B
+  model: XiaomiMiMo/MiMo-V2-Flash
   temperature: 0.1
   max_tokens: 1500
+  extra_body:
+    chat_template_kwargs:
+      enable_thinking: false
 
+researcher_planner:
+  provider: huggingface
+  model: XiaomiMiMo/MiMo-V2-Flash
+  temperature: 0.1
+  max_tokens: 1500
+  extra_body:
+    chat_template_kwargs:
+      enable_thinking: false
+
+supervisor:
+  provider: huggingface
+  model: XiaomiMiMo/MiMo-V2-Flash
+  temperature: 0.0
+  max_tokens: 400
+  extra_body:
+    chat_template_kwargs:
+      enable_thinking: false
+
+# ── Smart agents (DeepSeek-V4-Flash) ─────────────────────────────────────────
+
+# onboarder — conversational Q&A, no deep reasoning needed; non-think mode.
 onboarder:
   provider: huggingface
-  model: Qwen/Qwen3-32B
+  model: deepseek-ai/DeepSeek-V4-Flash
   temperature: 0.7
   max_tokens: 2000
 
-# Researcher — synthesis call: Coach-tier, strong reasoning, lower temperature
-# so citations are not hallucinated.
+# coach — user-facing final response; think mode for quality.
+coach:
+  provider: huggingface
+  model: deepseek-ai/DeepSeek-V4-Flash
+  temperature: 1.0
+  max_tokens: 2500
+  extra_body:
+    thinking_mode: thinking
+
+# researcher — multi-source synthesis with citations; think mode.
 researcher:
   provider: huggingface
-  model: Qwen/Qwen3-32B
-  temperature: 0.2
+  model: deepseek-ai/DeepSeek-V4-Flash
+  temperature: 1.0
   max_tokens: 3000
+  extra_body:
+    thinking_mode: thinking
 
-# Researcher planner — cheap Haiku-tier call to decide what to search for.
-# Uses the dense 32B model since the task is structured and doesn't require
-# the full MoE.
-researcher_planner:
-  provider: huggingface
-  model: Qwen/Qwen3-32B
-  temperature: 0.1
-  max_tokens: 1500
-
-# Devil's Advocate — Coach-tier per spec §8.
-# Haiku-tier produces generic risk-list slop; strong model needed for
-# user-profile-grounded counter-points.
+# devils_advocate — counter-argument generation; think mode.
 devils_advocate:
   provider: huggingface
-  model: Qwen/Qwen3-32B
-  temperature: 0.3
+  model: deepseek-ai/DeepSeek-V4-Flash
+  temperature: 1.0
   max_tokens: 1500
+  extra_body:
+    thinking_mode: thinking
 
-# Synthesizer — Coach-tier. This is the user-facing voice on Flow C; quality
-# must match the Coach. Temperature 0.5 to produce coherent integrated prose
-# without being too conservative.
+# synthesizer — integrates researcher + coach outputs; think mode.
 synthesizer:
   provider: huggingface
-  model: Qwen/Qwen3-32B
-  temperature: 0.5
+  model: deepseek-ai/DeepSeek-V4-Flash
+  temperature: 1.0
   max_tokens: 3000
-
-# Supervisor — Haiku-tier (fast, cheap). One job: evaluate, not generate.
-# p50 < 500ms target per §10.3. Dense 32B model, low temperature for
-# deterministic safety checks.
-supervisor:
-  provider: huggingface
-  model: Qwen/Qwen3-32B
-  temperature: 0.0
-  max_tokens: 400
+  extra_body:
+    thinking_mode: thinking
