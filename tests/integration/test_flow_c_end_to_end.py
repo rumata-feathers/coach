@@ -28,7 +28,7 @@ from career_coach.db import get_pool
 from career_coach.llm.factory import LLMFactory
 from career_coach.pipeline.turn import TurnPipeline
 
-pytestmark = pytest.mark.asyncio
+pytestmark = [pytest.mark.asyncio, pytest.mark.live]
 
 _CONFIG_PATH = None  # Uses default from LLMFactory
 
@@ -158,9 +158,8 @@ async def test_flow_c_end_to_end(
     )
 
     # 3. Response quality assertions (against synthesizer_output)
-    import json
-
-    synth = json.loads(row["synthesizer_output"])
+    # asyncpg decodes JSONB columns via the pool codec → already a dict.
+    synth: dict = row["synthesizer_output"]
     response_text: str = synth.get("response_text", "")
 
     # ≥1 inline citation [N] in response

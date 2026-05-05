@@ -34,7 +34,7 @@ from career_coach.models.user_model import Hypothesis
 
 _CONFIG = Path(__file__).resolve().parents[2] / "config" / "models.yaml"
 
-pytestmark = pytest.mark.asyncio
+pytestmark = [pytest.mark.asyncio, pytest.mark.live]
 
 USER_FACTS = {
     "name": "Alex",

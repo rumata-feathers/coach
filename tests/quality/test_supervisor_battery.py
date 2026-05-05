@@ -29,7 +29,7 @@ from career_coach.models.agent_io import SupervisorInput
 _CONFIG = Path(__file__).resolve().parents[2] / "config" / "models.yaml"
 _FIXTURES_DIR = Path(__file__).parent / "supervisor_redteam"
 
-pytestmark = pytest.mark.asyncio
+pytestmark = [pytest.mark.asyncio, pytest.mark.live]
 
 # ---------------------------------------------------------------------------
 # Helpers

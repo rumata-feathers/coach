@@ -9,10 +9,12 @@ All tests use httpx.AsyncClient with ASGITransport (no real TCP).
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from unittest.mock import patch
 from uuid import UUID, uuid4
 
+import httpx
 import pytest
 from httpx import ASGITransport, AsyncClient
 
@@ -67,6 +69,19 @@ def _profiler_json() -> str:
             "hypothesis_evidence": [],
         }
     )
+
+
+def _parse_sse(resp: httpx.Response) -> dict:
+    """Extract the JSON payload from a Server-Sent Events response body.
+
+    The /chat endpoint emits optional keepalive comment lines followed by a
+    single ``data: {...}`` event.  Plain ``.json()`` fails because the body
+    starts with ``: keepalive``.
+    """
+    text = resp.text
+    match = re.search(r"^data: (.+)$", text, re.MULTILINE)
+    assert match, f"No 'data:' line found in SSE body: {text!r}"
+    return json.loads(match.group(1))
 
 
 def _make_mock_factory() -> tuple[MockLLMClient, LLMFactory]:
@@ -138,7 +153,7 @@ async def test_chat_returns_response(api_client) -> None:  # type: ignore[no-unt
     )
 
     assert resp.status_code == 200
-    body = resp.json()
+    body = _parse_sse(resp)
     assert "response" in body
     assert body["response"]
     assert "turn_id" in body
@@ -165,7 +180,7 @@ async def test_chat_preserves_session_id(api_client) -> None:  # type: ignore[no
     # Turn 1
     mock.queue(_intent_json(), _coach_json(), _critic_pass_json(), _profiler_json())
     resp1 = await client.post("/chat", json={"user_id": user_id, "message": "Hello"})
-    session_id = resp1.json()["session_id"]
+    session_id = _parse_sse(resp1)["session_id"]
 
     # Turn 2 — pass the same session_id back
     mock.queue(_intent_json(), _coach_json(), _critic_pass_json(), _profiler_json())
@@ -175,7 +190,7 @@ async def test_chat_preserves_session_id(api_client) -> None:  # type: ignore[no
     )
 
     assert resp2.status_code == 200
-    assert resp2.json()["session_id"] == session_id
+    assert _parse_sse(resp2)["session_id"] == session_id
 
 
 # ---- /admin/distill ----------------------------------------------------------

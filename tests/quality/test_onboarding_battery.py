@@ -28,7 +28,7 @@ from career_coach.pipeline.onboarding import OnboardingPipeline
 
 _CONFIG = Path(__file__).resolve().parents[2] / "config" / "models.yaml"
 
-pytestmark = pytest.mark.asyncio
+pytestmark = [pytest.mark.asyncio, pytest.mark.live]
 
 COLD_START_QUESTIONS = [
     "Should I study economics?",
