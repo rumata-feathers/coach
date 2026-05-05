@@ -43,6 +43,7 @@ class Critic(Agent):
         input_data: CriticInput,
         *,
         turn_id: UUID | None = None,
+        user_id: UUID | None = None,
     ) -> CriticVerdict:
         """Evaluate a Coach response and return a pass/reject verdict.
 
@@ -52,6 +53,7 @@ class Critic(Agent):
         Args:
             input_data: Typed input containing the Coach output + user model.
             turn_id: Optional turn_id for the agent_calls log.
+            user_id: Owning user; stored in agent_calls for per-user token aggregation.
 
         Returns:
             A validated :class:`CriticVerdict`.
@@ -107,6 +109,7 @@ class Critic(Agent):
 
         await self.log_call(
             turn_id=turn_id,
+            user_id=user_id,
             input_payload=_serialize_input(input_data),
             output_payload=verdict.model_dump(),
             latency_ms=latency,

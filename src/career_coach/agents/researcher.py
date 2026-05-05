@@ -87,6 +87,7 @@ class Researcher(Agent):
         input_data: ResearcherInput,
         *,
         turn_id: UUID | None = None,
+        user_id: UUID | None = None,
         _budget_override_s: float | None = None,
     ) -> ResearchBrief:
         """Produce a :class:`ResearchBrief`.
@@ -94,6 +95,7 @@ class Researcher(Agent):
         Args:
             input_data: Typed researcher input.
             turn_id: For agent_calls logging and research_briefs persistence.
+            user_id: Owning user; stored in agent_calls for per-user token aggregation.
             _budget_override_s: Internal — overrides the depth-based budget.
                 Used in unit tests to force truncation without real delays.
 
@@ -149,6 +151,7 @@ class Researcher(Agent):
 
         await self.log_call(
             turn_id=turn_id,
+            user_id=user_id,
             input_payload=_serialize_input(input_data),
             output_payload=_serialize_brief(brief),
             latency_ms=latency,

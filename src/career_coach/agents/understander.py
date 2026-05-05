@@ -45,6 +45,7 @@ class Understander(Agent):
         input_data: UnderstanderInput,
         *,
         turn_id: UUID | None = None,
+        user_id: UUID | None = None,
     ) -> IntentPacket:
         """Run the Understander and return a validated :class:`IntentPacket`.
 
@@ -52,6 +53,7 @@ class Understander(Agent):
             input_data: Typed input from the turn pipeline.
             turn_id: Optional turn_id for the agent_calls log (``None`` on
                 the first pass before the turn row is written).
+            user_id: Owning user; stored in agent_calls for per-user token aggregation.
 
         Returns:
             A validated :class:`IntentPacket`.
@@ -101,6 +103,7 @@ class Understander(Agent):
 
         await self.log_call(
             turn_id=turn_id,
+            user_id=user_id,
             input_payload=_serialize_input(input_data),
             output_payload=packet.model_dump(),
             latency_ms=latency,

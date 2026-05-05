@@ -78,12 +78,14 @@ class Synthesizer(Agent):
         input_data: SynthesizerInput,
         *,
         turn_id: UUID | None = None,
+        user_id: UUID | None = None,
     ) -> SynthesizedResponse:
         """Synthesise Coach + DA + Research into a single user-facing response.
 
         Args:
             input_data: Typed synthesizer input.
             turn_id: For agent_calls logging.
+            user_id: Owning user; stored in agent_calls for per-user token aggregation.
 
         Returns:
             A validated :class:`SynthesizedResponse`. Falls back to a Coach-text
@@ -179,6 +181,7 @@ class Synthesizer(Agent):
         latency = self.now_ms() - t0
         await self.log_call(
             turn_id=turn_id,
+            user_id=user_id,
             input_payload=_serialize_input(input_data),
             output_payload=output.model_dump(mode="json"),
             latency_ms=latency,

@@ -23,7 +23,7 @@ import json
 import os
 import re
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 from uuid import UUID
@@ -41,10 +41,10 @@ def _parse_since(raw: str) -> datetime:
     raw = raw.strip()
     m = re.fullmatch(r"(\d+(?:\.\d+)?)h", raw)
     if m:
-        return datetime.now(timezone.utc) - timedelta(hours=float(m.group(1)))
+        return datetime.now(UTC) - timedelta(hours=float(m.group(1)))
     dt = datetime.fromisoformat(raw)
     if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
+        dt = dt.replace(tzinfo=UTC)
     return dt
 
 
@@ -86,7 +86,7 @@ def _parse_args() -> tuple[datetime, UUID | None, str | None, Path]:
 
     since = _parse_since(since_raw)
     if output is None:
-        date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        date_str = datetime.now(UTC).strftime("%Y-%m-%d")
         output = f"reports/daily_{date_str}.md"
 
     return since, user_id, dsn, Path(output)
@@ -123,19 +123,6 @@ def _uf(user_id: UUID | None, alias: str = "t", base_param: int = 1) -> tuple[st
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
-
-
-def _sum_tokens(tokens_used: Any) -> int:
-    """Sum all values in a tokens_used JSONB dict."""
-    if tokens_used is None:
-        return 0
-    try:
-        d: dict[str, Any] = (
-            json.loads(tokens_used) if isinstance(tokens_used, str) else dict(tokens_used)
-        )
-        return sum(int(v) for v in d.values() if isinstance(v, (int, float)))
-    except Exception:
-        return 0
 
 
 def _trunc(text: str | None, n: int = 250) -> str:
@@ -185,12 +172,22 @@ async def _fetch_summary(conn: Any, since: datetime, user_id: UUID | None) -> di
         since, *up,
     )
 
-    # Total tokens: pull all tokens_used dicts and sum in Python
-    token_rows = await conn.fetch(
-        f"SELECT tokens_used FROM turns t WHERE t.created_at >= $1{uf} AND t.tokens_used IS NOT NULL",
-        since, *up,
+    # Total tokens: aggregate from agent_calls (authoritative source — turns.tokens_used
+    # was historically NULL; agent_calls.user_id is populated since migration 006).
+    uf_ac, up_ac = _uf(user_id, alias="ac", base_param=1)
+    token_row = await conn.fetchrow(
+        f"""
+        SELECT
+          COALESCE(SUM(ac.tokens_in),  0) AS total_in,
+          COALESCE(SUM(ac.tokens_out), 0) AS total_out
+        FROM agent_calls ac
+        WHERE ac.created_at >= $1{uf_ac}
+        """,
+        since, *up_ac,
     )
-    total_tokens = sum(_sum_tokens(r["tokens_used"]) for r in token_rows)
+    total_tokens = int(
+        (token_row["total_in"] or 0) + (token_row["total_out"] or 0)
+    )
 
     # Agent calls
     uf2, up2 = _uf(user_id, alias="t", base_param=1)
@@ -272,6 +269,18 @@ async def _fetch_user_breakdown(
             WHERE t.created_at >= $1{uf}
             GROUP BY t.user_id
         ),
+        token_totals AS (
+            -- Aggregate from agent_calls.user_id (populated since migration 006).
+            -- This covers pre-persist calls whose turn_id is NULL, giving accurate
+            -- per-user token counts across the full pipeline.
+            SELECT ac.user_id,
+                   COALESCE(SUM(ac.tokens_in),  0) +
+                   COALESCE(SUM(ac.tokens_out), 0)                               AS total_tokens
+            FROM agent_calls ac
+            WHERE ac.created_at >= $1
+              AND ac.user_id IS NOT NULL
+            GROUP BY ac.user_id
+        ),
         fact_delta AS (
             SELECT user_id, COUNT(*) AS fact_count
             FROM structured_facts
@@ -287,13 +296,15 @@ async def _fetch_user_breakdown(
         )
         SELECT
             pu.*,
-            COALESCE(fb.fallback_count, 0)  AS fallback_count,
-            COALESCE(fb.ac_total, 0)         AS ac_total,
-            COALESCE(fd.fact_count, 0)       AS fact_delta,
-            COALESCE(ed.ev_count, 0)         AS evidence_delta
+            COALESCE(fb.fallback_count, 0)   AS fallback_count,
+            COALESCE(fb.ac_total, 0)          AS ac_total,
+            COALESCE(tt.total_tokens, 0)      AS total_tokens,
+            COALESCE(fd.fact_count, 0)        AS fact_delta,
+            COALESCE(ed.ev_count, 0)          AS evidence_delta
         FROM per_user pu
-        LEFT JOIN fallbacks     fb ON fb.user_id = pu.user_id
-        LEFT JOIN fact_delta    fd ON fd.user_id = pu.user_id
+        LEFT JOIN fallbacks      fb ON fb.user_id = pu.user_id
+        LEFT JOIN token_totals   tt ON tt.user_id = pu.user_id
+        LEFT JOIN fact_delta     fd ON fd.user_id = pu.user_id
         LEFT JOIN evidence_delta ed ON ed.user_id = pu.user_id
         ORDER BY pu.turn_count DESC
         """,
@@ -562,8 +573,8 @@ def _render_report(
     p("")
 
     s = summary
-    p(f"| Metric | Value |")
-    p(f"|--------|-------|")
+    p("| Metric | Value |")
+    p("|--------|-------|")
     p(f"| Active users | {s['active_users']} |")
     p(f"| Sessions started | {s['sessions']} |")
     p(f"| Total turns | {s['turns']} |")
@@ -585,8 +596,8 @@ def _render_report(
     if not users:
         p("_No active users in this window._")
     else:
-        p("| User | ID | Sessions | Turns | First turn | Last turn | Critic rejects | Fallbacks | Onboarding turns | Fact Δ | Evidence Δ |")
-        p("|------|----|----------|-------|------------|-----------|----------------|-----------|------------------|--------|------------|")
+        p("| User | ID | Sessions | Turns | First turn | Last turn | Tokens | Critic rejects | Fallbacks | Onboarding turns | Fact Δ | Evidence Δ |")
+        p("|------|----|----------|-------|------------|-----------|--------|----------------|-----------|------------------|--------|------------|")
         for u in users:
             uid8 = str(u["user_id"])[:8]
             p(
@@ -596,6 +607,7 @@ def _render_report(
                 f"| {u['turn_count']} "
                 f"| {_fmt_ts(u['first_turn'])} "
                 f"| {_fmt_ts(u['last_turn'])} "
+                f"| {int(u['total_tokens']):,} "
                 f"| {_pct(u['critic_rejects'], u['flow_b'])} ({u['critic_rejects']}/{u['flow_b']}) "
                 f"| {_pct(u['fallback_count'], u['ac_total'])} ({u['fallback_count']}/{u['ac_total']}) "
                 f"| {u['onboarding_count']} "
@@ -625,7 +637,7 @@ def _render_report(
         p("_None._")
     else:
         for r in quality["critic_exhausted"]:
-            p(_quality_item(r, f"critic retried {r['retry_count']}× ending in reject"))
+            p(_quality_item(r, f"critic retried {r['retry_count']}x ending in reject"))
 
     # 3b. Agent fallbacks
     h(3, "3b — Agent fallbacks")
@@ -759,7 +771,7 @@ async def _main() -> None:
         command_timeout=60.0,
     )
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     print(
         f"Generating report: {since.strftime('%Y-%m-%d %H:%M UTC')} → {now.strftime('%Y-%m-%d %H:%M UTC')}",
         file=sys.stderr,

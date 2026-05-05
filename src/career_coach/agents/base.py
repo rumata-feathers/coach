@@ -46,6 +46,7 @@ async def log_agent_call(
     agent_name: str,
     model_used: str | None,
     turn_id: UUID | None,
+    user_id: UUID | None = None,
     input_payload: dict[str, Any],
     output_payload: dict[str, Any] | None,
     latency_ms: int,
@@ -63,6 +64,9 @@ async def log_agent_call(
 
     Payloads are round-tripped through JSON to coerce non-serialisable types
     (UUID, datetime, …) to strings before asyncpg's JSONB codec sees them.
+
+    ``user_id`` is stored alongside ``turn_id`` so per-user token aggregation
+    is possible even when ``turn_id`` is ``NULL`` (all pre-persist agent calls).
     """
     pool = await get_pool()
     safe_input = _jsonify(input_payload)
@@ -71,12 +75,13 @@ async def log_agent_call(
         await conn.execute(
             """
             INSERT INTO agent_calls
-                (turn_id, agent_name, model_used, input_payload, output_payload,
+                (turn_id, user_id, agent_name, model_used, input_payload, output_payload,
                  latency_ms, tokens_in, tokens_out, error,
                  retry_count, fallback_reason)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
             """,
             turn_id,
+            user_id,
             agent_name,
             model_used,
             safe_input,
@@ -144,6 +149,7 @@ class Agent:
         self,
         *,
         turn_id: UUID | None,
+        user_id: UUID | None = None,
         input_payload: dict[str, Any],
         output_payload: dict[str, Any] | None,
         latency_ms: int,
@@ -158,6 +164,8 @@ class Agent:
         Delegates to the module-level :func:`log_agent_call` function.
 
         Args:
+            user_id: Owning user; stored so per-user token aggregation works
+                even when ``turn_id`` is ``NULL`` (pre-persist calls).
             retry_count: Number of retry attempts made (0 = first attempt succeeded).
             fallback_reason: Populated when a fallback path was used, e.g.
                 ``"empty_llm_response"``, ``"schema_validation_failed"``,
@@ -167,6 +175,7 @@ class Agent:
             agent_name=self.name,
             model_used=self._llm_config.model,
             turn_id=turn_id,
+            user_id=user_id,
             input_payload=input_payload,
             output_payload=output_payload,
             latency_ms=latency_ms,

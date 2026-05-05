@@ -58,12 +58,14 @@ class Supervisor(Agent):
         input_data: SupervisorInput,
         *,
         turn_id: UUID | None = None,
+        user_id: UUID | None = None,
     ) -> SupervisorEvent:
         """Run the three-check safety monitor.
 
         Args:
             input_data: Supervisor input including user message + response.
             turn_id: For agent_calls logging.
+            user_id: Owning user; stored in agent_calls for per-user token aggregation.
 
         Returns:
             A :class:`SupervisorEvent`. On parse failure, returns a ``pass``
@@ -134,6 +136,7 @@ class Supervisor(Agent):
         latency = self.now_ms() - t0
         await self.log_call(
             turn_id=turn_id,
+            user_id=user_id,
             input_payload=_serialize_input(input_data),
             output_payload=event.model_dump(mode="json"),
             latency_ms=latency,

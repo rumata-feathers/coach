@@ -47,6 +47,7 @@ class Profiler(Agent):
         input_data: ProfilerInput,
         *,
         turn_id: UUID | None = None,
+        user_id: UUID | None = None,
     ) -> ProfilerOutput:
         """Call the LLM and return a :class:`ProfilerOutput`.
 
@@ -92,6 +93,7 @@ class Profiler(Agent):
 
         await self.log_call(
             turn_id=turn_id,
+            user_id=user_id,
             input_payload=_serialize_input(input_data),
             output_payload=output.model_dump(),
             latency_ms=latency,
@@ -123,7 +125,7 @@ class Profiler(Agent):
             existing_facts=existing_facts,
         )
         try:
-            output = await self.run(inp, turn_id=turn_id)
+            output = await self.run(inp, turn_id=turn_id, user_id=user_id)
             all_facts = output.new_facts + output.fact_updates
             if all_facts:
                 await self._structured.bulk_upsert(user_id, all_facts)

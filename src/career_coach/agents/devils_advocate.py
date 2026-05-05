@@ -74,6 +74,7 @@ class DevilsAdvocate(Agent):
         input_data: DevilsAdvocateInput,
         *,
         turn_id: UUID | None = None,
+        user_id: UUID | None = None,
     ) -> DevilsAdvocateOutput:
         """Critique the Coach's response and return a structured DA output.
 
@@ -81,6 +82,7 @@ class DevilsAdvocate(Agent):
             input_data: Typed DA input including coach output, optional research
                 brief, user facts, and intent.
             turn_id: For agent_calls logging.
+            user_id: Owning user; stored in agent_calls for per-user token aggregation.
 
         Returns:
             A validated :class:`DevilsAdvocateOutput`. Falls back to an honest
@@ -155,6 +157,7 @@ class DevilsAdvocate(Agent):
         latency = self.now_ms() - t0
         await self.log_call(
             turn_id=turn_id,
+            user_id=user_id,
             input_payload=_serialize_input(input_data),
             output_payload=output.model_dump(),
             latency_ms=latency,

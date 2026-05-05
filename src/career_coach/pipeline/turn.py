@@ -356,7 +356,8 @@ class TurnPipeline:
                 session_theory=session.session_theory,
                 recent_turns=state.get("recent_turns", []),
                 user_facts=state.get("user_facts", {}),
-            )
+            ),
+            user_id=state["user_id"],
         )
         return {"intent_packet": intent_packet}
 
@@ -418,7 +419,9 @@ class TurnPipeline:
             user_facts=state.get("user_facts", {}),
             depth="deep",
         )
-        research_brief = await self._get_researcher().run(researcher_input)
+        research_brief = await self._get_researcher().run(
+            researcher_input, user_id=state["user_id"]
+        )
         result: dict[str, Any] = {"research_brief": research_brief}
         if research_brief and research_brief.brief_id:
             result["research_brief_id"] = research_brief.brief_id
@@ -442,7 +445,7 @@ class TurnPipeline:
             recent_turns=state.get("recent_turns", []),
             critic_feedback=critic_feedback,
         )
-        coach_out = await self._coach.run(coach_input)
+        coach_out = await self._coach.run(coach_input, user_id=state["user_id"])
         return {"coach_out": coach_out, "coach_attempt": attempt + 1}
 
     async def _node_coach_escalation(self, state: TurnState) -> dict[str, Any]:
@@ -455,7 +458,8 @@ class TurnPipeline:
                 active_hypotheses=state.get("active_hypotheses", []),
                 recent_turns=state.get("recent_turns", []),
                 critic_feedback=state.get("critic_feedback_ab"),
-            )
+            ),
+            user_id=state["user_id"],
         )
         return {"coach_out": coach_out}
 
@@ -472,7 +476,7 @@ class TurnPipeline:
             intent_packet=state["intent_packet"],
             research_brief=state.get("research_brief"),
         )
-        da_out = await self._devils_advocate.run(da_input)
+        da_out = await self._devils_advocate.run(da_input, user_id=state["user_id"])
         return {
             "da_out": da_out,
             "da_output_dict": da_out.model_dump(mode="json"),
@@ -496,7 +500,7 @@ class TurnPipeline:
             intent_packet=state["intent_packet"],
             critic_feedback=critic_feedback,
         )
-        synth_out = await self._synthesizer.run(synth_input)
+        synth_out = await self._synthesizer.run(synth_input, user_id=state["user_id"])
         return {
             "synth_out": synth_out,
             "synth_attempt": attempt + 1,
@@ -535,7 +539,7 @@ class TurnPipeline:
                 intent_packet=state["intent_packet"],
             )
 
-        verdict = await self._critic.run(critic_input)
+        verdict = await self._critic.run(critic_input, user_id=state["user_id"])
         result: dict[str, Any] = {"critic_verdicts": [verdict.model_dump()]}
 
         if verdict.verdict != "pass":
@@ -579,6 +583,7 @@ class TurnPipeline:
             intent_packet=state["intent_packet"],
             active_hypotheses=state.get("active_hypotheses", []),
             recent_turns=state.get("recent_turns", []),
+            user_id=state["user_id"],
             coach_out_obj=coach_out,
             da_out_obj=state.get("da_out"),
             research_brief_obj=state.get("research_brief"),
@@ -737,6 +742,7 @@ class TurnPipeline:
         intent_packet: Any,
         active_hypotheses: list[Any],
         recent_turns: list[Any],
+        user_id: UUID | None = None,
         coach_out_obj: Any = None,
         da_out_obj: Any = None,
         research_brief_obj: Any = None,
@@ -760,7 +766,7 @@ class TurnPipeline:
             specific_ask=specific_ask,
             flow_used=flow,
         )
-        event = await self._supervisor.run(sup_input)
+        event = await self._supervisor.run(sup_input, user_id=user_id)
 
         if event.action == "pass":
             return response_text, event, None
@@ -787,6 +793,7 @@ class TurnPipeline:
             active_hypotheses=active_hypotheses,
             recent_turns=recent_turns,
             original_response=response_text,
+            user_id=user_id,
             coach_out_obj=coach_out_obj,
             da_out_obj=da_out_obj,
             research_brief_obj=research_brief_obj,
@@ -800,7 +807,8 @@ class TurnPipeline:
                 user_facts=user_facts,
                 specific_ask=specific_ask,
                 flow_used=flow,
-            )
+            ),
+            user_id=user_id,
         )
         if retry_event.action == "pass":
             return retry_response, event, new_synth_out
@@ -822,6 +830,7 @@ class TurnPipeline:
         active_hypotheses: list[Any],
         recent_turns: list[Any],
         original_response: str,
+        user_id: UUID | None = None,
         coach_out_obj: Any = None,
         da_out_obj: Any = None,
         research_brief_obj: Any = None,
@@ -840,7 +849,8 @@ class TurnPipeline:
                     active_hypotheses=active_hypotheses,
                     recent_turns=recent_turns,
                     critic_feedback=supervisor_feedback,
-                )
+                ),
+                user_id=user_id,
             )
             return retry_out.response_text, None
 
@@ -854,7 +864,8 @@ class TurnPipeline:
                     active_hypotheses=active_hypotheses,
                     intent_packet=intent_packet,
                     critic_feedback=supervisor_feedback,
-                )
+                ),
+                user_id=user_id,
             )
             return retry_synth.response_text, retry_synth
 

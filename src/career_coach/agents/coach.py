@@ -51,6 +51,7 @@ class Coach(Agent):
         input_data: CoachInput,
         *,
         turn_id: UUID | None = None,
+        user_id: UUID | None = None,
     ) -> CoachOutput:
         """Generate a coaching response.
 
@@ -58,6 +59,7 @@ class Coach(Agent):
             input_data: Typed input including intent, user model, and optional
                 Critic feedback for retries.
             turn_id: Optional turn_id for the agent_calls log.
+            user_id: Owning user; stored in agent_calls for per-user token aggregation.
 
         Returns:
             A validated :class:`CoachOutput`. Falls back to a safe canned
@@ -103,6 +105,7 @@ class Coach(Agent):
 
         await self.log_call(
             turn_id=turn_id,
+            user_id=user_id,
             input_payload=_serialize_input(input_data),
             output_payload=output.model_dump(),
             latency_ms=latency,
@@ -119,6 +122,7 @@ class Coach(Agent):
         input_data: CoachInput,
         *,
         turn_id: UUID | None = None,
+        user_id: UUID | None = None,
     ) -> CoachOutput:
         """Return an honest 'I need more context' response after retry exhaustion.
 
@@ -134,6 +138,7 @@ class Coach(Agent):
         )
         await self.log_call(
             turn_id=turn_id,
+            user_id=user_id,
             input_payload=_serialize_input(input_data),
             output_payload=output.model_dump(),
             latency_ms=0,
