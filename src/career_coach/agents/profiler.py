@@ -145,10 +145,39 @@ class Profiler(Agent):
                     user_id,
                     turn_id,
                 )
+                # Auto-trigger distillation whenever new evidence is queued.
+                # This runs inside the existing background task so it never
+                # blocks the user-facing response. The job returns early if
+                # the evidence queue is empty, making it safe to call every turn.
+                await self._run_distillation(user_id)
         except Exception as exc:
             logger.error("Profiler background task failed: %s", exc, exc_info=True)
             return ProfilerOutput()
         return output
+
+    async def _run_distillation(self, user_id: UUID) -> None:
+        """Trigger distillation in-process after evidence is queued.
+
+        Imported lazily to avoid a module-level circular dependency between
+        the agents and jobs packages.  Failures are logged and swallowed so
+        a broken distillation job never kills the profiler background task.
+        """
+        try:
+            from career_coach.jobs.distillation import run_distillation
+
+            result = await run_distillation(user_id, factory=self._factory)
+            logger.info(
+                "Auto-distillation for user %s: processed=%d created=%d matched=%d deduped=%d",
+                user_id,
+                result.get("processed", 0),
+                result.get("created", 0),
+                result.get("matched", 0),
+                result.get("deduped", 0),
+            )
+        except Exception as exc:
+            logger.error(
+                "Auto-distillation failed for user %s: %s", user_id, exc, exc_info=True
+            )
 
 
 # ---- helpers ---------------------------------------------------------------

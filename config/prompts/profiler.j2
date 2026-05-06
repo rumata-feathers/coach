@@ -64,6 +64,13 @@ Respond with JSON only — no prose, no markdown fences. Match this schema exact
 Rules:
 - Only extract facts explicitly evidenced in this turn. Do NOT hallucinate.
 - If nothing new was revealed, return empty arrays.
-- confidence must be 0.0–1.0 inclusive.
 - weight must be non-zero.
 - Return a valid JSON object. No prose before or after.
+
+Confidence calibration — do NOT default everything to 1.0:
+- 1.0  : user stated it directly and unambiguously ("I am 22", "I study in London")
+- 0.85 : stated clearly but with minor ambiguity or hedging ("I think I'm around 22")
+- 0.7  : strongly implied by what the user said, not stated outright
+- 0.5  : reasonable inference from indirect signals
+- 0.3  : uncertain guess from weak signals
+Only use source="user_stated" when the user said it directly. Use source="inferred" when you are reading between the lines — and lower the confidence accordingly.
