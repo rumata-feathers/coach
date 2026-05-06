@@ -28,7 +28,7 @@ async def _make_user(name: str):  # type: ignore[no-untyped-def]
     pool = await get_pool()
     async with pool.acquire() as conn:
         return await conn.fetchval(
-            "INSERT INTO users (display_name) VALUES ($1) RETURNING user_id", name
+            "INSERT INTO users (display_name, is_test) VALUES ($1, TRUE) RETURNING user_id", name
         )
 
 

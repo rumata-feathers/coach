@@ -59,7 +59,7 @@ async def _create_user(display_name: str, *, facts: dict[str, str] | None = None
     pool = await get_pool()
     async with pool.acquire() as conn:
         user_id: UUID = await conn.fetchval(
-            "INSERT INTO users (display_name) VALUES ($1) RETURNING user_id",
+            "INSERT INTO users (display_name, is_test) VALUES ($1, TRUE) RETURNING user_id",
             display_name,
         )
         for key, jsonb_val in (facts or {}).items():

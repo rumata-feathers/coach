@@ -76,7 +76,7 @@ async def flow_c_user_id(skip_if_missing: None) -> UUID:
     pool = await get_pool()
     async with pool.acquire() as conn:
         user_id: UUID = await conn.fetchval(
-            "INSERT INTO users (display_name) VALUES ($1) RETURNING user_id",
+            "INSERT INTO users (display_name, is_test) VALUES ($1, TRUE) RETURNING user_id",
             "test-flow-c-e2e",
         )
         # Seed ≥5 facts including math + research signals so Flow C fires.

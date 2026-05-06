@@ -60,6 +60,7 @@ def _get_factory() -> LLMFactory:
 
 class CreateUserRequest(BaseModel):
     display_name: str = Field(..., min_length=1, max_length=200)
+    is_test: bool = Field(default=False, description="Mark as a test/dev user; excluded from daily reports by default.")
 
 
 class CreateUserResponse(BaseModel):
@@ -105,10 +106,11 @@ async def create_user(request: Request, body: CreateUserRequest) -> CreateUserRe
     pool = await get_pool()
     async with pool.acquire() as conn:
         user_id = await conn.fetchval(
-            "INSERT INTO users (display_name) VALUES ($1) RETURNING user_id",
+            "INSERT INTO users (display_name, is_test) VALUES ($1, $2) RETURNING user_id",
             body.display_name,
+            body.is_test,
         )
-    logger.info("Created user %s ('%s').", user_id, body.display_name)
+    logger.info("Created user %s ('%s', is_test=%s).", user_id, body.display_name, body.is_test)
     return CreateUserResponse(user_id=user_id)
 
 

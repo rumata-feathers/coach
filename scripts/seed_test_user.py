@@ -39,7 +39,7 @@ async def seed(dsn: str) -> UUID:
             )
             if existing is None:
                 user_id = await conn.fetchval(
-                    "INSERT INTO users (display_name) VALUES ($1) RETURNING user_id",
+                    "INSERT INTO users (display_name, is_test) VALUES ($1, TRUE) RETURNING user_id",
                     TEST_USER_NAME,
                 )
             else:

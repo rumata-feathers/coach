@@ -11,6 +11,7 @@ Usage
     uv run python scripts/daily_report.py --user-id <uuid>
     uv run python scripts/daily_report.py --output reports/daily_custom.md
     uv run python scripts/daily_report.py --dsn "postgresql://..."
+    uv run python scripts/daily_report.py --include-test
 
 If --dsn is omitted the script falls back to SUPABASE_DB_URL / .env.
 Output defaults to reports/daily_YYYY-MM-DD.md (today's date, UTC).
@@ -48,13 +49,14 @@ def _parse_since(raw: str) -> datetime:
     return dt
 
 
-def _parse_args() -> tuple[datetime, UUID | None, str | None, Path]:
-    """Return (since_dt, user_id | None, dsn | None, output_path)."""
+def _parse_args() -> tuple[datetime, UUID | None, str | None, Path, bool]:
+    """Return (since_dt, user_id | None, dsn | None, output_path, include_test)."""
     argv = sys.argv[1:]
     since_raw = "24h"
     user_id: UUID | None = None
     dsn: str | None = None
     output: str | None = None
+    include_test: bool = False
 
     i = 0
     while i < len(argv):
@@ -79,6 +81,8 @@ def _parse_args() -> tuple[datetime, UUID | None, str | None, Path]:
             output = argv[i] if i < len(argv) else None
         elif a.startswith("--output="):
             output = a[len("--output="):]
+        elif a == "--include-test":
+            include_test = True
         elif a in ("-h", "--help"):
             print(__doc__)
             sys.exit(0)
@@ -89,7 +93,7 @@ def _parse_args() -> tuple[datetime, UUID | None, str | None, Path]:
         date_str = datetime.now(UTC).strftime("%Y-%m-%d")
         output = f"reports/daily_{date_str}.md"
 
-    return since, user_id, dsn, Path(output)
+    return since, user_id, dsn, Path(output), include_test
 
 
 def _resolve_dsn(dsn_override: str | None) -> str:
@@ -118,6 +122,13 @@ def _uf(user_id: UUID | None, alias: str = "t", base_param: int = 1) -> tuple[st
     if user_id is None:
         return "", []
     return f" AND {alias}.user_id = ${base_param + 1}", [user_id]
+
+
+def _tf(include_test: bool, alias: str = "u") -> str:
+    """Return SQL fragment to exclude test users unless include_test is True."""
+    if include_test:
+        return ""
+    return f" AND NOT {alias}.is_test"
 
 
 # ---------------------------------------------------------------------------
@@ -149,10 +160,13 @@ def _pct(num: int, denom: int) -> str:
 # ---------------------------------------------------------------------------
 
 
-async def _fetch_summary(conn: Any, since: datetime, user_id: UUID | None) -> dict[str, Any]:
+async def _fetch_summary(
+    conn: Any, since: datetime, user_id: UUID | None, include_test: bool
+) -> dict[str, Any]:
+    tf = _tf(include_test, "u")
     uf, up = _uf(user_id, alias="t")
 
-    # Scalar stats
+    # Scalar stats — join users so is_test filter can be applied.
     row = await conn.fetchrow(
         f"""
         SELECT
@@ -167,7 +181,8 @@ async def _fetch_summary(conn: Any, since: datetime, user_id: UUID | None) -> di
               AND t.critic_verdicts->-1->>'verdict' = 'reject')              AS critic_rejects,
           COUNT(*) FILTER (WHERE t.flow_used = 'onboarding')                AS onboarding_turns
         FROM turns t
-        WHERE t.created_at >= $1{uf}
+        JOIN users u ON u.user_id = t.user_id
+        WHERE t.created_at >= $1{uf}{tf}
         """,
         since, *up,
     )
@@ -181,7 +196,8 @@ async def _fetch_summary(conn: Any, since: datetime, user_id: UUID | None) -> di
           COALESCE(SUM(ac.tokens_in),  0) AS total_in,
           COALESCE(SUM(ac.tokens_out), 0) AS total_out
         FROM agent_calls ac
-        WHERE ac.created_at >= $1{uf_ac}
+        JOIN users u ON u.user_id = ac.user_id
+        WHERE ac.created_at >= $1{uf_ac}{tf}
         """,
         since, *up_ac,
     )
@@ -198,14 +214,19 @@ async def _fetch_summary(conn: Any, since: datetime, user_id: UUID | None) -> di
           COUNT(*) FILTER (WHERE ac.fallback_reason IS NOT NULL) AS fallback_calls
         FROM agent_calls ac
         JOIN turns t ON t.turn_id = ac.turn_id
-        WHERE t.created_at >= $1{uf2}
+        JOIN users u ON u.user_id = t.user_id
+        WHERE t.created_at >= $1{uf2}{tf}
         """,
         since, *up2,
     )
 
     # Deployment versions
     ver_rows = await conn.fetch(
-        f"SELECT DISTINCT t.deployment_version FROM turns t WHERE t.created_at >= $1{uf}",
+        f"""
+        SELECT DISTINCT t.deployment_version FROM turns t
+        JOIN users u ON u.user_id = t.user_id
+        WHERE t.created_at >= $1{uf}{tf}
+        """,
         since, *up,
     )
     versions = [r["deployment_version"] or "unknown" for r in ver_rows]
@@ -230,8 +251,9 @@ async def _fetch_summary(conn: Any, since: datetime, user_id: UUID | None) -> di
 
 
 async def _fetch_user_breakdown(
-    conn: Any, since: datetime, user_id: UUID | None
+    conn: Any, since: datetime, user_id: UUID | None, include_test: bool
 ) -> list[dict[str, Any]]:
+    tf = _tf(include_test, "u")
     uf, up = _uf(user_id, alias="t")
 
     rows = await conn.fetch(
@@ -240,7 +262,7 @@ async def _fetch_user_breakdown(
             SELECT t.*, u.display_name
             FROM turns t
             JOIN users u ON u.user_id = t.user_id
-            WHERE t.created_at >= $1{uf}
+            WHERE t.created_at >= $1{uf}{tf}
         ),
         per_user AS (
             SELECT
@@ -319,8 +341,9 @@ async def _fetch_user_breakdown(
 
 
 async def _fetch_quality(
-    conn: Any, since: datetime, user_id: UUID | None
+    conn: Any, since: datetime, user_id: UUID | None, include_test: bool
 ) -> dict[str, list[dict[str, Any]]]:
+    tf = _tf(include_test, "u")
     uf, up = _uf(user_id, alias="t")
 
     # 1. Critic exhausted retries (≥2 verdicts, last = reject)
@@ -331,7 +354,7 @@ async def _fetch_quality(
                jsonb_array_length(t.critic_verdicts) AS retry_count
         FROM turns t
         JOIN users u ON u.user_id = t.user_id
-        WHERE t.created_at >= $1{uf}
+        WHERE t.created_at >= $1{uf}{tf}
           AND t.critic_verdicts IS NOT NULL
           AND jsonb_array_length(t.critic_verdicts) >= 2
           AND t.critic_verdicts->-1->>'verdict' = 'reject'
@@ -351,7 +374,7 @@ async def _fetch_quality(
         FROM agent_calls ac
         JOIN turns t ON t.turn_id = ac.turn_id
         JOIN users u ON u.user_id = t.user_id
-        WHERE t.created_at >= $1{uf}
+        WHERE t.created_at >= $1{uf}{tf}
           AND ac.fallback_reason IS NOT NULL
         ORDER BY t.turn_id, t.created_at
         """,
@@ -366,7 +389,7 @@ async def _fetch_quality(
                LENGTH(t.assistant_message) AS msg_len
         FROM turns t
         JOIN users u ON u.user_id = t.user_id
-        WHERE t.created_at >= $1{uf}
+        WHERE t.created_at >= $1{uf}{tf}
           AND t.assistant_message IS NOT NULL
           AND t.flow_used != 'clarification'
           AND (LENGTH(t.assistant_message) < 100 OR LENGTH(t.assistant_message) > 2000)
@@ -382,7 +405,7 @@ async def _fetch_quality(
                t.user_message, t.assistant_message, t.turn_index
         FROM turns t
         JOIN users u ON u.user_id = t.user_id
-        WHERE t.created_at >= $1{uf}
+        WHERE t.created_at >= $1{uf}{tf}
           AND t.flow_used = 'clarification'
           AND t.turn_index >= 3
         ORDER BY t.created_at
@@ -397,7 +420,7 @@ async def _fetch_quality(
                t.user_message, t.assistant_message
         FROM turns t
         JOIN users u ON u.user_id = t.user_id
-        WHERE t.created_at >= $1{uf}
+        WHERE t.created_at >= $1{uf}{tf}
           AND t.user_message LIKE '%[retried]%'
         ORDER BY t.created_at
         """,
@@ -419,8 +442,9 @@ async def _fetch_quality(
 
 
 async def _fetch_extractions(
-    conn: Any, since: datetime, user_id: UUID | None
+    conn: Any, since: datetime, user_id: UUID | None, include_test: bool
 ) -> dict[str, dict[str, Any]]:
+    tf = _tf(include_test, "u")
     uf_sf, up_sf = _uf(user_id, alias="sf")
     uf_h, up_h = _uf(user_id, alias="h")
 
@@ -431,7 +455,7 @@ async def _fetch_extractions(
                sf.source, sf.confidence
         FROM structured_facts sf
         JOIN users u ON u.user_id = sf.user_id
-        WHERE sf.created_at >= $1{uf_sf}
+        WHERE sf.created_at >= $1{uf_sf}{tf}
         ORDER BY u.display_name, sf.key
         """,
         since, *up_sf,
@@ -445,7 +469,7 @@ async def _fetch_extractions(
                 WHERE he.hypothesis_id = h.hypothesis_id) AS evidence_count
         FROM hypotheses h
         JOIN users u ON u.user_id = h.user_id
-        WHERE h.created_at >= $1{uf_h}
+        WHERE h.created_at >= $1{uf_h}{tf}
         ORDER BY u.display_name, h.confidence DESC
         """,
         since, *up_h,
@@ -482,9 +506,10 @@ async def _fetch_extractions(
 
 
 async def _fetch_transcripts(
-    conn: Any, since: datetime, user_id: UUID | None
+    conn: Any, since: datetime, user_id: UUID | None, include_test: bool
 ) -> list[dict[str, Any]]:
     """Return all sessions (with turns) that had activity in the window."""
+    tf = _tf(include_test, "u")
     uf, up = _uf(user_id, alias="t")
 
     # All sessions that have at least one turn in the window
@@ -495,7 +520,7 @@ async def _fetch_transcripts(
         FROM sessions s
         JOIN turns t ON t.session_id = s.session_id
         JOIN users u ON u.user_id = s.user_id
-        WHERE t.created_at >= $1{uf}
+        WHERE t.created_at >= $1{uf}{tf}
         ORDER BY s.user_id, s.started_at
         """,
         since, *up,
@@ -553,6 +578,7 @@ def _render_report(
     extractions: dict[str, dict[str, Any]],
     transcripts: list[dict[str, Any]],
     user_filter: UUID | None,
+    include_test: bool = False,
 ) -> str:
     lines: list[str] = []
 
@@ -564,7 +590,8 @@ def _render_report(
 
     # ── Title ──────────────────────────────────────────────────────────────
     filter_note = f" (user `{str(user_filter)[:8]}…`)" if user_filter else ""
-    h(1, f"Daily Report — {now.strftime('%Y-%m-%d %H:%M UTC')}{filter_note}")
+    test_note = " · _test users included_" if include_test else ""
+    h(1, f"Daily Report — {now.strftime('%Y-%m-%d %H:%M UTC')}{filter_note}{test_note}")
 
     # ── Section 1: Summary ─────────────────────────────────────────────────
     h(2, "1 — Summary")
@@ -750,7 +777,7 @@ def _render_report(
 async def _main() -> None:
     import asyncpg
 
-    since, user_id, dsn_override, output_path = _parse_args()
+    since, user_id, dsn_override, output_path, include_test = _parse_args()
     dsn = _resolve_dsn(dsn_override)
 
     if not dsn:
@@ -772,19 +799,21 @@ async def _main() -> None:
     )
 
     now = datetime.now(UTC)
+    test_note = " (test users included)" if include_test else " (test users excluded)"
     print(
-        f"Generating report: {since.strftime('%Y-%m-%d %H:%M UTC')} → {now.strftime('%Y-%m-%d %H:%M UTC')}",
+        f"Generating report: {since.strftime('%Y-%m-%d %H:%M UTC')} → "
+        f"{now.strftime('%Y-%m-%d %H:%M UTC')}{test_note}",
         file=sys.stderr,
     )
 
     try:
         async with pool.acquire() as conn:
             # asyncpg connections are single-query-at-a-time; run sequentially.
-            summary     = await _fetch_summary(conn, since, user_id)
-            users       = await _fetch_user_breakdown(conn, since, user_id)
-            quality     = await _fetch_quality(conn, since, user_id)
-            extractions = await _fetch_extractions(conn, since, user_id)
-            transcripts = await _fetch_transcripts(conn, since, user_id)
+            summary     = await _fetch_summary(conn, since, user_id, include_test)
+            users       = await _fetch_user_breakdown(conn, since, user_id, include_test)
+            quality     = await _fetch_quality(conn, since, user_id, include_test)
+            extractions = await _fetch_extractions(conn, since, user_id, include_test)
+            transcripts = await _fetch_transcripts(conn, since, user_id, include_test)
     finally:
         await pool.close()
 
@@ -797,6 +826,7 @@ async def _main() -> None:
         extractions=extractions,
         transcripts=transcripts,
         user_filter=user_id,
+        include_test=include_test,
     )
 
     output_path.parent.mkdir(parents=True, exist_ok=True)

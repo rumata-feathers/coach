@@ -141,7 +141,7 @@ async def test_create_user_returns_422_on_empty_name(migrated_db: str) -> None:
 async def test_chat_returns_response(api_client) -> None:  # type: ignore[no-untyped-def]
     client, mock = api_client
     # First create a user
-    user_resp = await client.post("/users", json={"display_name": f"chat_test_{uuid4().hex[:6]}"})
+    user_resp = await client.post("/users", json={"display_name": f"chat_test_{uuid4().hex[:6]}", "is_test": True})
     user_id = user_resp.json()["user_id"]
 
     # Reset mock queue for this test
@@ -173,7 +173,7 @@ async def test_chat_returns_404_for_unknown_user(api_client) -> None:  # type: i
 async def test_chat_preserves_session_id(api_client) -> None:  # type: ignore[no-untyped-def]
     client, mock = api_client
     user_resp = await client.post(
-        "/users", json={"display_name": f"session_test_{uuid4().hex[:6]}"}
+        "/users", json={"display_name": f"session_test_{uuid4().hex[:6]}", "is_test": True}
     )
     user_id = user_resp.json()["user_id"]
 
@@ -199,7 +199,7 @@ async def test_chat_preserves_session_id(api_client) -> None:  # type: ignore[no
 async def test_distill_dry_run_returns_200(api_client) -> None:  # type: ignore[no-untyped-def]
     client, _mock = api_client
     user_resp = await client.post(
-        "/users", json={"display_name": f"distill_{uuid4().hex[:6]}"}
+        "/users", json={"display_name": f"distill_{uuid4().hex[:6]}", "is_test": True}
     )
     user_id = user_resp.json()["user_id"]
 

@@ -62,7 +62,7 @@ async def test_research_briefs_fk_and_roundtrip(db_conn: asyncpg.Connection) -> 
     now = datetime.utcnow()
 
     await db_conn.execute(
-        "INSERT INTO users (user_id, display_name) VALUES ($1, $2)",
+        "INSERT INTO users (user_id, display_name, is_test) VALUES ($1, $2, TRUE)",
         user_id,
         "migration-004-test-user",
     )
@@ -144,7 +144,7 @@ async def test_supervisor_events_fk_and_roundtrip(db_conn: asyncpg.Connection) -
     now = datetime.utcnow()
 
     await db_conn.execute(
-        "INSERT INTO users (user_id, display_name) VALUES ($1, $2)",
+        "INSERT INTO users (user_id, display_name, is_test) VALUES ($1, $2, TRUE)",
         user_id,
         "migration-004-supervisor-test",
     )
@@ -204,7 +204,7 @@ async def test_chart_specs_default_is_empty_array(db_conn: asyncpg.Connection) -
     now = datetime.utcnow()
 
     await db_conn.execute(
-        "INSERT INTO users (user_id, display_name) VALUES ($1, $2)",
+        "INSERT INTO users (user_id, display_name, is_test) VALUES ($1, $2, TRUE)",
         user_id,
         "migration-004-chart-test",
     )
