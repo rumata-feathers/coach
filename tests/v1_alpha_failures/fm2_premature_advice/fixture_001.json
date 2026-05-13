@@ -1,0 +1,20 @@
+{
+  "failure_mode": "premature_advice",
+  "source": "v1_alpha_production",
+  "turn_id": "eae447c9-aec4-4ee0-8c70-321e7aa89569",
+  "user_display_name": "alex",
+  "turn_index": 0,
+  "flow_used": "B",
+  "user_message": "i need to choose my major for uni, what jobs exist for a math/cs student?",
+  "assistant_message": "It's smart to be thinking about this now — matching your major to real job options will save you a lot of later pivoting. Given your location (London), your university (Ecole Polytechnique), and your craving for fast-moving, impactful work, I'd look at three clusters that blend math/CS with high velocity: quantitative finance (e.g., quant at a hedge fund or prop shop), software engineering at big tech or fintech (e.g., Meta, Stripe), and business development roles in tech where analytical rigor matters. You already have a Goldman Sachs quant internship, which gives you a huge edge. For your major, a double or joint degree in math and CS (or applied math) keeps doors open across all three — pure CS might tilt you more toward engineering roles while pure math might limit some software engineer applications. I'd check course lists at Ecole Poly to see if you can build a strong CS foundation while keeping heavy math coursework. Also, your interest in AlphaFold suggests you care about impact — that could pull you toward AI/ML roles in biotech or fintech, which are high-velocity and meaningful. Want me to dig deeper into any of these paths?",
+  "annotations": {
+    "problem": "Turn 0. The user asked an open question about what jobs exist. The system had prior context (GS internship, AlphaFold interest) and immediately delivered a three-cluster job recommendation with specific firm names (Meta, Stripe, hedge funds). No elicitation of what the user actually values, fears, or is wrestling with. The recommendation is plausible but driven by surface keywords, not by understanding.",
+    "evidence": [
+      "Turn index 0 — first message in session",
+      "Response jumps to 'three clusters' + specific firm names (Meta, Stripe, hedge fund prop shops)",
+      "No clarifying questions before recommendation delivered",
+      "User's actual concern (choosing a major) addressed only as an afterthought in the middle paragraph"
+    ],
+    "v2_expectation": "On turn 0 with an open question, the Elicitor asks a single targeted question to understand what the user is actually wrestling with before any recommendation is made. A landscape of options may be surfaced but no specific path is recommended."
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "failure_mode": "generic_feel",
+  "source": "v1_alpha_production",
+  "turn_id": "f20fae01-6b98-45fd-b7bb-fa247aeed982",
+  "user_display_name": "alex",
+  "turn_index": 0,
+  "flow_used": "B",
+  "user_message": "hi, I will be very promt with you, execute this as I say, no your implementations: produce a CHART (not a text, but a chart), of 5 of my possible future jobs, plot their salary levels in london, starting from a grad role and which position ill have into career (use citations from websites, so I can check later)",
+  "assistant_message": "I want to give you a genuinely useful response here, but I'm running into difficulty shaping one that I'm confident is actually grounded in what I know about you and addresses what you're asking. Could you help me by sharing a bit more context? For example: what specifically prompted this question, and what would a useful answer look like for you?",
+  "critic_verdicts": [
+    {
+      "verdict": "reject",
+      "failure_modes": ["ungrounded"],
+      "specific_complaints": [
+        "The response does not use any specific items from the user's facts or hypotheses; it fails the grounding test by not referencing at least two items."
+      ]
+    },
+    {
+      "verdict": "reject",
+      "failure_modes": ["ungrounded"],
+      "specific_complaints": [
+        "The response only references two specific items from the user's facts (location and requested_salary_sectors), but does not use them in a meaningful way. It does not incorporate the user's current role (Quant in DCM), university (Ecole Polytechnique), or other specific requested roles."
+      ]
+    },
+    {
+      "verdict": "reject",
+      "failure_modes": ["ungrounded"],
+      "specific_complaints": [
+        "The response does not use any specific items from the user's facts or hypotheses; it only reports an internal parse error and asks for rephrasing without engaging with the user's known context."
+      ]
+    }
+  ],
+  "annotations": {
+    "problem": "The user opened with a very specific, direct request: a chart of 5 possible future jobs with salary progression in London, with citations. The system had this user's full profile from prior sessions (GS quant, Polytechnique, London, prior salary discussions). The response is a generic context-request stall that ignores everything known about the user and doesn't acknowledge the concrete deliverable requested. Critic rejected 3 times. This is the same boilerplate stall used in fixture_001 — it was a hardcoded fallback, not a personalised response.",
+    "evidence": [
+      "Identical stall text as fixture_001: 'I want to give you a genuinely useful response here, but I'm running into difficulty...'",
+      "Critic rejected 3 consecutive times with failure_mode='ungrounded'",
+      "User had populated profile: GS quant, Polytechnique, London — none used",
+      "Response asks 'what would a useful answer look like for you?' when user had just described exactly that in explicit detail"
+    ],
+    "v2_expectation": "The generic stall fallback ('I want to give you a genuinely useful response here, but I\\'m running into difficulty...') is removed. Any response that uses zero known user facts is a Critic auto-reject. When a user has a populated profile, every response references at minimum two specific facts. A concrete deliverable request gets a concrete attempt or a specific explanation of what's missing to complete it."
+  }
+}

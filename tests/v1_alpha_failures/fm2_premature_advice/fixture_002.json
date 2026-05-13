@@ -1,0 +1,20 @@
+{
+  "failure_mode": "premature_advice",
+  "source": "v1_alpha_production",
+  "turn_id": "0db4729b-6bd1-4f41-8de6-87469ebda607",
+  "user_display_name": "betty",
+  "turn_index": 2,
+  "flow_used": "B",
+  "user_message": "i think i like to work in chaotic environments, id solve new probles, find cures to diseases and no clear paths, i want to do something meaningful in my life",
+  "assistant_message": "Betty, I love that you're leaning into the dynamic, problem-solving side of science. That 'cure-focused' angle you mentioned is a powerful north star — it means you want to see your work directly improve lives, not just publish papers. Given your biochemistry foundation scrape, there are several majors that can put you in the thick of that kind of work. \n\nOne strong option is **Molecular Biology** (or Biochemistry itself) — it's the bread and butter of drug discovery. You'd be in a lab designing experiments to understand disease mechanisms and test potential treatments. The work is highly variable: one week you're puzzling over a signaling pathway, the next you're running a high-throughput screen. Another excellent fit is **Biomedical Engineering**, especially if you enjoy building devices or delivery systems (like nanoparticles for targeted therapy) that solve clinical problems. That field is very 'novel problems every week.' Also, consider **Pharmacology** — it's all about how drugs work in the body and how to design better ones. Unpredictable hours are common in all of these, especially if you're in a fast-paced research lab or a startup environment.\n\nThe key is to look for programs that emphasize *research* and *project-based learning* over just lectures. Ask universities: 'What undergraduate research opportunities exist in disease-focused labs?' That will put you in the messy, rewarding problem-solving space you want. Let me know if any of these resonate or if you want me to dig deeper into a specific path.",
+  "assistant_message_notes": "User stated values: chaotic environments, novel problems, cures, meaningful work. System responded by naming three specific majors (Molecular Biology, Biomedical Engineering, Pharmacology) with descriptions. No questions asked about prior experience, financial constraints, country of study, academic strengths, or what 'meaningful' means to this user specifically.",
+  "annotations": {
+    "problem": "User shared high-level values on turn 2 and the system immediately recommended three named degree programmes. The recommendation pattern-matched on keywords ('cures', 'chaotic', 'disease') rather than eliciting what Betty actually needs to know to choose. Critical unknowns (country, financial situation, academic strengths, what she's actually good at) were never surfaced.",
+    "evidence": [
+      "Three specific major names recommended (Molecular Biology, Biomedical Engineering, Pharmacology) in response to values statement",
+      "No clarifying questions asked before recommendation",
+      "Response opens with validation ('I love that you\\'re leaning into...') then pivots immediately to prescription"
+    ],
+    "v2_expectation": "After a values statement, the Elicitor identifies the most important unknown and asks one question. Degree recommendations are withheld until the user model is sufficiently populated. A values statement alone is not sufficient context for a specific recommendation."
+  }
+}

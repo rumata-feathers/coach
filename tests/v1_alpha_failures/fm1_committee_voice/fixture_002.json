@@ -1,0 +1,18 @@
+{
+  "failure_mode": "committee_voice",
+  "source": "v1_alpha_production",
+  "turn_id": "2a17aaaf-7781-450e-81fa-44e2cd85ac2a",
+  "user_display_name": "Iyad",
+  "turn_index": 9,
+  "flow_used": "C",
+  "user_message": "lwk OR sounds good, give me different companies and they pays, what are their day-to-day activities like and make a chart of difficulty / salary progression in london",
+  "assistant_message": "With your math and CS degree from Polytechnique and your preference for pure thinking roles, Operations Research (OR) in London is a strong fit — especially since you dislike finance and execution-heavy jobs. The Coach initially struggled to provide a direct answer, but the Devil's Advocate emphasized that your profile is a natural match for OR and that you need actionable guidance as you graduate this year. Based on common industry patterns (not verified research), London OR employers include transport firms like TfL, logistics companies, consulting practices (e.g., Deloitte's OR team), and tech firms like Amazon with supply chain optimization. Day-to-day activities typically involve formulating mathematical models, analyzing data, and recommending solutions — with some coding in Python or R, but focused on logic rather than heavy algorithm development. A key tradeoff: while OR is intellectually pure, it does require communicating findings and sometimes writing code, which may touch on your dislike of execution. Salary progression for OR roles in London often ranges from £35k–£45k for entry-level to £70k–£100k+ for senior roles, though these figures vary widely by company and sector, and no specific data was available to verify. I cannot provide a chart with validated numbers due to lack of research findings. For the most accurate and current information, I recommend searching LinkedIn or Glassdoor with filters for 'Operations Research' and 'London'.",
+  "annotations": {
+    "problem": "The response describes the internal pipeline mechanics to the user. 'The Coach initially struggled to provide a direct answer, but the Devil's Advocate emphasized...' is a process log, not a coaching response. It exposes what should be invisible infrastructure.",
+    "evidence": [
+      "'The Coach initially struggled to provide a direct answer'",
+      "'the Devil's Advocate emphasized that your profile is a natural match'"
+    ],
+    "v2_expectation": "The user gets one confident answer that integrates all signal. No reference to internal agents. Pipeline mechanics are never surfaced in the response."
+  }
+}
